@@ -143,7 +143,7 @@ export default function AdminAudiobooksPage() {
 
   const loadNarrators = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/narrators');
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/narrators`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {

@@ -4,13 +4,11 @@
  * fallback when NEXT_PUBLIC_API_URL is not explicitly injected.
  */
 
-const LOCAL_BACKEND_URL = 'http://localhost:5000';
-const DEPLOYED_BACKEND_URL = 'https://ebookbackend-chi.vercel.app';
+const DEPLOYED_BACKEND_URL = 'https://ebooksbackend-production.up.railway.app';
 
-export const USE_LOCAL_BACKEND = process.env.NODE_ENV === 'development';
+export const USE_LOCAL_BACKEND = false;
 
 export const BACKEND_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
-  (USE_LOCAL_BACKEND ? LOCAL_BACKEND_URL : DEPLOYED_BACKEND_URL)
+  DEPLOYED_BACKEND_URL
 ).replace(/\/+$/, '');
-

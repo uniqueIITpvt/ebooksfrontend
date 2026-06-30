@@ -63,15 +63,14 @@ describe('next.config.ts — image remotePatterns', () => {
 // ── API URL selection logic ───────────────────────────────────────────────────
 
 describe('next.config.ts — API URL selection', () => {
-  const LOCAL_API_URL = 'http://localhost:5000';
-  const PRODUCTION_API_URL = 'https://ebookbackend-chi.vercel.app';
+  const PRODUCTION_API_URL = 'https://ebooksbackend-production.up.railway.app';
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_API_URL;
     jest.resetModules();
   });
 
-  test('uses localhost in development when no env override is set', () => {
+  test('uses production URL in development when no env override is set', () => {
     delete process.env.NEXT_PUBLIC_API_URL;
     let cfg: { env: { NEXT_PUBLIC_API_URL: string } } | undefined;
     jest.isolateModules(() => {
@@ -79,7 +78,7 @@ describe('next.config.ts — API URL selection', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       cfg = require('../../../next.config').default;
     });
-    expect(cfg!.env.NEXT_PUBLIC_API_URL).toBe(LOCAL_API_URL);
+    expect(cfg!.env.NEXT_PUBLIC_API_URL).toBe(PRODUCTION_API_URL);
   });
 
   test('uses production URL when NODE_ENV is production', () => {

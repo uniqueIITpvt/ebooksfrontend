@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://ebookbackend-chi.vercel.app/api/:path*"
+      "destination": "https://ebooksbackend-production.up.railway.app/api/:path*"
     }
   ]
 }
