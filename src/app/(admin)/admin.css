@@ -1,0 +1,39 @@
+/* Admin-specific global styles */
+.admin-layout {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #f9fafb;
+  overflow-x: hidden;
+}
+
+/* Reset any inherited styles */
+.admin-layout * {
+  box-sizing: border-box;
+}
+
+/* Hide main website components that might leak through */
+.admin-layout > nav:not([class*="Mui"]),
+.admin-layout > header:not([class*="Mui"]),
+.admin-layout > footer:not([class*="Mui"]) {
+  display: none !important;
+}
+
+/* Ensure full height */
+.admin-layout {
+  min-height: 100vh;
+  height: 100vh;
+}
+
+/* Admin-specific responsive styles */
+@media (max-width: 768px) {
+  .admin-layout {
+    font-size: 14px;
+  }
+}
+
+/* Override any global styles that might interfere with MUI */
+.admin-layout .MuiCssBaseline-root {
+  margin: 0;
+  padding: 0;
+}
