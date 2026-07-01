@@ -178,7 +178,7 @@ export default function AdminAudiobooksTable({
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip size="small" label={displayStatus} color={displayStatus === 'published' ? 'success' : displayStatus === 'processing' || displayStatus === 'review' ? 'warning' : displayStatus === 'archived' ? 'error' : 'default'} />
+                    <Chip size="small" label={displayStatus} color={displayStatus === 'published' ? 'success' : displayStatus === 'review' ? 'warning' : displayStatus === 'archived' ? 'error' : 'default'} />
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
