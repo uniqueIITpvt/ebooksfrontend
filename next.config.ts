@@ -1,12 +1,9 @@
 // Single Next.js config for both local development and production.
-// Local dev uses localhost automatically; production build uses deployed backend.
+// Defaults to the deployed backend. To use a local API, set NEXT_PUBLIC_API_URL.
 // To force a backend in any environment, set NEXT_PUBLIC_API_URL before running Next.
 
-const LOCAL_API_URL = 'http://localhost:5000';
-// const PRODUCTION_API_URL = 'https://ebookbackend.vercel.app';
-const PRODUCTION_API_URL = 'https://ebookbackend-chi.vercel.app';
-const API_URL = process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'development' ? LOCAL_API_URL : PRODUCTION_API_URL);
+const PRODUCTION_API_URL = 'https://ebooksbackend-production.up.railway.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API_URL;
 
 const nextConfig = {
   transpilePackages: ['swiper'],
@@ -24,7 +21,7 @@ const nextConfig = {
       // },
       {
         protocol: 'https',
-        hostname: 'ebookbackend-chi.vercel.app',
+        hostname: 'ebooksbackend-production.up.railway.app',
       },
       {
         protocol: 'https',

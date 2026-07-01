@@ -27,28 +27,15 @@ export default function CTA() {
     setIsLoading(true);
 
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/contact`;
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: 'Contact from Landing Page',
-          message: formData.message
-        })
+      await contactApi.submit({
+        name: formData.name,
+        email: formData.email,
+        subject: 'Contact from Landing Page',
+        message: formData.message,
+        preferredContact: 'email',
       });
 
-      const responseData = await response.json();
-
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        throw new Error(responseData.message || 'Failed to send message');
-      }
+      setIsSubmitted(true);
     } catch (error) {
       console.error('Error sending contact message:', error);
       // Show error message instead of success for debugging

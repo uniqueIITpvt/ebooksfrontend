@@ -1,4 +1,5 @@
 import type { Audiobook } from '@/services/api/audiobooksApi';
+import { BACKEND_URL } from '@/config/backend-url.config';
 import type { ScriptData, ScriptLanguageKey } from './types';
 
 export function getRequiredScriptKeys(language?: string): ScriptLanguageKey[] {
@@ -147,7 +148,7 @@ export function getGeneratedAudioFile(book: any) {
 
 export function toBackendUrl(url: string) {
   if (!url) return '';
-  return url.startsWith('http') ? url : `http://localhost:5000${url}`;
+  return url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
 }
 
 export async function readJsonFile<T>(file: File): Promise<T> {

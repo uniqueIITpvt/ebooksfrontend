@@ -12,10 +12,7 @@ import type { TrendingBook } from '@/services/api/trendingBooksApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import type { FaqItem } from '@/types/faq';
 
-const DEFAULT_API_ORIGIN =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5000'
-    : 'https://ebookbackend-chi.vercel.app';
+const DEFAULT_API_ORIGIN = 'https://ebooksbackend-production.up.railway.app';
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_ORIGIN;
 const API_ORIGIN = RAW_API_URL.replace(/\/+$/, '').replace(/\/api\/v\d+$/, '');
 const API_BASE_URL = `${API_ORIGIN}/api/v1`;
