@@ -157,6 +157,36 @@ function findEstimatedWordIndex(timings: EstimatedWordTiming[], time: number) {
   return time >= timings[timings.length - 1].endTime ? timings.length - 1 : -1;
 }
 
+function normalizeTimedWords<T extends { startTime: number; endTime: number }>(
+  words: T[],
+  audioDuration: number
+): T[] {
+  if (!words.length || !Number.isFinite(audioDuration) || audioDuration <= 0) {
+    return words;
+  }
+
+  const validWords = words.filter(
+    (word) => Number.isFinite(word.startTime) && Number.isFinite(word.endTime)
+  );
+  if (!validWords.length) return words;
+
+  const firstStart = Math.min(...validWords.map((word) => word.startTime));
+  const lastEnd = Math.max(...validWords.map((word) => word.endTime));
+  const transcriptDuration = lastEnd - firstStart;
+  if (!Number.isFinite(transcriptDuration) || transcriptDuration <= 0) return words;
+
+  const durationDifference = Math.abs(transcriptDuration - audioDuration);
+  const alreadyAligned = firstStart < 0.25 && durationDifference / audioDuration < 0.03;
+  if (alreadyAligned) return words;
+
+  const scale = audioDuration / transcriptDuration;
+  return words.map((word) => ({
+    ...word,
+    startTime: Math.max(0, (word.startTime - firstStart) * scale),
+    endTime: Math.max(0, (word.endTime - firstStart) * scale),
+  }));
+}
+
 export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClientProps) {
   const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -191,12 +221,8 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   };
 
   const scriptWords = useMemo(() => splitScriptWords(getScriptText()), [audiobook]);
-  const estimatedWordTimings = useMemo(
-    () => buildEstimatedWordTimings(scriptWords, duration),
-    [duration, scriptWords]
-  );
 
-  const transcriptWords = useMemo<TimedTranscriptWord[]>(() => {
+  const rawTranscriptWords = useMemo<TimedTranscriptWord[]>(() => {
     const languages = Array.isArray(audiobook.transcript?.languages)
       ? audiobook.transcript.languages
       : [];
@@ -225,7 +251,31 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     ).filter((word: TimedTranscriptWord) => word.text && word.endTime > word.startTime);
   }, [audiobook]);
 
-  const transcriptDisplayWords = transcriptWords.map((word) => word.text);
+  const transcriptWords = useMemo(
+    () => normalizeTimedWords(rawTranscriptWords, duration),
+    [duration, rawTranscriptWords]
+  );
+
+  const transcriptDisplayWords = useMemo(
+    () => transcriptWords.map((word) => word.text),
+    [transcriptWords]
+  );
+  const displayWords = useMemo(
+    () => (transcriptDisplayWords.length ? transcriptDisplayWords : scriptWords),
+    [scriptWords, transcriptDisplayWords]
+  );
+  const timingMethod = String(audiobook.wordSync?.method || '').toLowerCase();
+  const audiobookLanguage = String(audiobook.language || '').toLowerCase();
+  const hasEnglishTimingLanguage =
+    audiobookLanguage.includes('english') && !audiobookLanguage.includes('hindi');
+  const useTranscriptWordTimings =
+    transcriptWords.length > 0 &&
+    (timingMethod.includes('whisperx-anchor') ||
+      (timingMethod.includes('whisperx') && hasEnglishTimingLanguage));
+  const estimatedWordTimings = useMemo(
+    () => buildEstimatedWordTimings(displayWords, duration),
+    [displayWords, duration]
+  );
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00';
@@ -418,7 +468,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
 
-      if (transcriptWords.length) {
+      if (useTranscriptWordTimings) {
         const timedWordIndex = transcriptWords.findIndex(
           (word) => audio.currentTime >= word.startTime && audio.currentTime < word.endTime
         );
@@ -466,7 +516,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentWordIndex, activeTab, transcriptWords, estimatedWordTimings]);
+  }, [currentWordIndex, activeTab, transcriptWords, estimatedWordTimings, useTranscriptWordTimings]);
 
   // Load voices for speech synthesis
   useEffect(() => {
@@ -712,7 +762,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   const handleWordClick = (wordIndex: number) => {
     const audio = audioRef.current;
     if (audio && audio.src) {
-      const timedWord = transcriptWords[wordIndex];
+      const timedWord = useTranscriptWordTimings ? transcriptWords[wordIndex] : null;
       if (timedWord) {
         audio.currentTime = timedWord.startTime;
         setCurrentWordIndex(wordIndex);
@@ -1321,9 +1371,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
 
                       if (!scriptContent) return null;
 
-                      const words = transcriptDisplayWords.length
-                        ? transcriptDisplayWords
-                        : scriptWords;
+                      const words = displayWords;
 
                       return (
                         <div style={{ width: '100%' }}>
