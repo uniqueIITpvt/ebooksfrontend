@@ -30,13 +30,22 @@ function AuthLoading() {
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialMode = searchParams?.get('mode') === 'signup' ? 'signup' : 'signin';
-  const returnUrl = searchParams?.get('returnUrl') || '';
+  const { login, isLoginModalOpen, authModalMode, authModalReturnUrl, setIsLoginModalOpen } = useAuth();
+  const isModal = isLoginModalOpen;
+  const onClose = () => setIsLoginModalOpen(false);
+  const initialMode = isModal ? authModalMode : (searchParams?.get('mode') === 'signup' ? 'signup' : 'signin');
+  const returnUrl = isModal ? authModalReturnUrl : searchParams?.get('returnUrl') || '';
   
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
   const [isAnimating, setIsAnimating] = useState(false);
   
-  const { login } = useAuth();
+  useEffect(() => {
+    setIsSignUp(initialMode === 'signup');
+  }, [initialMode]);
+
+  useEffect(() => {
+    router.prefetch('/admin/dashboard');
+  }, [router]);
   
   // Form states
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -100,8 +109,9 @@ function AuthContent() {
       if (result.success && result.user) {
         // Check role and redirect accordingly
         const role = result.user.role;
+        onClose?.();
         if (role === 'admin' || role === 'superadmin') {
-          router.push('/admin/dashboard');
+          router.replace('/admin/dashboard');
         } else {
           // If returnUrl exists, redirect there (for checkout/subscription flow)
           if (returnUrl) {
@@ -209,6 +219,9 @@ function AuthContent() {
           setSignupOtpSent(false);
           setSignupPhoneVerified(false);
           setSignupOtpMessage(null);
+          if (isModal) {
+            return;
+          }
           router.replace(signInUrl);
         }, 1600);
       } else {
@@ -284,7 +297,7 @@ function AuthContent() {
 
   if (success && isSignUp) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center px-4">
+      <div className={`${isModal ? 'h-full bg-transparent' : 'min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 px-4'} flex items-center justify-center`}>
         <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-green-600" />
@@ -297,7 +310,7 @@ function AuthContent() {
   }
 
   return (
-    <div className="h-dvh overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-2 md:p-4">
+    <div className={`${isModal ? 'h-full bg-transparent' : 'h-dvh bg-gradient-to-br from-slate-100 to-slate-200 p-2 md:p-4'} overflow-hidden flex items-center justify-center`}>
       <div className="relative w-full max-w-[300px] md:max-w-4xl h-[calc(100dvh-1rem)] md:h-[calc(100vh-2rem)] max-h-[560px] md:max-h-[640px] min-h-0 md:min-h-[520px] bg-white rounded-[2rem] shadow-2xl overflow-hidden">
         
         {/* Forms Container */}
@@ -370,9 +383,19 @@ function AuthContent() {
               >
                 Don&apos;t have an account? Sign Up
               </button>
-               <Link href="/" className="block text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700">
-                ← Back to Home
-              </Link>
+              {isModal ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="block w-full text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700"
+                >
+                  Back to Home
+                </button>
+              ) : (
+                <Link href="/" className="block text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700">
+                  ← Back to Home
+                </Link>
+              )}
             </div>
           </div>
 
@@ -637,4 +660,3 @@ export default function AuthPage() {
     </Suspense>
   );
 }
-

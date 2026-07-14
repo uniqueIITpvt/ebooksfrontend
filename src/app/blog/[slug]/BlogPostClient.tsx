@@ -30,7 +30,7 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
   const [likes, setLikes] = useState(post.likes ?? 0);
   const [isSavingAction, setIsSavingAction] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, openAuthModal } = useAuth();
   const blogIdentifier = post.slug || post._id;
 
   const articleTags = useMemo(() => {
@@ -235,7 +235,7 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
   }, [blogIdentifier, isAuthenticated, isLoading]);
 
   const redirectToSignIn = () => {
-    router.push(`/user/auth?mode=signin&returnUrl=${encodeURIComponent(window.location.pathname)}`);
+    openAuthModal('signin', window.location.pathname);
   };
 
   const handleLike = async () => {

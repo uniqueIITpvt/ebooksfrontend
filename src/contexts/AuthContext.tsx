@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isLoggingOut: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; message: string; user?: User }>;
   register: (userData: RegisterData) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
@@ -17,6 +18,9 @@ interface AuthContextType {
   isUser: boolean;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: (open: boolean) => void;
+  authModalMode: 'signin' | 'signup';
+  authModalReturnUrl: string;
+  openAuthModal: (mode?: 'signin' | 'signup', returnUrl?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +32,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
+  const [authModalReturnUrl, setAuthModalReturnUrl] = useState('');
   const router = useRouter();
 
   // Initialize auth state from localStorage (checks both user and admin tokens)
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await authApi.login(credentials);
       
       if (response.success && response.data) {
+        setIsLoggingOut(false);
         setUser(response.data.user);
         return { success: true, message: 'Login successful', user: response.data.user };
       }
@@ -130,6 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
       await authApi.logout();
     } catch (error) {
@@ -141,8 +150,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.removeItem('admin_accessToken');
       localStorage.removeItem('accessToken');
       setUser(null);
-      router.push('/');
+      setIsLoginModalOpen(false);
+      setAuthModalReturnUrl('');
+      window.location.replace('/');
     }
+  };
+
+  const openAuthModal = (mode: 'signin' | 'signup' = 'signin', returnUrl = '') => {
+    setAuthModalMode(mode);
+    setAuthModalReturnUrl(returnUrl);
+    setIsLoginModalOpen(true);
   };
 
   const refreshUser = async () => {
@@ -160,6 +177,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     isAuthenticated: !!user,
     isLoading,
+    isLoggingOut,
     login,
     register,
     logout,
@@ -169,6 +187,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isUser: user?.role === 'user',
     isLoginModalOpen,
     setIsLoginModalOpen,
+    authModalMode,
+    authModalReturnUrl,
+    openAuthModal,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

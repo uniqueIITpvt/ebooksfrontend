@@ -29,9 +29,11 @@ const API_URL = API_CONFIG.API_BASE_URL;
 
 // Login Button Component
 function LoginButton() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, openAuthModal } = useAuth();
+  const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const shouldOpenAuthPopup = pathname === '/';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -116,18 +118,39 @@ function LoginButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link
-        href="/user/auth?mode=signup"
-        className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
-      >
-        Sign Up Free
-      </Link>
-      <Link
-        href="/user/auth?mode=signin"
-        className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
-      >
-        Sign In
-      </Link>
+      {shouldOpenAuthPopup ? (
+        <>
+          <button
+            type="button"
+            onClick={() => openAuthModal('signup')}
+            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
+          >
+            Sign Up Free
+          </button>
+          <button
+            type="button"
+            onClick={() => openAuthModal('signin')}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Sign In
+          </button>
+        </>
+      ) : (
+        <>
+          <Link
+            href="/user/auth?mode=signup"
+            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
+          >
+            Sign Up Free
+          </Link>
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Sign In
+          </Link>
+        </>
+      )}
     </div>
   );
 }
