@@ -81,6 +81,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
     { name: 'Audiobooks', href: '/audiobooks' },
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
+    { name: 'Contact Us', href: '/contact' },
   ];
 
   const resources = [
