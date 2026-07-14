@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
+import { API_CONFIG } from '@/config/api';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -295,6 +297,11 @@ function AuthContent() {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    const target = returnUrl || '/';
+    window.location.href = `${API_CONFIG.API_BASE_URL}/auth/google?returnUrl=${encodeURIComponent(target)}`;
+  };
+
   if (success && isSignUp) {
     return (
       <div className={`${isModal ? 'h-full bg-transparent' : 'min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 px-4'} flex items-center justify-center`}>
@@ -319,8 +326,26 @@ function AuthContent() {
           {/* Sign In Form */}
           <div className={`absolute inset-0 w-full md:w-1/2 flex items-start md:items-center justify-center pt-16 md:pt-0 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
             <div className="w-full max-w-none md:max-w-sm px-7 md:px-10 py-2 md:py-5">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-1.5">Sign In</h2>
-              <p className="text-xs md:text-base text-gray-500 mb-4 md:mb-6">or use your email password</p>
+              <div className="mb-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50"
+                >
+                  <span className="text-base font-bold text-blue-600">G</span>
+                  Google
+                </button>
+                <button
+                  type="button"
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50"
+                >
+                  <span className="text-base font-bold text-blue-700">f</span>
+                  Facebook
+                </button>
+              </div>
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-1.5 justify-content:center align-items:center">or</h2>
+              {/* <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-1.5">Sign In</h2> */}
+              {/* <p className="text-xs md:text-base text-gray-500 mb-4 md:mb-6">or use your email password</p> */}
               
               <form onSubmit={handleLoginSubmit} className="space-y-3 md:space-y-4">
                 <div className="relative">
@@ -563,6 +588,15 @@ function AuthContent() {
 
         {/* Sliding Overlay Panel */}
         <div className={`hidden md:flex absolute top-0 h-full w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col items-center justify-center p-8 md:p-12 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-0 rounded-r-[80px] md:rounded-r-[150px]' : 'translate-x-full md:translate-x-full rounded-l-[80px] md:rounded-l-[150px]'}`}>
+          <div className="absolute top-8 flex h-24 w-44 items-center justify-center">
+            <Image
+              src="/TechIITlogo-transparent.png"
+              alt="TechUniqueIIT Research Center"
+              width={152}
+              height={72}
+              className="h-full w-full object-contain"
+            />
+          </div>
           
           {/* Sign In Overlay Content (shown when in sign up mode) */}
           <div className={`text-center transition-all duration-500 ${isSignUp ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20 pointer-events-none absolute'}`}>
