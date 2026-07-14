@@ -61,6 +61,7 @@ export default function MobileNavigation({
   const isNavItemActive = (item: NavItem) => {
     if (item.name === 'Audiobooks') return isAudiobooksRoute;
     if (item.name === 'Books') return isBooksRoute;
+    if (item.dropdownItems?.some((dropdownItem) => pathname === dropdownItem.href)) return true;
     return pathname === item.href;
   };
 
@@ -278,6 +279,7 @@ export default function MobileNavigation({
                       {item.name === 'Blog' && 'Read Insights'}
                       {item.name === 'About' && 'Know More'}
                       {item.name === 'FAQ' && 'Help & Support'}
+                      {item.name === 'Resource' && 'Explore More'}
                     </div>
                   </div>
                 </Link>
