@@ -414,8 +414,8 @@ export default function AdminDashboard() {
                 ]}
                 slotProps={{
                   legend: {
-                    direction: 'row',
-                    position: { vertical: 'bottom', horizontal: 'middle' },
+                    direction: 'horizontal',
+                    position: { vertical: 'bottom', horizontal: 'center' },
                   },
                 }}
               />

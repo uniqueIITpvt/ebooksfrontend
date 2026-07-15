@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
+import { API_CONFIG } from '@/config/api';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -30,13 +32,22 @@ function AuthLoading() {
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialMode = searchParams?.get('mode') === 'signup' ? 'signup' : 'signin';
-  const returnUrl = searchParams?.get('returnUrl') || '';
+  const { login, isLoginModalOpen, authModalMode, authModalReturnUrl, setIsLoginModalOpen } = useAuth();
+  const isModal = isLoginModalOpen;
+  const onClose = () => setIsLoginModalOpen(false);
+  const initialMode = isModal ? authModalMode : (searchParams?.get('mode') === 'signup' ? 'signup' : 'signin');
+  const returnUrl = isModal ? authModalReturnUrl : searchParams?.get('returnUrl') || '';
   
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
   const [isAnimating, setIsAnimating] = useState(false);
   
-  const { login } = useAuth();
+  useEffect(() => {
+    setIsSignUp(initialMode === 'signup');
+  }, [initialMode]);
+
+  useEffect(() => {
+    router.prefetch('/admin/dashboard');
+  }, [router]);
   
   // Form states
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -100,8 +111,9 @@ function AuthContent() {
       if (result.success && result.user) {
         // Check role and redirect accordingly
         const role = result.user.role;
+        onClose?.();
         if (role === 'admin' || role === 'superadmin') {
-          router.push('/admin/dashboard');
+          router.replace('/admin/dashboard');
         } else {
           // If returnUrl exists, redirect there (for checkout/subscription flow)
           if (returnUrl) {
@@ -209,6 +221,9 @@ function AuthContent() {
           setSignupOtpSent(false);
           setSignupPhoneVerified(false);
           setSignupOtpMessage(null);
+          if (isModal) {
+            return;
+          }
           router.replace(signInUrl);
         }, 1600);
       } else {
@@ -282,9 +297,14 @@ function AuthContent() {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    const target = returnUrl || '/';
+    window.location.href = `${API_CONFIG.API_BASE_URL}/auth/google?returnUrl=${encodeURIComponent(target)}`;
+  };
+
   if (success && isSignUp) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center px-4">
+      <div className={`${isModal ? 'h-full bg-transparent' : 'min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 px-4'} flex items-center justify-center`}>
         <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-green-600" />
@@ -297,7 +317,7 @@ function AuthContent() {
   }
 
   return (
-    <div className="h-dvh overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-2 md:p-4">
+    <div className={`${isModal ? 'h-full bg-transparent' : 'h-dvh bg-gradient-to-br from-slate-100 to-slate-200 p-2 md:p-4'} overflow-hidden flex items-center justify-center`}>
       <div className="relative w-full max-w-[300px] md:max-w-4xl h-[calc(100dvh-1rem)] md:h-[calc(100vh-2rem)] max-h-[560px] md:max-h-[640px] min-h-0 md:min-h-[520px] bg-white rounded-[2rem] shadow-2xl overflow-hidden">
         
         {/* Forms Container */}
@@ -306,8 +326,33 @@ function AuthContent() {
           {/* Sign In Form */}
           <div className={`absolute inset-0 w-full md:w-1/2 flex items-start md:items-center justify-center pt-16 md:pt-0 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
             <div className="w-full max-w-none md:max-w-sm px-7 md:px-10 py-2 md:py-5">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-1.5">Sign In</h2>
-              <p className="text-xs md:text-base text-gray-500 mb-4 md:mb-6">or use your email password</p>
+              <h2 className="mb-4 text-center text-2xl md:text-3xl font-bold text-blue-950">Welcome</h2>
+              <div className="mb-5 space-y-2">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="flex h-11 w-full items-center justify-start gap-3 rounded-lg border border-gray-200 bg-white px-4 text-base font-medium text-blue-950 shadow-sm transition-all hover:bg-gray-50"
+                >
+                  <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z" />
+                  </svg>
+                  Continue with google
+                </button>
+                <button
+                  type="button"
+                  className="flex h-11 w-full items-center justify-start gap-3 rounded-lg border border-gray-200 bg-white px-4 text-base font-medium text-blue-950 shadow-sm transition-all hover:bg-gray-50"
+                >
+                  <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#1877F2" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.412c0-3.024 1.792-4.695 4.533-4.695 1.312 0 2.686.236 2.686.236v2.97H15.83c-1.491 0-1.955.93-1.955 1.884v2.266h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+                    <path fill="#FFFFFF" d="m16.671 15.563.532-3.49h-3.328V9.807c0-.954.464-1.884 1.955-1.884h1.514v-2.97s-1.374-.236-2.686-.236c-2.741 0-4.533 1.671-4.533 4.695v2.661H7.078v3.49h3.047V24a12.14 12.14 0 0 0 3.75 0v-8.437h2.796z" />
+                  </svg>
+                  Continue with facebook
+                </button>
+              </div>
+              <div className="mb-3 text-center text-xl md:text-3xl font-bold text-gray-900">or</div>
               
               <form onSubmit={handleLoginSubmit} className="space-y-3 md:space-y-4">
                 <div className="relative">
@@ -370,9 +415,19 @@ function AuthContent() {
               >
                 Don&apos;t have an account? Sign Up
               </button>
-               <Link href="/" className="block text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700">
-                ← Back to Home
-              </Link>
+              {isModal ? (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="block w-full text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700"
+                >
+                  Back to Home
+                </button>
+              ) : (
+                <Link href="/" className="block text-center text-xs md:text-sm text-gray-500 mt-3 md:mt-5 hover:text-gray-700">
+                  ← Back to Home
+                </Link>
+              )}
             </div>
           </div>
 
@@ -540,6 +595,15 @@ function AuthContent() {
 
         {/* Sliding Overlay Panel */}
         <div className={`hidden md:flex absolute top-0 h-full w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col items-center justify-center p-8 md:p-12 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-0 rounded-r-[80px] md:rounded-r-[150px]' : 'translate-x-full md:translate-x-full rounded-l-[80px] md:rounded-l-[150px]'}`}>
+          <div className="absolute top-8 flex h-24 w-44 items-center justify-center">
+            <Image
+              src="/TechIITlogo-transparent.png"
+              alt="TechUniqueIIT Research Center"
+              width={152}
+              height={72}
+              className="h-full w-full object-contain"
+            />
+          </div>
           
           {/* Sign In Overlay Content (shown when in sign up mode) */}
           <div className={`text-center transition-all duration-500 ${isSignUp ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20 pointer-events-none absolute'}`}>
@@ -637,4 +701,3 @@ export default function AuthPage() {
     </Suspense>
   );
 }
-

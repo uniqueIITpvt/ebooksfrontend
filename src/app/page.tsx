@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import MediaContent from "@/components/ui/media/MediaContent";
-import About from "@/components/ui/sections/About";
-import CTA from "@/components/ui/sections/CTA";
 import Hero from "@/components/ui/sections/Hero";
 import { getHomePageData } from "@/lib/server/public-data";
 import { SITE_DESCRIPTION, SITE_KEYWORDS, siteUrl } from "@/config/site.config";
@@ -48,12 +46,6 @@ export default async function Home() {
       {/* <div id='chatbot-features'>
         <ChatbotFeatures />
       </div> */}
-      <div id='about'>
-        <About />
-      </div>
-      <div id='cta'>
-        <CTA />
-      </div>
       {/* <SectionToggle /> */}
     </div>
   );

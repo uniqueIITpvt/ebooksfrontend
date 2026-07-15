@@ -7,8 +7,7 @@ export default function AdminLoginRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to unified login page with returnUrl to come back to admin
-    router.push('/user/auth?mode=signin');
+    router.replace('/');
   }, [router]);
 
   return null;

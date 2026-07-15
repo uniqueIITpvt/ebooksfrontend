@@ -53,7 +53,7 @@ const plans = [
 const PLAN_RANK: Record<string, number> = { basic: 1, premium: 2, pro: 3 };
 
 export default function SubscriptionPage() {
-  const { user, isAuthenticated, refreshUser, setIsLoginModalOpen } = useAuth();
+  const { user, isAuthenticated, refreshUser, openAuthModal } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
@@ -74,8 +74,7 @@ export default function SubscriptionPage() {
 
     // If not logged in, redirect to login with return URL
     if (!isAuthenticated) {
-      const returnUrl = encodeURIComponent(`/checkout?plan=${planKey}&type=subscription`);
-      router.push(`/user/auth?mode=signin&returnUrl=${returnUrl}`);
+      openAuthModal('signin', `/checkout?plan=${planKey}&type=subscription`);
       return;
     }
 

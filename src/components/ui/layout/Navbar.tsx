@@ -17,6 +17,8 @@ import {
   NewspaperIcon,
   QuestionMarkCircleIcon,
   ShoppingCartIcon,
+  Squares2X2Icon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import MobileNavigation from './MobileNavigation';
 import BooksDropdown from './BooksDropdown';
@@ -29,9 +31,11 @@ const API_URL = API_CONFIG.API_BASE_URL;
 
 // Login Button Component
 function LoginButton() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, openAuthModal } = useAuth();
+  const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const shouldOpenAuthPopup = pathname === '/';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -116,18 +120,39 @@ function LoginButton() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link
-        href="/user/auth?mode=signup"
-        className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
-      >
-        Sign Up Free
-      </Link>
-      <Link
-        href="/user/auth?mode=signin"
-        className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
-      >
-        Sign In
-      </Link>
+      {shouldOpenAuthPopup ? (
+        <>
+          <button
+            type="button"
+            onClick={() => openAuthModal('signup')}
+            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
+          >
+            Sign Up Free
+          </button>
+          <button
+            type="button"
+            onClick={() => openAuthModal('signin')}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Sign In
+          </button>
+        </>
+      ) : (
+        <>
+          <Link
+            href="/user/auth?mode=signup"
+            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
+          >
+            Sign Up Free
+          </Link>
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Sign In
+          </Link>
+        </>
+      )}
     </div>
   );
 }
@@ -167,24 +192,37 @@ const navItems: NavItem[] = [
   },
 
   {
-    name: 'Blog',
+    name: 'Resource',
     href: '/blog',
-    icon: <NewspaperIcon className='w-5 h-5' />,
+    icon: <Squares2X2Icon className='w-5 h-5' />,
     color: 'from-blue-500 to-indigo-600',
-  },
-  
-  {
-    name: 'About',
-    href: '/about',
-    icon: <UserIcon className='w-5 h-5' />,
-    color: 'from-blue-500 to-indigo-600',
-  },
-
-  {
-    name: 'FAQ',
-    href: '/faq',
-    icon: <QuestionMarkCircleIcon className='w-5 h-5' />,
-    color: 'from-blue-500 to-indigo-600',
+    hasDropdown: true,
+    dropdownItems: [
+      {
+        name: 'Blog',
+        href: '/blog',
+        description: 'Read Insights',
+        icon: <NewspaperIcon className='w-5 h-5' />,
+      },
+      {
+        name: 'About',
+        href: '/about',
+        description: 'Know More',
+        icon: <UserIcon className='w-5 h-5' />,
+      },
+      {
+        name: 'FAQ',
+        href: '/faq',
+        description: 'Help & Support',
+        icon: <QuestionMarkCircleIcon className='w-5 h-5' />,
+      },
+      {
+        name: 'Contact Us',
+        href: '/contact',
+        description: 'Get in Touch',
+        icon: <EnvelopeIcon className='w-5 h-5' />,
+      },
+    ],
   },
 
 
@@ -239,6 +277,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
   const isNavItemActive = (item: NavItem) => {
     if (item.name === 'Audiobooks') return isAudiobooksRoute;
     if (item.name === 'Books') return isBooksRoute;
+    if (item.dropdownItems?.some((dropdownItem) => pathname === dropdownItem.href)) return true;
     return pathname === item.href;
   };
 
@@ -466,9 +505,10 @@ export default function Navbar({ siteLogo }: NavbarProps) {
               <div className='hidden sm:block relative'>
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className='text-slate-600 hover:text-blue-700 p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                  className='flex h-11 w-72 xl:w-80 items-center gap-3 rounded-xl border border-blue-100 bg-white/80 px-4 text-left text-slate-500 shadow-sm transition-all duration-300 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md'
                 >
-                  <MagnifyingGlassIcon className='w-5 h-5' />
+                  <MagnifyingGlassIcon className='w-5 h-5 flex-shrink-0' />
+                  <span className='text-sm'>Search here..</span>
                 </button>
                 <SearchDropdown 
                   isOpen={searchOpen} 
