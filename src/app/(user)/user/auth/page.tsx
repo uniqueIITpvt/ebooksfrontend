@@ -14,7 +14,6 @@ import {
   EyeIcon, 
   EyeSlashIcon,
   CheckCircleIcon,
-  PhoneIcon
 } from '@heroicons/react/24/outline';
 
 // Loading component for Suspense
@@ -54,7 +53,7 @@ function AuthContent() {
   const [signupData, setSignupData] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
   const [signupOtp, setSignupOtp] = useState('');
   const [signupOtpSent, setSignupOtpSent] = useState(false);
-  const [signupPhoneVerified, setSignupPhoneVerified] = useState(false);
+  const [signupEmailVerified, setSignupEmailVerified] = useState(false);
   const [signupOtpLoading, setSignupOtpLoading] = useState(false);
   const [signupOtpCooldown, setSignupOtpCooldown] = useState(0);
   const [signupOtpMessage, setSignupOtpMessage] = useState<string | null>(null);
@@ -177,12 +176,8 @@ function AuthContent() {
       setError('Please enter a valid email address');
       return;
     }
-    if (!/^\+?[0-9]{10,15}$/.test(signupData.phone.trim())) {
-      setError('Please enter a valid mobile number');
-      return;
-    }
-    if (!signupPhoneVerified) {
-      setError('Please verify your mobile number before creating account');
+    if (!signupEmailVerified) {
+      setError('Please verify your email before creating account');
       return;
     }
     if (signupData.password.length < 6) {
@@ -219,7 +214,7 @@ function AuthContent() {
           setSignupData({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
           setSignupOtp('');
           setSignupOtpSent(false);
-          setSignupPhoneVerified(false);
+          setSignupEmailVerified(false);
           setSignupOtpMessage(null);
           if (isModal) {
             return;
@@ -237,10 +232,10 @@ function AuthContent() {
   };
 
   const handleSendSignupOtp = async () => {
-    const phone = signupData.phone.trim();
+    const email = signupData.email.trim();
 
-    if (!/^\+?[0-9]{10,15}$/.test(phone)) {
-      setError('Please enter a valid mobile number before sending OTP');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address before sending OTP');
       return;
     }
 
@@ -249,16 +244,16 @@ function AuthContent() {
     setSignupOtpMessage(null);
 
     try {
-      const response = await authApi.sendRegistrationPhoneOtp(phone);
+      const response = await authApi.sendRegistrationEmailOtp(email);
 
       if (!response.success) {
         throw new Error(response.message || 'Unable to send OTP');
       }
 
       setSignupOtpSent(true);
-      setSignupPhoneVerified(false);
+      setSignupEmailVerified(false);
       setSignupOtpCooldown(30);
-      setSignupOtpMessage('OTP sent to your mobile number.');
+      setSignupOtpMessage('OTP sent to your email address.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to send OTP');
     } finally {
@@ -267,7 +262,7 @@ function AuthContent() {
   };
 
   const handleVerifySignupOtp = async () => {
-    const phone = signupData.phone.trim();
+    const email = signupData.email.trim();
 
     if (!signupOtp.trim()) {
       setError('Please enter the OTP');
@@ -279,17 +274,17 @@ function AuthContent() {
     setSignupOtpMessage(null);
 
     try {
-      const response = await authApi.verifyRegistrationPhoneOtp(phone, signupOtp);
+      const response = await authApi.verifyRegistrationEmailOtp(email, signupOtp);
 
       if (!response.success) {
         throw new Error(response.message || 'Unable to verify OTP');
       }
 
-      setSignupPhoneVerified(true);
+      setSignupEmailVerified(true);
       setSignupOtpSent(false);
       setSignupOtp('');
       setSignupOtpCooldown(0);
-      setSignupOtpMessage('Mobile number verified successfully');
+      setSignupOtpMessage('Email verified successfully');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to verify OTP');
     } finally {
@@ -461,34 +456,22 @@ function AuthContent() {
                   />
                 </div>
                 
-                <div className="relative">
-                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={signupData.email}
-                    onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                    placeholder="Email"
-                    className="w-full pl-11 md:pl-12 pr-4 py-2 md:py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                    required
-                  />
-                </div>
-
                 <div className="space-y-1.5 md:space-y-2">
                   <div className="grid grid-cols-[1fr_auto] gap-2">
                     <div className="relative">
-                      <PhoneIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input
-                        type="tel"
-                        value={signupData.phone}
+                        type="email"
+                        value={signupData.email}
                         onChange={(e) => {
-                          setSignupData({ ...signupData, phone: e.target.value });
+                          setSignupData({ ...signupData, email: e.target.value });
                           setSignupOtp('');
                           setSignupOtpSent(false);
-                          setSignupPhoneVerified(false);
+                          setSignupEmailVerified(false);
                           setSignupOtpCooldown(0);
                           setSignupOtpMessage(null);
                         }}
-                        placeholder="Mobile Number"
+                        placeholder="Email"
                         className="w-full pl-11 md:pl-12 pr-4 py-2 md:py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
                         required
                       />
@@ -496,12 +479,12 @@ function AuthContent() {
                     <button
                       type="button"
                       onClick={handleSendSignupOtp}
-                      disabled={signupOtpLoading || signupPhoneVerified || signupOtpCooldown > 0 || !signupData.phone.trim()}
+                      disabled={signupOtpLoading || signupEmailVerified || signupOtpCooldown > 0 || !signupData.email.trim()}
                       className="px-3 md:px-4 py-2 md:py-2.5 bg-blue-600 text-white text-xs md:text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {signupOtpLoading
                         ? 'Wait'
-                        : signupPhoneVerified
+                        : signupEmailVerified
                           ? 'Verified'
                           : signupOtpCooldown > 0
                             ? `${signupOtpCooldown}s`
@@ -532,9 +515,9 @@ function AuthContent() {
                   )}
 
                   {signupOtpMessage && (
-                    <p className={`text-xs font-semibold ${signupPhoneVerified ? 'text-emerald-600' : 'text-blue-600'}`}>
+                    <p className={`text-xs font-semibold ${signupEmailVerified ? 'text-emerald-600' : 'text-blue-600'}`}>
                       {signupOtpMessage}
-                      {!signupPhoneVerified && signupOtpCooldown > 0
+                      {!signupEmailVerified && signupOtpCooldown > 0
                         ? ` Verify in ${signupOtpCooldown}s.`
                         : ''}
                     </p>
@@ -587,7 +570,7 @@ function AuthContent() {
 
                 <button
                   type="submit"
-                  disabled={isLoading || !signupPhoneVerified}
+                  disabled={isLoading || !signupEmailVerified}
                   className="w-full py-2 md:py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Creating...' : 'SIGN UP'}

@@ -287,6 +287,44 @@ class AuthApiService {
     }
   }
 
+  async sendRegistrationEmailOtp(email: string): Promise<{ success: boolean; message?: string; data?: { otp?: string } }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register/email/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        credentials: 'include',
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error('Send registration email OTP error:', error);
+      return {
+        success: false,
+        message: 'Failed to send OTP',
+      };
+    }
+  }
+
+  async verifyRegistrationEmailOtp(email: string, otp: string): Promise<{ success: boolean; message?: string; data?: { emailVerified?: boolean } }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register/email/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+        credentials: 'include',
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error('Verify registration email OTP error:', error);
+      return {
+        success: false,
+        message: 'Failed to verify OTP',
+      };
+    }
+  }
+
   /**
    * Logout user
    */
