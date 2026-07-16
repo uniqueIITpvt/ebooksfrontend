@@ -1,9 +1,12 @@
 // Single Next.js config for both local development and production.
-// Defaults to the deployed backend. To use a local API, set NEXT_PUBLIC_API_URL.
-// To force a backend in any environment, set NEXT_PUBLIC_API_URL before running Next.
+// Local development uses the local backend, production uses Railway unless overridden.
 
 const PRODUCTION_API_URL = 'https://ebooksbackend-production.up.railway.app';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API_URL;
+const LOCAL_API_URL = 'http://localhost:5000';
+const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API_URL
+    : LOCAL_API_URL;
 
 const nextConfig = {
   transpilePackages: ['swiper'],

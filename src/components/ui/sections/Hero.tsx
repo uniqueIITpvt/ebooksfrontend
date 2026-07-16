@@ -279,7 +279,7 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
 
   return (
     <section
-      className='relative h-[115px] xs:h-[100px] sm:h-[125px] md:h-[155px] lg:h-[200px] xl:h-[220px] 2xl:h-[250px] w-full overflow-hidden cursor-grab active:cursor-grabbing select-none'
+      className='relative h-[300px] xs:h-[290px] sm:h-[270px] md:h-[310px] lg:h-[400px] xl:h-[500px] 2xl:h-[520px] w-full overflow-hidden cursor-grab active:cursor-grabbing select-none'
       id='hero'
       ref={containerRef}  
       onMouseDown={handleMouseDown}
@@ -338,6 +338,24 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
         <div className='absolute top-60 left-1/3 w-1 h-1 bg-white/30 rounded-full animate-ping delay-500' />
         <div className='absolute bottom-60 right-1/3 w-2 h-2 bg-white/20 rounded-full animate-ping delay-1500' />
       </div>
+
+      <div className='absolute inset-y-0 left-5 z-20 flex w-[46%] items-center justify-center sm:left-10 md:left-14 lg:left-20 xl:left-28'>
+        <div className='pointer-events-auto max-w-[520px] text-left'>
+          <h2 className='text-2xl font-extrabold tracking-normal text-blue-950 sm:text-3xl md:text-4xl lg:text-5xl'>
+            Listen &amp; Learn
+          </h2>
+          <p className='mt-2 text-xs font-semibold leading-snug text-blue-950 sm:text-sm md:text-lg lg:text-xl'>
+            Explore ebooks, audiobooks, and learning resources designed for everyday growth
+          </p>
+          <Link
+            href='/#free-summaries-section'
+            className='mt-4 inline-flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-600 md:px-7 md:py-3 md:text-base'
+          >
+            Start With Free learning
+          </Link>
+        </div>
+      </div>
+
       <div className='absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20'>
         <div className='flex items-center space-x-1 sm:space-x-2 md:space-x-3 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 transition-all duration-300'>
           {heroSlides.map((_, index) => (
