@@ -100,7 +100,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
 
   return (
     <footer className='bg-gradient-to-br from-slate-900 to-slate-800 text-white'>
-      <div className='max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8'>
+      <div className='mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8'>
         {/* Main Content */}
         <div className='pt-8 pb-4 sm:pt-12 sm:pb-5 lg:pt-16 lg:pb-6'>
           <div className='grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12'>

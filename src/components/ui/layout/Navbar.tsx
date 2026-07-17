@@ -323,7 +323,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
             : 'bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 backdrop-blur-sm'
         }`}
       >
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8'>
           <div className='flex items-center h-20'>
             {/* Logo - Far Left Corner */}
             <div className='flex-shrink-0 flex items-center'>

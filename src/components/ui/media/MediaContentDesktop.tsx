@@ -515,28 +515,31 @@ export default function MediaContentDesktop({
 
         {filteredFreeSummaries.length > 0 && (
           <div id='free-summaries-section' className='relative z-10 w-full px-3 pt-4 pb-4 lg:px-5 lg:pt-8 lg:pb-6'>
-            <SectionCarousel
-              title='Free Summaries'
-              seeMoreHref='/free-summaries'
-              isLoading={false}
-              items={filteredFreeSummaries}
-              emptyMsg='No free summaries'
-              sectionKey='free'
-              itemLimit={LANDING_COLLAPSED_ITEM_LIMIT}
-              cartFormat={selectedCartFormat}
-              cardHref={(b) => {
-                const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
-                if (selectedFormats.length === 1) {
-                  return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
-                }
-                return baseUrl;
-              }}
-              subLabel='Free'
-            />
+            <div className='mx-auto max-w-[1300px]'>
+              <SectionCarousel
+                title='Free Summaries'
+                seeMoreHref='/free-summaries'
+                isLoading={false}
+                items={filteredFreeSummaries}
+                emptyMsg='No free summaries'
+                sectionKey='free'
+                itemLimit={LANDING_COLLAPSED_ITEM_LIMIT}
+                cartFormat={selectedCartFormat}
+                cardHref={(b) => {
+                  const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
+                  if (selectedFormats.length === 1) {
+                    return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
+                  }
+                  return baseUrl;
+                }}
+                subLabel='Free'
+              />
+            </div>
           </div>
         )}
 
         <div className='relative z-10 mt-6 w-full px-3 lg:px-5'>
+          <div className='mx-auto max-w-[1600px]'>
           <div className='flex gap-6'>
 
             {/* ── Left Filter Sidebar ── */}
@@ -790,7 +793,7 @@ export default function MediaContentDesktop({
             </div>{/* end flex-1 main content */}
           </div>{/* end flex gap-6 */}
 
-          <div className='relative mt-8 mb-4 p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
+          <div className='relative mx-auto mt-8 mb-4 max-w-[1600px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
             <div className='absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none' />
             <div className='absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none' />
 
@@ -859,6 +862,7 @@ export default function MediaContentDesktop({
               </div>
             </div>{/* end categories panel content */}
           </div>{/* end dark section */}
+          </div>
         </div>{/* end max-w-7xl */}
       </section>
     </>
