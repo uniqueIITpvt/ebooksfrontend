@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { XMarkIcon, MinusIcon, ChevronUpIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -154,6 +155,7 @@ function getBotResponse(input: string): Omit<Message, 'id' | 'time' | 'role'> {
 }
 
 export default function AutomaticChatEmbed() {
+  const { openAuthModal } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -304,20 +306,43 @@ export default function AutomaticChatEmbed() {
                       {msg.links && msg.links.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
                           {msg.links.map((lk, li) => (
-                            <Link key={li} href={lk.href}
-                              onClick={() => setIsOpen(false)}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 5,
-                                padding: '5px 11px',
-                                background: '#eff6ff', color: '#1e40af',
-                                border: '1px solid #bfdbfe',
-                                borderRadius: 8, fontSize: 12, fontWeight: 600,
-                                textDecoration: 'none',
-                                transition: 'background .15s',
-                              }}
-                            >
-                              {lk.label}
-                            </Link>
+                            lk.href === '/user/login' || lk.href === '/user/signup' ? (
+                              <button
+                                key={li}
+                                type='button'
+                                onClick={() => {
+                                  setIsOpen(false);
+                                  openAuthModal(lk.href === '/user/signup' ? 'signup' : 'signin');
+                                }}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                                  padding: '5px 11px',
+                                  background: '#eff6ff', color: '#1e40af',
+                                  border: '1px solid #bfdbfe',
+                                  borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                  textDecoration: 'none',
+                                  transition: 'background .15s',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {lk.label}
+                              </button>
+                            ) : (
+                              <Link key={li} href={lk.href}
+                                onClick={() => setIsOpen(false)}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                                  padding: '5px 11px',
+                                  background: '#eff6ff', color: '#1e40af',
+                                  border: '1px solid #bfdbfe',
+                                  borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                  textDecoration: 'none',
+                                  transition: 'background .15s',
+                                }}
+                              >
+                                {lk.label}
+                              </Link>
+                            )
                           ))}
                         </div>
                       )}

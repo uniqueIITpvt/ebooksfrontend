@@ -313,7 +313,7 @@ function AuthContent() {
 
   return (
     <div className={`${isModal ? 'h-full bg-transparent' : 'h-dvh bg-gradient-to-br from-slate-100 to-slate-200 p-2 md:p-4'} overflow-hidden flex items-center justify-center`}>
-      <div className="relative w-full max-w-[300px] md:max-w-4xl h-[calc(100dvh-1rem)] md:h-[calc(100vh-2rem)] max-h-[560px] md:max-h-[640px] min-h-0 md:min-h-[520px] bg-white rounded-[2rem] shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-[280px] md:max-w-3xl h-[calc(100dvh-3rem)] md:h-[calc(100vh-5rem)] max-h-[520px] md:max-h-[560px] min-h-0 md:min-h-[480px] bg-white rounded-[2rem] shadow-2xl overflow-hidden">
         
         {/* Forms Container */}
         <div className="relative w-full h-full flex m-0">

@@ -20,7 +20,7 @@ export default function AuthModal() {
         onClick={closeModal}
       />
 
-      <div className="relative h-[calc(100dvh-1rem)] w-full max-w-[300px] md:h-[calc(100dvh-2rem)] md:max-w-4xl">
+      <div className="relative h-[calc(100dvh-3rem)] w-full max-w-[280px] md:h-[calc(100dvh-5rem)] md:max-w-3xl">
         <button
           type="button"
           aria-label="Close auth popup"
