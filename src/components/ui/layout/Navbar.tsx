@@ -26,6 +26,7 @@ import { SearchDropdown } from '../primitives/SearchComponent';
 import MobileSearch from '../primitives/MobileSearch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { Crown } from 'lucide-react';
 
 const API_URL = API_CONFIG.API_BASE_URL;
 
@@ -121,37 +122,20 @@ function LoginButton() {
   return (
     <div className="flex items-center gap-2">
       {shouldOpenAuthPopup ? (
-        <>
-          <button
-            type="button"
-            onClick={() => openAuthModal('signup')}
-            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
-          >
-            Sign Up Free
-          </button>
-          <button
-            type="button"
-            onClick={() => openAuthModal('signin')}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            Sign In
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={() => openAuthModal('signin')}
+          className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
+        >
+          Login/SignUp
+        </button>
       ) : (
-        <>
-          <Link
-            href="/user/auth?mode=signup"
-            className="hidden sm:block px-4 py-2 rounded-xl border-2 border-blue-600 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-all duration-300"
-          >
-            Sign Up Free
-          </Link>
-          <Link
-            href="/"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            Sign In
-          </Link>
-        </>
+        <Link
+          href="/user/auth?mode=signin"
+          className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
+        >
+          Login/SignUp
+        </Link>
       )}
     </div>
   );
@@ -528,6 +512,14 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                     {totalItems > 99 ? '99+' : totalItems}
                   </span>
                 )}
+              </Link>
+
+              <Link
+                href='/subscription'
+                className='hidden items-center gap-1.5 whitespace-nowrap px-2 py-2 text-sm font-bold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:inline-flex'
+              >
+                <Crown className='h-5 w-5 flex-shrink-0 fill-orange-500 text-orange-500' />
+                <span>Go Premium</span>
               </Link>
 
               {/* Login/User Button */}
