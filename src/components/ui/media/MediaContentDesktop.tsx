@@ -539,7 +539,7 @@ export default function MediaContentDesktop({
         )}
 
         <div className='relative z-10 mt-6 w-full px-3 lg:px-5'>
-          <div className='mx-auto max-w-[1600px]'>
+          <div className='mx-auto max-w-[1300px]'>
           <div className='flex gap-6'>
 
             {/* ── Left Filter Sidebar ── */}
@@ -793,7 +793,7 @@ export default function MediaContentDesktop({
             </div>{/* end flex-1 main content */}
           </div>{/* end flex gap-6 */}
 
-          <div className='relative mx-auto mt-8 mb-4 max-w-[1600px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
+          <div className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
             <div className='absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none' />
             <div className='absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none' />
 
