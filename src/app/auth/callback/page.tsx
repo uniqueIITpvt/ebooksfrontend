@@ -30,7 +30,7 @@ export default function AuthCallbackPage() {
       return;
     }
 
-    router.replace('/user/auth?mode=signin');
+    router.replace('signin');
   }, [router, searchParams]);
 
   return (

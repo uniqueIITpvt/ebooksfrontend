@@ -33,10 +33,8 @@ const API_URL = API_CONFIG.API_BASE_URL;
 // Login Button Component
 function LoginButton() {
   const { isAuthenticated, user, logout, openAuthModal } = useAuth();
-  const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const shouldOpenAuthPopup = pathname === '/';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -121,22 +119,13 @@ function LoginButton() {
 
   return (
     <div className="flex items-center gap-2">
-      {shouldOpenAuthPopup ? (
-        <button
-          type="button"
-          onClick={() => openAuthModal('signin')}
-          className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
-        >
-          Login/SignUp
-        </button>
-      ) : (
-        <Link
-          href="/user/auth?mode=signin"
-          className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
-        >
-          Login/SignUp
-        </Link>
-      )}
+      <button
+        type="button"
+        onClick={() => openAuthModal('signin')}
+        className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
+      >
+        Login/SignUp
+      </button>
     </div>
   );
 }

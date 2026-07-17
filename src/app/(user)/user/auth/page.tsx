@@ -206,7 +206,7 @@ function AuthContent() {
         setTimeout(() => {
           const signInUrl = returnUrl
             ? `/user/auth?mode=signin&returnUrl=${encodeURIComponent(returnUrl)}`
-            : '/user/auth?mode=signin';
+            : 'signin';
 
           setSuccess(false);
           setIsSignUp(false);
