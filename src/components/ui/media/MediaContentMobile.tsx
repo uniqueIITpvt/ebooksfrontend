@@ -643,7 +643,7 @@ export default function MediaContentMobile({
         </div>
       )}
 
-      <div className='max-w-2xl mx-auto px-4 relative'>
+      <div className='relative z-10 w-full px-3 pt-4 pb-4 lg:px-5 lg:pt-8 lg:pb-6'>
         {/* Free Summaries Section */}
         <div id="free-summaries-section-mobile" className='mb-8'>
           <div className='flex items-center justify-between mb-6'>

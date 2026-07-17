@@ -514,7 +514,7 @@ export default function MediaContentDesktop({
         </div>
 
         {filteredFreeSummaries.length > 0 && (
-          <div id='free-summaries-section' className='relative z-10 w-full px-6 lg:px-10'>
+          <div id='free-summaries-section' className='relative z-10 w-full px-3 pt-4 pb-4 lg:px-5 lg:pt-8 lg:pb-6'>
             <SectionCarousel
               title='Free Summaries'
               seeMoreHref='/free-summaries'
@@ -536,13 +536,13 @@ export default function MediaContentDesktop({
           </div>
         )}
 
-        <div className='max-w-7xl mx-auto relative z-10'>
+        <div className='relative z-10 mt-6 w-full px-3 lg:px-5'>
           <div className='flex gap-6'>
 
             {/* ── Left Filter Sidebar ── */}
             <aside
               className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${
-                isFilterSidebarCollapsed ? '-mt-24 w-12' : '-mt-9 w-49'
+                isFilterSidebarCollapsed ? '-mt-24 w-12' : '-mt-14 w-49'
               }`}
             >
               {isFilterSidebarCollapsed ? (

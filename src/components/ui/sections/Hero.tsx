@@ -74,6 +74,24 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const handleStartFreeLearning = () => {
+    const section =
+      document.getElementById('free-summaries-section') ||
+      document.getElementById('free-summaries-section-mobile');
+
+    if (!section) {
+      window.location.href = '/free-summaries-section';
+      return;
+    }
+
+    window.history.pushState(null, '', '/free-summaries-section');
+    const scrollOffset = window.innerWidth < 768 ? 80 : 120;
+    window.scrollTo({
+      top: section.getBoundingClientRect().top + window.scrollY + scrollOffset,
+      behavior: 'smooth',
+    });
+  };
+
   useEffect(() => {
     const fetchBannerSetting = async () => {
       try {
@@ -347,12 +365,13 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
           <p className='mt-2 text-xs font-semibold leading-snug text-blue-950 sm:text-sm md:text-lg lg:text-xl'>
             Explore ebooks, audiobooks, and learning resources designed for everyday growth
           </p>
-          <Link
-            href='/#free-summaries-section'
+          <button
+            type='button'
+            onClick={handleStartFreeLearning}
             className='mt-4 inline-flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-600 md:px-7 md:py-3 md:text-base'
           >
             Start With Free learning
-          </Link>
+          </button>
         </div>
       </div>
 
