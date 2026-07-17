@@ -514,7 +514,7 @@ export default function MediaContentDesktop({
         </div>
 
         {filteredFreeSummaries.length > 0 && (
-          <div id='free-summaries-section' className='relative z-10 w-full px-3 pt-4 pb-4 lg:px-5 lg:pt-8 lg:pb-6'>
+          <div id='free-summaries-section' className='relative z-10 w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-white px-3 pt-4 pb-4 lg:px-5 lg:pt-8 lg:pb-6'>
             <div className='mx-auto max-w-[1300px]'>
               <SectionCarousel
                 title='Free Summaries'
@@ -545,7 +545,7 @@ export default function MediaContentDesktop({
             {/* ── Left Filter Sidebar ── */}
             <aside
               className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${
-                isFilterSidebarCollapsed ? '-mt-24 w-12' : '-mt-14 w-49'
+                isFilterSidebarCollapsed ? '-mt-24 w-12' : 'w-49'
               }`}
             >
               {isFilterSidebarCollapsed ? (
