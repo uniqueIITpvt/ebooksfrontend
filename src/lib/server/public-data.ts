@@ -302,12 +302,9 @@ export const getFaqPageData = cache(async (): Promise<FaqPageData> => {
 });
 
 export const getBooksPageData = cache(async (): Promise<BooksPageData> => {
-  const [books, audiobooks, categories, languages] = await Promise.all([
+  const [books, categories, languages] = await Promise.all([
     fetchApiData<PublicBookListItem[]>('/books', {
-      query: { view: 'listing' },
-    }),
-    fetchApiData<PublicBookListItem[]>('/audiobooks', {
-      query: { view: 'listing' },
+      query: { view: 'listing', type: 'Books' },
     }),
     fetchApiData<Category[]>('/categories', {
       query: { includeInactive: false, sortBy: 'sortOrder' },
@@ -316,7 +313,7 @@ export const getBooksPageData = cache(async (): Promise<BooksPageData> => {
   ]);
 
   return {
-    allBooks: [...(books ?? []), ...(audiobooks ?? [])],
+    allBooks: books ?? [],
     categories: categories ?? [],
     languages: languages ?? [],
   };
