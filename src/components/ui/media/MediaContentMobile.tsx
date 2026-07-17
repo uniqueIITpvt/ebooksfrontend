@@ -644,6 +644,68 @@ export default function MediaContentMobile({
       )}
 
       <div className='max-w-2xl mx-auto px-4 relative'>
+        {/* Free Summaries Section */}
+        <div id="free-summaries-section-mobile" className='mb-8'>
+          <div className='flex items-center justify-between mb-6'>
+            <div className='flex-1'>
+              <h3 className='text-lg font-bold text-slate-900 mb-2 flex items-center'>
+                <BookOpenIcon className='w-4 h-4 mr-2 text-black' />
+                <span className='text-black'>Free Summaries</span>
+              </h3>
+              <div className='h-1 w-20 bg-black rounded-full'></div>
+            </div>
+            <Button
+              onClick={() => router.push('/free-summaries')}
+              variant="outline"
+              size="sm"
+              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+            >
+              See More
+            </Button>
+          </div>
+
+          <div
+            ref={freeSummariesContainerRef}
+            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            onTouchStart={(e) => {
+              setActivePager({
+                currentPage: currentFreeSummaryPage,
+                setCurrentPage: setCurrentFreeSummaryPage,
+                totalPages: getFreeSummariesTotalPages(),
+              });
+              onTouchStart(e);
+            }}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {(isLoadingFreeSummaries ? [] : getFreeSummariesPageItems()).map((summary, index) => (
+              <MobileShowcaseCard
+                key={(summary as any)._id || (summary as any).id}
+                item={summary}
+                index={index}
+                meta={summary.pages ? `${summary.pages} pages` : 'Free Summary'}
+                href={`/books/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
+              />
+            ))}
+          </div>
+
+          {getFreeSummariesTotalPages() > 1 && (
+            <div className='flex justify-center space-x-2 mb-4'>
+              {Array.from({ length: getFreeSummariesTotalPages() }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentFreeSummaryPage(i)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    currentFreeSummaryPage === i
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 w-6'
+                      : 'bg-slate-300'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* New Release Books Section */}
         <div className='mb-8'>
           {/* Header */}
@@ -776,68 +838,6 @@ export default function MediaContentMobile({
                   onClick={() => setCurrentAudiobookPage(i)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     currentAudiobookPage === i
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 w-6'
-                      : 'bg-slate-300'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Free Summaries Section */}
-        <div id="free-summaries-section-mobile" className='mb-8'>
-          <div className='flex items-center justify-between mb-6'>
-            <div className='flex-1'>
-              <h3 className='text-lg font-bold text-slate-900 mb-2 flex items-center'>
-                <BookOpenIcon className='w-4 h-4 mr-2 text-black' />
-                <span className='text-black'>Free Summaries</span>
-              </h3>
-              <div className='h-1 w-20 bg-black rounded-full'></div>
-            </div>
-            <Button
-              onClick={() => router.push('/free-summaries')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
-            >
-              See More
-            </Button>
-          </div>
-
-          <div
-            ref={freeSummariesContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
-            onTouchStart={(e) => {
-              setActivePager({
-                currentPage: currentFreeSummaryPage,
-                setCurrentPage: setCurrentFreeSummaryPage,
-                totalPages: getFreeSummariesTotalPages(),
-              });
-              onTouchStart(e);
-            }}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
-            {(isLoadingFreeSummaries ? [] : getFreeSummariesPageItems()).map((summary, index) => (
-              <MobileShowcaseCard
-                key={(summary as any)._id || (summary as any).id}
-                item={summary}
-                index={index}
-                meta={summary.pages ? `${summary.pages} pages` : 'Free Summary'}
-                href={`/books/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
-              />
-            ))}
-          </div>
-
-          {getFreeSummariesTotalPages() > 1 && (
-            <div className='flex justify-center space-x-2 mb-4'>
-              {Array.from({ length: getFreeSummariesTotalPages() }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentFreeSummaryPage(i)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    currentFreeSummaryPage === i
                       ? 'bg-gradient-to-r from-indigo-600 to-purple-600 w-6'
                       : 'bg-slate-300'
                   }`}
@@ -1041,4 +1041,3 @@ export default function MediaContentMobile({
     </section>
   );
 }
-

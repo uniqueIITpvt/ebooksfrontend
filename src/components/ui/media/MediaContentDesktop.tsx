@@ -513,6 +513,29 @@ export default function MediaContentDesktop({
           <div className='absolute bottom-20 left-10 w-40 h-40 bg-purple-200/15 rounded-full blur-3xl animate-pulse delay-1000' />
         </div>
 
+        {filteredFreeSummaries.length > 0 && (
+          <div id='free-summaries-section' className='relative z-10 w-full px-6 lg:px-10'>
+            <SectionCarousel
+              title='Free Summaries'
+              seeMoreHref='/free-summaries'
+              isLoading={false}
+              items={filteredFreeSummaries}
+              emptyMsg='No free summaries'
+              sectionKey='free'
+              itemLimit={LANDING_COLLAPSED_ITEM_LIMIT}
+              cartFormat={selectedCartFormat}
+              cardHref={(b) => {
+                const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
+                if (selectedFormats.length === 1) {
+                  return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
+                }
+                return baseUrl;
+              }}
+              subLabel='Free'
+            />
+          </div>
+        )}
+
         <div className='max-w-7xl mx-auto relative z-10'>
           <div className='flex gap-6'>
 
@@ -719,29 +742,6 @@ export default function MediaContentDesktop({
                   itemLimit={landingItemLimit}
                   cardHref={(b) => `/audiobooks/${b.slug || generateBookSlug(b.title)}`}
                 />
-              )}
-              {filteredFreeSummaries.length > 0 && (
-                <div id='free-summaries-section'>
-                  <SectionCarousel
-                    title='Free Summaries'
-                    seeMoreHref='/free-summaries'
-                    isLoading={false}
-                    items={filteredFreeSummaries}
-                    emptyMsg='No free summaries'
-                    sectionKey='free'
-                    itemLimit={landingItemLimit}
-                    cartFormat={selectedCartFormat}
-                    cardHref={(b) => {
-                      const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
-                      // If exactly one format is selected, include it as a URL parameter
-                      if (selectedFormats.length === 1) {
-                        return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
-                      }
-                      return baseUrl;
-                    }}
-                    subLabel='Free'
-                  />
-                </div>
               )}
               {filteredTrendingBooks.length > 0 && (
                 <SectionCarousel
