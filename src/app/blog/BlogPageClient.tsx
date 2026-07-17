@@ -73,7 +73,7 @@ export default function BlogPageClient({
   return (
     <div className="min-h-screen sm:pt-3 lg:pt-3 bg-white">
       <section className="bg-gradient-to-br from-slate-50 to-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-4">
               {blogSettings.title}
@@ -88,7 +88,7 @@ export default function BlogPageClient({
       </section>
 
       <section className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -143,7 +143,7 @@ export default function BlogPageClient({
       </section>
 
       <section className="py-6 sm:py-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           {filteredBlogs.length === 0 && searchTerm ? (
             <div className="text-center py-16">
               <div className="max-w-md mx-auto">

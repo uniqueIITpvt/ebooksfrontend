@@ -177,7 +177,7 @@ export default function AudiobooksPage() {
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.10),transparent_35%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.10),transparent_32%),linear-gradient(180deg,#ffffff_0%,#f8fafc_62%)]' />
         <div className='absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-300/70 to-transparent' />
 
-        <div className='relative mx-auto max-w-[1500px]  sm:px-1 lg:px-7 lg:py-3'>
+        <div className='relative mx-auto max-w-[1300px]  sm:px-1 lg:px-7 lg:py-3'>
           <button
             onClick={() => router.push('/')}
             className='inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-slate-700 transition hover:border-blue-500 hover:bg-slate-50'
@@ -190,7 +190,7 @@ export default function AudiobooksPage() {
         </div>
       </section>
 
-      <section className='mx-auto max-w-[1500px] sm:px-6 lg:px-4'>
+      <section className='mx-auto max-w-[1300px] sm:px-6 lg:px-4'>
         <div className='lg:flex lg:gap-8 xl:gap-10'>
           <div className='lg:w-[320px] xl:w-[340px] lg:flex-shrink-0'>
             <AudiobookFilters

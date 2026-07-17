@@ -141,7 +141,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
         <div className='absolute bottom-40 right-10 w-20 h-20 bg-emerald-200/15 rounded-full blur-2xl animate-pulse delay-3000' />
       </div>
 
-      <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
+      <div className='max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 relative'>
         <div
           className={`text-center mb-16 ${
             isVisible

@@ -188,7 +188,7 @@ const About = () => {
         <div className='absolute top-1/2 left-1/4 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-500'></div>
       </div>
 
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative'>
+      <div className='max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 relative'>
         {/* Header */}
         <div className='text-center mb-16'>
           <div className='inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6'>
