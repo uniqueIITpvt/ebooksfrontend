@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   BookOpenIcon,
   ChevronLeftIcon,
@@ -55,6 +56,7 @@ interface BookCardProps {
 function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }: BookCardProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
+  const { openAuthModal } = useAuth();
   const [added, setAdded] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const filledStars = Math.round(book.rating || 0);
@@ -116,7 +118,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     const token = tokenStore.getAccessToken();
 
     if (!token) {
-      router.push(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      openAuthModal('signin', href);
       return;
     }
 
@@ -139,7 +141,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     } finally {
       setClaiming(false);
     }
-  }, [book, href, isAudiobook, router]);
+  }, [book, defaultReadTarget, href, isAudiobook, openAuthModal]);
 
   return (
     <div className='group flex h-full flex-col w-full bg-white rounded-lg border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden'>
