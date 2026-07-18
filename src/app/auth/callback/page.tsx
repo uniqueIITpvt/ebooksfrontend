@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, type User } from '@/services/api/authApi';
 
@@ -16,7 +16,13 @@ const parseUser = (value: string | null): User | null => {
   }
 };
 
-export default function AuthCallbackPage() {
+const AuthCallbackLoading = () => (
+  <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
+    Signing you in...
+  </div>
+);
+
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,9 +39,13 @@ export default function AuthCallbackPage() {
     router.replace('signin');
   }, [router, searchParams]);
 
+  return <AuthCallbackLoading />;
+}
+
+export default function AuthCallbackPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
-      Signing you in...
-    </div>
+    <Suspense fallback={<AuthCallbackLoading />}>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
