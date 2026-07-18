@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { API_CONFIG } from '@/config/api';
 import categoriesApi, { type Category } from '@/services/api/categoriesApi';
 import type { PublicBookListItem } from '@/types/publicBook';
@@ -19,7 +19,9 @@ import {
   ShoppingCartIcon,
   Squares2X2Icon,
   EnvelopeIcon,
+  BookmarkIcon,
 } from '@heroicons/react/24/outline';
+import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import MobileNavigation from './MobileNavigation';
 import BooksDropdown from './BooksDropdown';
 import { SearchDropdown } from '../primitives/SearchComponent';
@@ -231,6 +233,8 @@ const fetchPublicBookItems = async (path: string) => {
 
 export default function Navbar({ siteLogo }: NavbarProps) {
   const { totalItems } = useCart();
+  const { user, openAuthModal } = useAuth();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -246,6 +250,8 @@ export default function Navbar({ siteLogo }: NavbarProps) {
     pathname === '/audiobooks' ||
     (pathname === '/books' && (searchParams?.get('type') || '') === 'Audiobook');
   const isBooksRoute = pathname === '/books' && !isAudiobooksRoute;
+  const savedBooksCount = user?.savedBooks?.length || 0;
+  const SavedBooksIcon = savedBooksCount > 0 ? BookmarkSolidIcon : BookmarkIcon;
 
   const isNavItemActive = (item: NavItem) => {
     if (item.name === 'Audiobooks') return isAudiobooksRoute;
@@ -488,6 +494,31 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                   onClose={() => setSearchOpen(false)} 
                 />
               </div>
+
+              <button
+                type='button'
+                onClick={() => {
+                  if (!user) {
+                    openAuthModal('signin', '/profile?tab=saved');
+                    return;
+                  }
+
+                  router.push('/profile?tab=saved');
+                }}
+                className='relative p-2 sm:p-3 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                aria-label='Saved books'
+              >
+                <SavedBooksIcon
+                  className={`w-5 h-5 ${
+                    savedBooksCount > 0 ? 'fill-blue-600 text-blue-600' : ''
+                  }`}
+                />
+                {savedBooksCount > 0 && (
+                  <span className='absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow'>
+                    {savedBooksCount > 99 ? '99+' : savedBooksCount}
+                  </span>
+                )}
+              </button>
 
               {/* Cart Icon with Badge */}
               <Link

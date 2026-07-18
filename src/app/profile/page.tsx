@@ -14,17 +14,21 @@ import {
   CameraIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { BookmarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
-import { authApi } from '@/services/api/authApi';
+import { authApi, type SavedBook } from '@/services/api/authApi';
+import { generateBookSlug } from '@/utils/slugify';
 
 export default function UserProfilePage() {
   const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'library' | 'orders'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'saved' | 'library' | 'orders'>('overview');
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
+  const [savedBooks, setSavedBooks] = useState<SavedBook[]>([]);
+  const [savedBooksLoading, setSavedBooksLoading] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [phone, setPhone] = useState('');
@@ -80,6 +84,8 @@ export default function UserProfilePage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('tab') === 'library') {
       setActiveTab('library');
+    } else if (params.get('tab') === 'saved') {
+      setActiveTab('saved');
     }
   }, []);
 
@@ -167,6 +173,31 @@ export default function UserProfilePage() {
       })
       .finally(() => {
         if (!ignore) setLibraryLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, isAuthenticated]);
+
+  useEffect(() => {
+    if (activeTab !== 'saved' || !isAuthenticated) return;
+
+    let ignore = false;
+    setSavedBooksLoading(true);
+
+    authApi
+      .getSavedBooks()
+      .then((response) => {
+        if (!ignore && response.success) {
+          setSavedBooks(response.data || []);
+        }
+      })
+      .catch(() => {
+        if (!ignore) setSavedBooks([]);
+      })
+      .finally(() => {
+        if (!ignore) setSavedBooksLoading(false);
       });
 
     return () => {
@@ -319,6 +350,16 @@ export default function UserProfilePage() {
                 My Orders
               </button>
               <button
+                onClick={() => setActiveTab('saved')}
+                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
+                  activeTab === 'saved'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Saved Books
+              </button>
+              <button
                 onClick={() => setActiveTab('library')}
                 className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
                   activeTab === 'library'
@@ -447,6 +488,93 @@ export default function UserProfilePage() {
                 >
                   Browse Books
                 </Link>
+              </div>
+            )}
+
+            {activeTab === 'saved' && (
+              <div>
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Saved Books</h3>
+                    <p className="text-sm text-gray-500">Books you saved for later</p>
+                  </div>
+                  <Link
+                    href="/books"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                  >
+                    Browse
+                  </Link>
+                </div>
+
+                {savedBooksLoading ? (
+                  <div className="py-12 flex justify-center">
+                    <div className="h-10 w-10 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin" />
+                  </div>
+                ) : savedBooks.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                    <BookmarkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No saved books yet</p>
+                    <p className="text-gray-500 text-sm mb-4">Tap Save on any book to find it here later</p>
+                    <Link
+                      href="/books"
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Browse Books
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {savedBooks.map((savedBook) => {
+                      const rawBook = typeof savedBook.bookId === 'object' ? savedBook.bookId : null;
+                      const title = savedBook.title || rawBook?.title || 'Saved Book';
+                      const slug = savedBook.slug || rawBook?.slug || savedBook.id || savedBook._id || generateBookSlug(title);
+                      const image = savedBook.image || (rawBook as any)?.image;
+
+                      return (
+                        <Link
+                          key={savedBook.id || savedBook._id || slug}
+                          href={`/books/${slug}`}
+                          className="group bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                        >
+                          <div className="relative h-44 bg-gray-100">
+                            {image ? (
+                              <Image
+                                src={image}
+                                alt={title}
+                                fill
+                                className="object-contain p-3"
+                              />
+                            ) : (
+                              <div className="h-full flex items-center justify-center text-gray-400">
+                                <BookOpenIcon className="w-10 h-10" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4">
+                            {savedBook.category && (
+                              <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                                {savedBook.category}
+                              </span>
+                            )}
+                            <h4 className="mt-2 font-bold text-gray-900 line-clamp-2 group-hover:text-blue-700">
+                              {title}
+                            </h4>
+                            {savedBook.author && (
+                              <p className="text-sm text-gray-500 mt-1 line-clamp-1">{savedBook.author}</p>
+                            )}
+                            <p className="text-xs text-gray-400 mt-3">
+                              Saved {new Date(savedBook.savedAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
