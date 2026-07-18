@@ -11,6 +11,7 @@ import type { PremiumSummary } from '@/services/api/premiumSummariesApi';
 import type { TrendingBook } from '@/services/api/trendingBooksApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import type { FaqItem } from '@/types/faq';
+import { generateBookSlug } from '@/utils/slugify';
 
 const DEFAULT_API_ORIGIN = 'https://ebooksbackend-production.up.railway.app';
 const RAW_API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_ORIGIN;
@@ -342,7 +343,40 @@ export const getBlogPostBySlug = cache(async (slug: string): Promise<BlogPost | 
 });
 
 export const getBookBySlug = cache(async (slug: string): Promise<Book | null> => {
-  return fetchApiData<Book>(`/books/${encodeURIComponent(slug)}`, { revalidate: 0 });
+  const directBook = await fetchApiData<Book>(`/books/${encodeURIComponent(slug)}`, {
+    revalidate: 0,
+  });
+
+  if (directBook) {
+    return directBook;
+  }
+
+  const books = await fetchApiData<PublicBookListItem[]>('/books', {
+    query: { view: 'listing', type: 'Books', limit: 1000 },
+    revalidate: 0,
+  });
+
+  const matchedBook = (books ?? []).find((book) => {
+    const identifiers = [
+      book.slug,
+      book.id,
+      book._id,
+      generateBookSlug(book.title),
+      book.subtitle ? generateBookSlug(`${book.title} ${book.subtitle}`) : null,
+    ];
+
+    return identifiers.some((identifier) => identifier === slug);
+  });
+
+  const matchedId = matchedBook?.id || matchedBook?._id;
+
+  if (!matchedId) {
+    return null;
+  }
+
+  return fetchApiData<Book>(`/books/${encodeURIComponent(matchedId)}`, {
+    revalidate: 0,
+  });
 });
 
 export const getAudiobookBySlug = cache(async (slug: string): Promise<Audiobook | null> => {
