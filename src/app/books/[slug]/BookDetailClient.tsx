@@ -36,7 +36,7 @@ export default function BookDetailClient({
   relatedBooks,
 }: BookDetailClientProps) {
   const router = useRouter();
-  const { user, setIsLoginModalOpen, refreshUser, openAuthModal } = useAuth();
+  const { user, refreshUser, openAuthModal } = useAuth();
   const { addToCart, isInCart } = useCart();
   const [selectedFormat, setSelectedFormat] = useState('');
   const [isFavorited, setIsFavorited] = useState(false);
@@ -206,7 +206,7 @@ export default function BookDetailClient({
 
   const handleSubscribeClick = () => {
     if (!user) {
-      setIsLoginModalOpen(true);
+      openAuthModal('signin', '/subscription');
       return;
     }
 
@@ -237,7 +237,7 @@ export default function BookDetailClient({
     if (!identifier) return;
 
     if (!user) {
-      router.push(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      openAuthModal('signin', window.location.pathname);
       return;
     }
 

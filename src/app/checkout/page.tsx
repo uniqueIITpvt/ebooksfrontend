@@ -45,7 +45,7 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { cartItems, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
   const fromCart = searchParams.get('from') === 'cart';
   const checkoutKind = searchParams.get('kind');
@@ -325,7 +325,7 @@ function CheckoutContent() {
     const token = tokenStore.getAccessToken();
     if (!token) {
       alert('Please log in to complete your purchase');
-      router.push('/user/auth?returnUrl=' + encodeURIComponent(window.location.href));
+      openAuthModal('signin', `${window.location.pathname}${window.location.search}`);
       return;
     }
 

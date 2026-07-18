@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { BACKEND_URL } from '@/config/backend-url.config';
 import { audiobooksApi } from '@/services/api/audiobooksApi';
 import { tokenStore } from '@/services/api/tokenStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Audiobook {
   id: string;
@@ -189,6 +190,7 @@ function normalizeTimedWords<T extends { startTime: number; endTime: number }>(
 
 export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClientProps) {
   const router = useRouter();
+  const { openAuthModal } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -322,7 +324,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     const token = tokenStore.getAccessToken();
 
     if (!token) {
-      router.push(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      openAuthModal('signin', window.location.pathname);
       return;
     }
 
@@ -349,7 +351,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     const token = tokenStore.getAccessToken();
 
     if (!token) {
-      router.push(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      openAuthModal('signin', window.location.pathname);
       return;
     }
 
@@ -368,7 +370,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     } catch (error: any) {
       const message = String(error?.message || '').toLowerCase();
       if (message.includes('401') || message.includes('login') || message.includes('authorized')) {
-        router.push(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+        openAuthModal('signin', window.location.pathname);
         return;
       }
 
