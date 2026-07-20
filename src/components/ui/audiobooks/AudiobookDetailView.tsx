@@ -20,6 +20,7 @@ import {
 import { parsePriceValue } from '@/lib/audiobooks';
 import type { AudiobookAccessState } from '@/services/api/booksApi';
 import type { Audiobook } from '@/services/api/audiobooksApi';
+import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 
 type AudiobookTab = 'about' | 'read' | 'details';
 
@@ -58,6 +59,7 @@ export default function AudiobookDetailView({
 }: AudiobookDetailViewProps) {
   const router = useRouter();
   const audioRef = useRef<HTMLAudioElement>(null);
+  const persistentAudio = usePersistentAudioPlayer();
   const [activeTab, setActiveTab] = useState<AudiobookTab>('about');
   const [isPlaying, setIsPlaying] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -69,6 +71,8 @@ export default function AudiobookDetailView({
     () => audiobook.files?.audiobook?.url || '',
     [audiobook.files?.audiobook?.url]
   );
+  const persistentTrackId = `audiobook-${audiobook.id || audiobook.slug}`;
+  const isPersistentTrack = persistentAudio.currentTrack?.id === persistentTrackId;
   const ebookFile = audiobook.files?.ebook || null;
   const isPdfEbook =
     ebookFile?.mimeType === 'application/pdf' ||
@@ -126,24 +130,49 @@ export default function AudiobookDetailView({
     if (!audio) return;
 
     audio.playbackRate = parseFloat(playbackRate);
+    if (isPersistentTrack) {
+      persistentAudio.setPlaybackRate(parseFloat(playbackRate) || 1);
+    }
   }, [playbackRate]);
 
+  useEffect(() => {
+    if (!isPersistentTrack) return;
+
+    setIsPlaying(persistentAudio.isPlaying);
+    setCurrentTime(persistentAudio.currentTime);
+    if (persistentAudio.duration > 0) {
+      setDuration(persistentAudio.duration);
+    }
+  }, [
+    isPersistentTrack,
+    persistentAudio.currentTime,
+    persistentAudio.duration,
+    persistentAudio.isPlaying,
+  ]);
+
   const handleTogglePlay = async () => {
-    const audio = audioRef.current;
-    if (!audio || !audioUrl) return;
+    if (!audioUrl) return;
 
     try {
-      if (audio.paused) {
-        await audio.play();
-      } else {
-        audio.pause();
-      }
+      await persistentAudio.toggleTrack({
+        id: persistentTrackId,
+        title: audiobook.title,
+        author: audiobook.author,
+        image: audiobook.image,
+        url: audioUrl,
+        href: `/audiobooks/${audiobook.slug || audiobook.id}`,
+      });
     } catch {
       setIsPlaying(false);
     }
   };
 
   const handleSkip = (delta: number) => {
+    if (isPersistentTrack) {
+      persistentAudio.skip(delta);
+      return;
+    }
+
     const audio = audioRef.current;
     if (!audio || !audioUrl) return;
 
@@ -155,12 +184,20 @@ export default function AudiobookDetailView({
   };
 
   const handleSeek = (event: MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
-    if (!audio || !audioUrl || duration <= 0) return;
+    if (!audioUrl || duration <= 0) return;
 
     const bounds = event.currentTarget.getBoundingClientRect();
     const progress = (event.clientX - bounds.left) / bounds.width;
     const nextTime = Math.max(0, Math.min(duration, progress * duration));
+
+    if (isPersistentTrack) {
+      persistentAudio.seek(nextTime);
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
     audio.currentTime = nextTime;
     setCurrentTime(nextTime);
   };

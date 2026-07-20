@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   StarIcon,
   ShoppingCartIcon,
@@ -17,6 +17,7 @@ import CoverImageFrame from './CoverImageFrame';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { getAudiobookHref, parsePriceValue } from '@/lib/audiobooks';
 import { useCart } from '@/contexts/CartContext';
+import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -48,10 +49,7 @@ interface BooksGridMobileProps {
 export default function BooksGridMobile({ items, className = '', onAudiobookSelect }: BooksGridMobileProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const currentPreviewItem = items.find((item) => item.id === currentlyPlaying) ?? null;
+  const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
 
   useEffect(() => {
     // Inject blob animation styles only once
@@ -64,25 +62,20 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
   }, []);
 
   // Audio playback functionality
-  const handlePlay = (item: PublicBookListItem) => {
+  const handlePlay = async (item: PublicBookListItem) => {
     if (item.type !== 'Audiobook') return;
-
-    if (!audioRef.current) return;
 
     const audioUrl = item.files?.audiobook?.url;
     if (!audioUrl) return;
 
-    if (currentlyPlaying === item.id && isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      if (currentlyPlaying !== item.id) {
-        audioRef.current.src = audioUrl;
-        setCurrentlyPlaying(item.id);
-      }
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
+    await toggleTrack({
+      id: `audiobook-${item.id}`,
+      title: item.title,
+      author: item.author,
+      image: item.image,
+      url: audioUrl,
+      href: getAudiobookHref(item),
+    });
   };
 
   const handleAudiobookSelect = (item: PublicBookListItem) => {
@@ -93,34 +86,6 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
 
     router.push(getAudiobookHref(item));
   };
-
-  // Audio event handlers
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentlyPlaying(null);
-    };
-
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, [currentlyPlaying]);
-
-  useEffect(() => {
-    if (!currentlyPlaying) return;
-
-    const stillExists = items.some((item) => item.id === currentlyPlaying);
-    if (stillExists) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-
-    setCurrentlyPlaying(null);
-    setIsPlaying(false);
-  }, [currentlyPlaying, items]);
 
   const formatPrice = (price?: string | null) => {
     if (!price) return null;
@@ -141,9 +106,6 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
 
   return (
     <div className={`${className}`}>
-      {/* Hidden Audio Element */}
-      <audio ref={audioRef} preload='metadata' />
-      
       <div className='grid grid-cols-2 gap-4 mb-2'>
         {items.map((item, index) => (
               item.type === 'Books' ? (
@@ -276,9 +238,9 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                         shadow-lg transition-all duration-300 hover:scale-110
                         disabled:cursor-not-allowed disabled:bg-white/60 disabled:hover:scale-100
                       '
-                      aria-label={`${currentlyPlaying === item.id && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
+                      aria-label={`${currentTrack?.id === `audiobook-${item.id}` && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
                     >
-                      {currentlyPlaying === item.id && isPlaying ? (
+                      {currentTrack?.id === `audiobook-${item.id}` && isPlaying ? (
                         <PauseIcon className='w-4 h-4 text-indigo-600' />
                       ) : (
                         <PlayIcon className='w-4 h-4 text-indigo-600 ml-0.5' />
@@ -370,66 +332,6 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
         ))}
       </div>
 
-      {/* Audio Player Bar (appears when playing audiobooks) */}
-      {currentlyPlaying && isPlaying && currentPreviewItem && (
-        <div className='
-          fixed bottom-0 left-0 right-0 
-          bg-indigo-600 backdrop-blur-sm 
-          border-t border-indigo-500 
-          p-3 z-50 shadow-2xl
-          safe-area-inset-bottom
-        '>
-          <div className='max-w-7xl mx-auto'>
-            <div className='flex items-center gap-3'>
-              <div className='flex items-center gap-2 flex-1 min-w-0'>
-                <div className='relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0'>
-                  {currentPreviewItem.image ? (
-                    <Image
-                      src={currentPreviewItem.image}
-                      alt={currentPreviewItem.title}
-                      fill
-                      className='object-cover'
-                      sizes='40px'
-                    />
-                  ) : (
-                    <div className='flex h-full w-full items-center justify-center bg-indigo-500 text-[10px] font-semibold text-white'>
-                      Audio
-                    </div>
-                  )}
-                </div>
-                <div className='flex-1 min-w-0'>
-                  <h4 className='font-semibold text-xs line-clamp-1 text-white'>
-                    {currentPreviewItem.title}
-                  </h4>
-                  <p className='text-xs text-indigo-200 line-clamp-1'>
-                    by {currentPreviewItem.author}
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-2 flex-shrink-0'>
-                <button
-                  onClick={() => handlePlay(currentPreviewItem)}
-                  className='
-                    text-white hover:text-indigo-200 
-                    transition-colors p-1
-                    touch-manipulation
-                  '
-                >
-                  {isPlaying ? (
-                    <PauseIcon className='w-5 h-5' />
-                  ) : (
-                    <PlayIcon className='w-5 h-5' />
-                  )}
-                </button>
-                <div className='text-xs text-indigo-200 whitespace-nowrap hidden xs:block'>
-                  Now Playing
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

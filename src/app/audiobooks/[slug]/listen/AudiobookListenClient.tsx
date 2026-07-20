@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BACKEND_URL } from '@/config/backend-url.config';
 import { audiobooksApi } from '@/services/api/audiobooksApi';
+import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 import type {
   AudiobookReaderPage,
   AudiobookTranscriptLanguage,
@@ -171,6 +172,7 @@ function normalizeTimedWords<T extends { startTime: number; endTime: number }>(
 
 export default function AudiobookListenClient({ slug }: { slug: string }) {
   const router = useRouter();
+  const persistentAudio = usePersistentAudioPlayer();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audiobook, setAudiobook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
@@ -233,6 +235,8 @@ export default function AudiobookListenClient({ slug }: { slug: string }) {
     const rawUrl = audiobook?.files?.audiobook?.url || getGeneratedAudioUrl(audiobook);
     return toAbsoluteBackendUrl(rawUrl);
   }, [audiobook]);
+  const persistentTrackId = `audiobook-${audiobook?.id || (audiobook as any)?._id || audiobook?.slug || slug}`;
+  const isPersistentTrack = persistentAudio.currentTrack?.id === persistentTrackId;
   const isPdfEbook =
     ebookFile?.mimeType === 'application/pdf' ||
     ebookFile?.url?.toLowerCase().includes('.pdf') ||
@@ -350,18 +354,38 @@ export default function AudiobookListenClient({ slug }: { slug: string }) {
     const audio = audioRef.current;
     if (!audio) return;
     audio.playbackRate = parseFloat(playbackRate);
+    if (isPersistentTrack) {
+      persistentAudio.setPlaybackRate(parseFloat(playbackRate));
+    }
   }, [playbackRate]);
 
+  useEffect(() => {
+    if (!isPersistentTrack) return;
+
+    setIsPlaying(persistentAudio.isPlaying);
+    setCurrentTime(persistentAudio.currentTime);
+    if (persistentAudio.duration > 0) {
+      setDuration(persistentAudio.duration);
+    }
+  }, [
+    isPersistentTrack,
+    persistentAudio.currentTime,
+    persistentAudio.duration,
+    persistentAudio.isPlaying,
+  ]);
+
   const handleTogglePlay = async () => {
-    const audio = audioRef.current;
-    if (!audio || !audioUrl) return;
+    if (!audioUrl || !audiobook) return;
 
     try {
-      if (audio.paused) {
-        await audio.play();
-      } else {
-        audio.pause();
-      }
+      await persistentAudio.toggleTrack({
+        id: persistentTrackId,
+        title: audiobook.title,
+        author: audiobook.author,
+        image: audiobook.image,
+        url: audioUrl,
+        href: `/audiobooks/${audiobook.slug || slug}/listen`,
+      });
     } catch {
       setIsPlaying(false);
     }
@@ -390,6 +414,11 @@ export default function AudiobookListenClient({ slug }: { slug: string }) {
 
   const handleSkip = (delta: number) => {
     const audio = audioRef.current;
+    if (isPersistentTrack) {
+      persistentAudio.skip(delta);
+      return;
+    }
+
     if (!audio) return;
 
     audio.currentTime = Math.min(

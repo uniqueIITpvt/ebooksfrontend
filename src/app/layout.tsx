@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { PersistentAudioPlayerProvider } from '@/contexts/PersistentAudioPlayerContext';
 import AuthModal from '@/components/ui/auth/AuthModal';
 import { getSiteLogo } from '@/lib/server/public-data';
 import ConditionalLayout from '@/components/ui/layout/ConditionalLayout';
@@ -90,10 +91,12 @@ export default async function RootLayout({
       <body suppressHydrationWarning className="font-dm-sans">
         <AuthProvider>
           <CartProvider>
-            <ConditionalLayout siteLogo={siteLogo}>
-              {children}
-            </ConditionalLayout>
-            <AuthModal />
+            <PersistentAudioPlayerProvider>
+              <ConditionalLayout siteLogo={siteLogo}>
+                {children}
+              </ConditionalLayout>
+              <AuthModal />
+            </PersistentAudioPlayerProvider>
           </CartProvider>
         </AuthProvider>
       </body>

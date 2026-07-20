@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -18,6 +18,7 @@ import {
   parsePriceValue,
 } from '@/lib/audiobooks';
 import { useCart } from '@/contexts/CartContext';
+import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 
 interface AudiobookGridProps {
   items: PublicBookListItem[];
@@ -33,62 +34,23 @@ const placeholderGradients = [
 export default function AudiobookGrid({ items }: AudiobookGridProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const currentPreview = useMemo(
-    () => items.find((item) => item.id === currentlyPlaying) ?? null,
-    [currentlyPlaying, items]
-  );
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => setIsPlaying(false);
-
-    audio.addEventListener('ended', handleEnded);
-    return () => audio.removeEventListener('ended', handleEnded);
-  }, []);
-
-  useEffect(() => {
-    if (!currentlyPlaying) return;
-
-    const previewStillExists = items.some((item) => item.id === currentlyPlaying);
-    if (previewStillExists) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-
-    setCurrentlyPlaying(null);
-    setIsPlaying(false);
-  }, [currentlyPlaying, items]);
+  const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
 
   const handleTogglePreview = async (item: PublicBookListItem) => {
-    const audio = audioRef.current;
     const audioUrl = item.files?.audiobook?.url;
 
-    if (!audio || !audioUrl) return;
+    if (!audioUrl) return;
 
     try {
-      if (currentlyPlaying === item.id && isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-        return;
-      }
-
-      if (audio.src !== audioUrl) {
-        audio.src = audioUrl;
-        setCurrentlyPlaying(item.id);
-      }
-
-      await audio.play();
-      setCurrentlyPlaying(item.id);
-      setIsPlaying(true);
+      await toggleTrack({
+        id: `audiobook-${item.id}`,
+        title: item.title,
+        author: item.author,
+        image: item.image,
+        url: audioUrl,
+        href: getAudiobookHref(item),
+      });
     } catch {
-      setIsPlaying(false);
     }
   };
 
@@ -129,13 +91,11 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
   }
 
   return (
-    <div className={currentPreview ? 'pb-24 lg:pb-28' : ''}>
-      <audio ref={audioRef} preload='metadata' />
-
+    <div className={currentTrack ? 'pb-24 lg:pb-28' : ''}>
       <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
         {items.map((item, index) => {
           const audioUrl = item.files?.audiobook?.url;
-          const isCurrentItem = currentlyPlaying === item.id;
+          const isCurrentItem = currentTrack?.id === `audiobook-${item.id}`;
           const inCart = isInCart(item.id);
 
           return (
@@ -277,52 +237,6 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
         })}
       </div>
 
-      {currentPreview ? (
-        <div className='fixed inset-x-4 bottom-4 z-30 lg:inset-x-auto lg:right-6 lg:w-[360px]'>
-          <div className='flex items-center gap-4 rounded-[24px] border border-gray-200 bg-white/95 p-4 text-slate-900 shadow-[0_26px_80px_rgba(15,23,42,0.16)] backdrop-blur'>
-            <div className='relative h-16 w-14 flex-shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-slate-50'>
-              {currentPreview.image ? (
-                <Image
-                  src={currentPreview.image}
-                  alt={currentPreview.title}
-                  fill
-                  sizes='56px'
-                  className='object-cover'
-                />
-              ) : (
-                <div className='flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 via-sky-200 to-indigo-100'>
-                  <SpeakerWaveIcon className='h-6 w-6 text-blue-700' />
-                </div>
-              )}
-            </div>
-
-            <div className='min-w-0 flex-1'>
-              <div className='text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500'>
-                Preview
-              </div>
-              <h4 className='line-clamp-1 text-sm font-semibold text-slate-900'>
-                {currentPreview.title}
-              </h4>
-              <p className='line-clamp-1 text-xs text-slate-500'>
-                {currentPreview.author}
-              </p>
-            </div>
-
-            <button
-              type='button'
-              onClick={() => handleTogglePreview(currentPreview)}
-              className='flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700'
-              aria-label={isPlaying ? 'Pause preview' : 'Play preview'}
-            >
-              {isPlaying ? (
-                <PauseIcon className='h-5 w-5' />
-              ) : (
-                <PlayIcon className='ml-0.5 h-5 w-5' />
-              )}
-            </button>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
