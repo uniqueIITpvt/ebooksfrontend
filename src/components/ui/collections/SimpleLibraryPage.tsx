@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
 import { libraryApi } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
+import { authApi } from '@/services/api/authApi';
 import {
   ArrowLeftIcon,
   BookmarkIcon,
@@ -65,10 +66,11 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 }: SimpleLibraryPageProps<T>) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const { openAuthModal } = useAuth();
+  const { openAuthModal, refreshUser } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const categories = useMemo(() => {
     return [...new Set(items.map((item) => item.category))];
@@ -130,6 +132,29 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
       alert(error?.message || 'Unable to claim this item');
     } finally {
       setClaimingId(null);
+    }
+  };
+
+  const handleSaveBook = async (item: T) => {
+    const identifier = item.slug || item.id || item._id;
+    if (!identifier) return;
+
+    const href = getHref(item);
+    const token = tokenStore.getAccessToken();
+
+    if (!token) {
+      openAuthModal('signin', href);
+      return;
+    }
+
+    setSavingId(getItemId(item));
+    try {
+      await authApi.toggleSavedBook(identifier);
+      await refreshUser();
+    } catch (error: any) {
+      alert(error?.message || 'Unable to save this item');
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -264,6 +289,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const filledStars = Math.round(item.rating || 0);
     const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
     const isClaiming = claimingId === itemId;
+    const isSaving = savingId === itemId;
 
     if (isFreeSummaryCard) {
       return (
@@ -271,7 +297,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
           key={itemId}
           className='group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'
         >
-          <Link href={getHref(item)} className='relative h-[240px] w-full overflow-hidden bg-white'>
+          <Link href={getHref(item)} className='relative h-[270px] w-full overflow-hidden bg-white'>
             {item.image ? (
               <Image
                 src={item.image}
@@ -292,7 +318,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             )}
           </Link>
 
-          <div className='flex flex-1 flex-col gap-2.5 p-3.5'>
+          <div className='flex flex-1 flex-col gap-2 p-3'>
             <div>
               <Link href={getHref(item)}>
                 <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
@@ -323,8 +349,12 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
               </button>
               <button
                 type='button'
-                onClick={() => void handleFreeSummaryClaim(item, false)}
-                disabled={isClaiming}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void handleSaveBook(item);
+                }}
+                disabled={isSaving}
                 className='flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
                 aria-label={`Save ${item.title}`}
               >

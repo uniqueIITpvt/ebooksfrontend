@@ -28,6 +28,7 @@ import { booksApi } from '@/services/api/booksApi';
 import { audiobooksApi } from '@/services/api/audiobooksApi';
 import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
+import { authApi } from '@/services/api/authApi';
 
 const LANDING_ITEM_LIMIT = 4;
 const LANDING_COLLAPSED_ITEM_LIMIT = 5;
@@ -58,9 +59,10 @@ interface BookCardProps {
 function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }: BookCardProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const { openAuthModal } = useAuth();
+  const { openAuthModal, refreshUser } = useAuth();
   const [added, setAdded] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [saving, setSaving] = useState(false);
   const filledStars = Math.round(book.rating || 0);
   const itemKey = book.slug || book.id || book._id || generateBookSlug(book.title);
 
@@ -148,10 +150,32 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     }
   }, [book, defaultReadTarget, href, isAudiobook, openAuthModal, router]);
 
+  const handleSaveBook = useCallback(async () => {
+    const identifier = book.slug || book.id || book._id;
+    if (!identifier) return;
+
+    const token = tokenStore.getAccessToken();
+
+    if (!token) {
+      openAuthModal('signin', href);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await authApi.toggleSavedBook(identifier);
+      await refreshUser();
+    } catch (error: any) {
+      alert(error?.message || 'Unable to save this item');
+    } finally {
+      setSaving(false);
+    }
+  }, [book, href, openAuthModal, refreshUser]);
+
   if (book.componentType === 'free-summaries') {
     return (
       <div className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'>
-        <Link href={href} className='relative h-[240px] w-full overflow-hidden bg-white'>
+        <Link href={href} className='relative h-[270px] w-full overflow-hidden bg-white'>
           {book.image ? (
             <Image
               src={getOptimizedImageUrl(book.image, 640) || book.image}
@@ -173,7 +197,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           )}
         </Link>
 
-        <div className='flex flex-1 flex-col gap-2.5 p-3.5'>
+        <div className='flex flex-1 flex-col gap-2 p-3'>
           <div>
             <Link href={href}>
               <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
@@ -208,8 +232,12 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
             </button>
             <button
               type='button'
-              onClick={() => void handleClaimEnroll(false)}
-              disabled={claiming}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void handleSaveBook();
+              }}
+              disabled={saving}
               className='flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
               aria-label={`Save ${book.title}`}
             >
