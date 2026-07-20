@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpenIcon,
+  BookmarkIcon,
   ChevronRightIcon,
   HandRaisedIcon,
   ArrowRightIcon,
@@ -22,6 +23,9 @@ import { generateBookSlug } from '@/utils/slugify';
 import type { Category } from '@/services/api/categoriesApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { libraryApi } from '@/services/api/libraryApi';
+import { tokenStore } from '@/services/api/tokenStore';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -54,7 +58,10 @@ interface MobileShowcaseCardProps {
 }
 
 function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps) {
+  const router = useRouter();
   const { addToCart, isInCart } = useCart();
+  const { openAuthModal } = useAuth();
+  const [claiming, setClaiming] = useState(false);
   const cartFormat =
     item.type === 'Audiobook'
       ? 'Audiobook'
@@ -73,6 +80,101 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
     if (!value) return null;
     return `₹${String(value).replace(/^[₹$]/, '')}`;
   };
+  const handleFreeSummaryClaim = async (navigateAfterClaim: boolean) => {
+    const identifier = item.slug || item.id || item._id;
+    if (!identifier) return;
+
+    const token = tokenStore.getAccessToken();
+
+    if (!token) {
+      openAuthModal('signin', href);
+      return;
+    }
+
+    setClaiming(true);
+    try {
+      const response = await libraryApi.claim(identifier);
+      const nextReadTarget = `/read/${response.bookSlug || identifier}`;
+      window.dispatchEvent(new Event('library:changed'));
+      if (navigateAfterClaim) {
+        router.push(nextReadTarget);
+      }
+    } catch (error: any) {
+      alert(error?.message || 'Unable to claim this item');
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  if (item.componentType === 'free-summaries') {
+    return (
+      <div
+        className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300'
+        style={{
+          animationDelay: `${index * 100}ms`,
+        }}
+      >
+        <Link href={href} className='relative h-[190px] w-full overflow-hidden bg-white'>
+          {item.image ? (
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              sizes='(max-width: 768px) 50vw, 200px'
+              priority={index === 0}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              className='object-contain object-center p-2 transition-transform duration-300'
+            />
+          ) : (
+            <div className='flex h-full w-full items-center justify-center'>
+              <span className='text-xs text-slate-400'>No Image</span>
+            </div>
+          )}
+        </Link>
+
+        <div className='flex flex-1 flex-col gap-2 p-2.5'>
+          <div>
+            <Link href={href}>
+              <h3 className='truncate text-[12px] font-extrabold leading-snug text-[#141454]'>
+                {item.title}
+              </h3>
+            </Link>
+            <p className='mt-1 line-clamp-1 text-[10px] font-semibold text-slate-400'>
+              {item.author}
+            </p>
+          </div>
+
+          {(item.rating ?? 0) > 0 && (
+            <div className='flex items-center gap-1.5'>
+              <StarIconSolid className='h-3.5 w-3.5 text-blue-600' />
+              <span className='text-xs font-extrabold text-[#141454]'>{(item.rating || 0).toFixed(1)}</span>
+              <span className='text-[10px] font-semibold text-slate-400'>({item.reviews || 0})</span>
+            </div>
+          )}
+
+          <div className='mt-auto grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
+            <button
+              type='button'
+              onClick={() => void handleFreeSummaryClaim(true)}
+              disabled={claiming}
+              className='flex h-8 w-full items-center justify-center rounded-lg bg-blue-600 text-[10px] font-extrabold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+            >
+              {claiming ? 'Claiming...' : 'Read Free'}
+            </button>
+            <button
+              type='button'
+              onClick={() => void handleFreeSummaryClaim(false)}
+              disabled={claiming}
+              className='flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              aria-label={`Save ${item.title}`}
+            >
+              <BookmarkIcon className='h-4 w-4' />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

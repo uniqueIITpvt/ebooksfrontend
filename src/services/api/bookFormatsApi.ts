@@ -1,6 +1,7 @@
 import { API_CONFIG } from '@/config/api';
 
 const API_BASE_URL = API_CONFIG.API_BASE_URL;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export interface BookFormat {
   _id: string;
@@ -26,6 +27,11 @@ export interface ApiResponse<T> {
 }
 
 class BookFormatsApiService {
+  private activeFormatsCache: {
+    expiresAt: number;
+    promise: Promise<ApiResponse<BookFormat[]>>;
+  } | null = null;
+
   private async fetchWithErrorHandling<T>(
     url: string,
     options: RequestInit = {}
@@ -63,7 +69,23 @@ class BookFormatsApiService {
   }
 
   async getActive(): Promise<ApiResponse<BookFormat[]>> {
-    return this.getAll(false);
+    const now = Date.now();
+
+    if (this.activeFormatsCache && this.activeFormatsCache.expiresAt > now) {
+      return this.activeFormatsCache.promise;
+    }
+
+    const promise = this.getAll(false).catch((error) => {
+      this.activeFormatsCache = null;
+      throw error;
+    });
+
+    this.activeFormatsCache = {
+      expiresAt: now + CACHE_TTL_MS,
+      promise,
+    };
+
+    return promise;
   }
 
   async create(data: BookFormatPayload): Promise<ApiResponse<BookFormat>> {

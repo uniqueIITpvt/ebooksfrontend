@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
+import { libraryApi } from '@/services/api/libraryApi';
+import { tokenStore } from '@/services/api/tokenStore';
 import {
   ArrowLeftIcon,
+  BookmarkIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -61,8 +65,10 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 }: SimpleLibraryPageProps<T>) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
+  const { openAuthModal } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   const categories = useMemo(() => {
     return [...new Set(items.map((item) => item.category))];
@@ -100,6 +106,32 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   };
   const parsePrice = (price?: string | null) =>
     price ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0 : 0;
+  const handleFreeSummaryClaim = async (item: T, navigateAfterClaim: boolean) => {
+    const identifier = item.slug || item.id || item._id;
+    if (!identifier) return;
+
+    const href = getHref(item);
+    const token = tokenStore.getAccessToken();
+
+    if (!token) {
+      openAuthModal('signin', href);
+      return;
+    }
+
+    setClaimingId(getItemId(item));
+    try {
+      const response = await libraryApi.claim(identifier);
+      const nextReadTarget = `/read/${response.bookSlug || identifier}`;
+      window.dispatchEvent(new Event('library:changed'));
+      if (navigateAfterClaim) {
+        router.push(nextReadTarget);
+      }
+    } catch (error: any) {
+      alert(error?.message || 'Unable to claim this item');
+    } finally {
+      setClaimingId(null);
+    }
+  };
 
   const renderGlassCard = (item: T) => (
     <div
@@ -230,6 +262,75 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const itemSlug = item.slug || generateBookSlug(item.title);
     const addedToCart = isInCart(itemId);
     const filledStars = Math.round(item.rating || 0);
+    const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
+    const isClaiming = claimingId === itemId;
+
+    if (isFreeSummaryCard) {
+      return (
+        <div
+          key={itemId}
+          className='group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'
+        >
+          <Link href={getHref(item)} className='relative h-[300px] w-full overflow-hidden bg-white'>
+            {item.image ? (
+              <Image
+                src={item.image}
+                alt={item.title}
+                fill
+                className='object-contain object-center p-2 transition-transform duration-300 group-hover:scale-[1.02]'
+                quality={100}
+                sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
+              />
+            ) : (
+              <div className='flex h-full w-full items-center justify-center'>
+                <span className='text-sm text-slate-400'>No Image</span>
+              </div>
+            )}
+          </Link>
+
+          <div className='flex flex-1 flex-col gap-2.5 p-3.5'>
+            <div>
+              <Link href={getHref(item)}>
+                <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
+                  {item.title}
+                </h3>
+              </Link>
+              <p className='mt-2 line-clamp-1 text-sm font-semibold text-slate-400'>
+                {item.author}
+              </p>
+            </div>
+
+            {(item.rating ?? 0) > 0 && (
+              <div className='flex items-center gap-3'>
+                <StarIconSolid className='h-5 w-5 text-blue-600' />
+                <span className='text-base font-extrabold text-[#141454]'>{(item.rating || 0).toFixed(1)}</span>
+                <span className='text-sm font-semibold text-slate-400'>({item.reviews || 0})</span>
+              </div>
+            )}
+
+            <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
+              <button
+                type='button'
+                onClick={() => void handleFreeSummaryClaim(item, true)}
+                disabled={isClaiming}
+                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              >
+                {isClaiming ? 'Claiming...' : 'Read Free'}
+              </button>
+              <button
+                type='button'
+                onClick={() => void handleFreeSummaryClaim(item, false)}
+                disabled={isClaiming}
+                className='flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+                aria-label={`Save ${item.title}`}
+              >
+                <BookmarkIcon className='h-6 w-6' />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div

@@ -2,6 +2,7 @@ import { API_CONFIG } from '@/config/api';
 
 // API base URL - adjust based on your backend configuration
 const API_BASE_URL = API_CONFIG.API_BASE_URL;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Category interfaces
 export interface Category {
@@ -55,6 +56,11 @@ export interface ApiResponse<T> {
 }
 
 class CategoriesApiService {
+  private activeCategoriesCache: {
+    expiresAt: number;
+    promise: Promise<ApiResponse<Category[]>>;
+  } | null = null;
+
   private async fetchWithErrorHandling<T>(
     url: string,
     options: RequestInit = {}
@@ -111,7 +117,23 @@ class CategoriesApiService {
 
   // Get active categories (most common use case)
   async getActive(): Promise<ApiResponse<Category[]>> {
-    return this.getAll({ includeInactive: false, sortBy: 'sortOrder' });
+    const now = Date.now();
+
+    if (this.activeCategoriesCache && this.activeCategoriesCache.expiresAt > now) {
+      return this.activeCategoriesCache.promise;
+    }
+
+    const promise = this.getAll({ includeInactive: false, sortBy: 'sortOrder' }).catch((error) => {
+      this.activeCategoriesCache = null;
+      throw error;
+    });
+
+    this.activeCategoriesCache = {
+      expiresAt: now + CACHE_TTL_MS,
+      promise,
+    };
+
+    return promise;
   }
 
   // Get single category by ID or slug

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { freeSummariesApi, type FreeSummary } from '@/services/api/freeSummariesApi';
+import { booksApi } from '@/services/api/booksApi';
 
 const WORDS_PER_PAGE = 170;
 
@@ -29,7 +30,31 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
     const loadSummary = async () => {
       try {
-        const data = await freeSummariesApi.getReadPayload(slug);
+        let data: FreeSummary;
+        try {
+          data = await freeSummariesApi.getReadPayload(slug);
+        } catch {
+          const response = await booksApi.getReadPayload(slug);
+          data = {
+            _id: response.data._id || response.data.id || slug,
+            title: response.data.title,
+            subtitle: response.data.subtitle,
+            slug: response.data.slug || slug,
+            author: response.data.author,
+            description: response.data.description,
+            category: response.data.category,
+            pages: response.data.pages,
+            publishDate: response.data.publishDate,
+            image: response.data.image,
+            featured: Boolean(response.data.featured),
+            isActive: true,
+            views: 0,
+            downloads: 0,
+            tags: response.data.tags || [],
+            createdAt: response.data.createdAt || response.data.publishDate || '',
+            updatedAt: response.data.updatedAt || response.data.publishDate || '',
+          };
+        }
         if (!ignore) setSummary(data);
       } catch (error: any) {
         if (ignore) return;

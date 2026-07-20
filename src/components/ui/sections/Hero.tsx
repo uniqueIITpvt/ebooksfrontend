@@ -118,7 +118,7 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
   // Fetch banners from API
   const fetchBanners = useCallback(async () => {
     try {
-      if (bannerEnabled !== true) return;
+      if (bannerEnabled !== true || banners.length > 0) return;
       const response = await fetch(`${API_URL}/banners`);
       const data = await response.json();
       
@@ -130,7 +130,7 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
     } finally {
       setLoading(false);
     }
-  }, [bannerEnabled]);
+  }, [bannerEnabled, banners.length]);
 
   useEffect(() => {
     if (bannerEnabled === true) {

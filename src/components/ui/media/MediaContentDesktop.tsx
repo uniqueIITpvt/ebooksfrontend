@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   BookOpenIcon,
+  BookmarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   FunnelIcon,
@@ -17,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Button } from '../primitives/Button';
+import Image from 'next/image';
 import Link from 'next/link';
 import CoverImageFrame from '../books/CoverImageFrame';
 import type { Category } from '@/services/api/categoriesApi';
@@ -111,7 +113,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     setTimeout(() => setAdded(false), 2000);
   }, [book, addToCart, cartFormat]);
 
-  const handleClaimEnroll = useCallback(async () => {
+  const handleClaimEnroll = useCallback(async (navigateAfterClaim = true) => {
     const identifier = book.slug || book.id || book._id;
     if (!identifier) return;
 
@@ -127,7 +129,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       let nextReadTarget = defaultReadTarget;
       if (href.startsWith('/free-summaries/') || book.componentType === 'free-summaries') {
         const response = await libraryApi.claim(identifier);
-        nextReadTarget = response.redirectTarget || `/read/${response.bookSlug || identifier}`;
+        nextReadTarget = `/read/${response.bookSlug || identifier}`;
       } else if (isAudiobook) {
         const response = await audiobooksApi.claim(identifier);
         nextReadTarget = response.data?.redirectTarget || `/audiobooks/${identifier}/listen`;
@@ -136,12 +138,84 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         nextReadTarget = response.data?.redirectTarget || `/books/${identifier}/read`;
       }
       window.dispatchEvent(new Event('library:changed'));
+      if (navigateAfterClaim) {
+        router.push(nextReadTarget);
+      }
     } catch (error: any) {
       alert(error?.message || 'Unable to claim this item');
     } finally {
       setClaiming(false);
     }
-  }, [book, defaultReadTarget, href, isAudiobook, openAuthModal]);
+  }, [book, defaultReadTarget, href, isAudiobook, openAuthModal, router]);
+
+  if (book.componentType === 'free-summaries') {
+    return (
+      <div className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'>
+        <Link href={href} className='relative h-[300px] w-full overflow-hidden bg-white'>
+          {book.image ? (
+            <Image
+              src={getOptimizedImageUrl(book.image, 640)}
+              alt={book.title}
+              fill
+              sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 260px'
+              className='h-full w-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]'
+              priority={index < 3}
+              loading={index < 3 ? 'eager' : 'lazy'}
+            />
+          ) : (
+            <div className='flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-400'>
+              No Image
+            </div>
+          )}
+        </Link>
+
+        <div className='flex flex-1 flex-col gap-2.5 p-3.5'>
+          <div>
+            <Link href={href}>
+              <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
+                {book.title}
+              </h3>
+            </Link>
+            <p className='mt-2 line-clamp-1 text-sm font-semibold text-slate-400'>
+              {book.author}
+            </p>
+          </div>
+
+          {(book.rating ?? 0) > 0 && (
+            <div className='flex items-center gap-3'>
+              <StarIconSolid className='h-5 w-5 text-blue-600' />
+              <span className='text-base font-extrabold text-[#141454]'>{(book.rating || 0).toFixed(1)}</span>
+              <span className='text-sm font-semibold text-slate-400'>({book.reviews || 0})</span>
+            </div>
+          )}
+
+          <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
+            <button
+              type='button'
+              onClick={
+                claimedReadTarget
+                  ? () => router.push(claimedReadTarget || defaultReadTarget)
+                  : () => void handleClaimEnroll(true)
+              }
+              disabled={claiming}
+              className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+            >
+              {claiming ? 'Claiming...' : 'Read Free'}
+            </button>
+            <button
+              type='button'
+              onClick={() => void handleClaimEnroll(false)}
+              disabled={claiming}
+              className='flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              aria-label={`Save ${book.title}`}
+            >
+              <BookmarkIcon className='h-6 w-6' />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='group flex h-full flex-col w-full bg-white rounded-lg border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden'>

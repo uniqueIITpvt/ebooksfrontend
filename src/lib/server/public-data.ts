@@ -388,7 +388,37 @@ export const getTrendingBookBySlug = cache(async (slug: string): Promise<Trendin
 });
 
 export const getFreeSummaryBySlug = cache(async (slug: string): Promise<FreeSummary | null> => {
-  return fetchApiData<FreeSummary>(`/free-summaries/${encodeURIComponent(slug)}`);
+  const directSummary = await fetchApiData<FreeSummary>(`/free-summaries/${encodeURIComponent(slug)}`);
+
+  if (directSummary) {
+    return directSummary;
+  }
+
+  const book = await getBookBySlug(slug);
+
+  if (!book || book.componentType !== 'free-summaries') {
+    return null;
+  }
+
+  return {
+    _id: book._id || book.id || slug,
+    title: book.title,
+    subtitle: book.subtitle,
+    slug: book.slug || slug,
+    author: book.author,
+    description: book.description,
+    category: book.category,
+    pages: book.pages,
+    publishDate: book.publishDate,
+    image: book.image,
+    featured: Boolean(book.featured),
+    isActive: true,
+    views: 0,
+    downloads: 0,
+    tags: book.tags || [],
+    createdAt: book.createdAt || book.publishDate || '',
+    updatedAt: book.updatedAt || book.publishDate || '',
+  };
 });
 
 export const getPremiumSummaryBySlug = cache(async (slug: string): Promise<PremiumSummary | null> => {
