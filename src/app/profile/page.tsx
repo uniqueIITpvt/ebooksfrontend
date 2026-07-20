@@ -12,7 +12,9 @@ import {
   BookOpenIcon,
   ArrowLeftIcon,
   CameraIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  EllipsisVerticalIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
@@ -29,6 +31,8 @@ export default function UserProfilePage() {
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [savedBooks, setSavedBooks] = useState<SavedBook[]>([]);
   const [savedBooksLoading, setSavedBooksLoading] = useState(false);
+  const [savedBookMenuOpen, setSavedBookMenuOpen] = useState<string | null>(null);
+  const [removingSavedBookId, setRemovingSavedBookId] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [phone, setPhone] = useState('');
@@ -210,6 +214,40 @@ export default function UserProfilePage() {
       router.push('/');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  const handleRemoveSavedBook = async (savedBook: SavedBook) => {
+    const title = savedBook.title || (typeof savedBook.bookId === 'object' ? savedBook.bookId?.title : '') || 'Saved Book';
+    const identifier =
+      savedBook.slug ||
+      (typeof savedBook.bookId === 'object' ? savedBook.bookId?.slug || savedBook.bookId?.id || savedBook.bookId?._id : savedBook.bookId) ||
+      savedBook.id ||
+      savedBook._id ||
+      generateBookSlug(title);
+    const itemKey = savedBook.id || savedBook._id || identifier;
+
+    if (!identifier) return;
+
+    setRemovingSavedBookId(itemKey);
+    setSavedBookMenuOpen(null);
+
+    try {
+      const response = await authApi.toggleSavedBook(identifier);
+      if (response.success) {
+        if (response.data?.savedBooks) {
+          setSavedBooks(response.data.savedBooks);
+        } else {
+          setSavedBooks((current) =>
+            current.filter((item) => (item.id || item._id || item.slug) !== itemKey)
+          );
+        }
+        await refreshUser();
+      }
+    } catch (error) {
+      alert('Unable to remove saved book');
+    } finally {
+      setRemovingSavedBookId(null);
+    }
+  };
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
@@ -530,13 +568,46 @@ export default function UserProfilePage() {
                       const slug = savedBook.slug || rawBook?.slug || savedBook.id || savedBook._id || generateBookSlug(title);
                       const image = savedBook.image || (rawBook as any)?.image;
 
+                      const itemKey = savedBook.id || savedBook._id || slug;
+
                       return (
-                        <Link
-                          key={savedBook.id || savedBook._id || slug}
-                          href={`/books/${slug}`}
-                          className="group bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                        <article
+                          key={itemKey}
+                          className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                         >
-                          <div className="relative h-44 bg-gray-100">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              setSavedBookMenuOpen((current) => (current === itemKey ? null : itemKey));
+                            }}
+                            className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white/95 text-gray-600 shadow-sm hover:bg-gray-50 hover:text-gray-900"
+                            aria-label={`More actions for ${title}`}
+                          >
+                            <EllipsisVerticalIcon className="h-5 w-5" />
+                          </button>
+
+                          {savedBookMenuOpen === itemKey && (
+                            <div className="absolute right-3 top-14 z-30 w-36 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  void handleRemoveSavedBook(savedBook);
+                                }}
+                                disabled={removingSavedBookId === itemKey}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                                {removingSavedBookId === itemKey ? 'Removing...' : 'Remove'}
+                              </button>
+                            </div>
+                          )}
+
+                          <Link href={`/books/${slug}`} className="block">
+                            <div className="relative h-44 bg-gray-100">
                             {image ? (
                               <Image
                                 src={image}
@@ -549,16 +620,19 @@ export default function UserProfilePage() {
                                 <BookOpenIcon className="w-10 h-10" />
                               </div>
                             )}
-                          </div>
+                            </div>
+                          </Link>
                           <div className="p-4">
                             {savedBook.category && (
                               <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">
                                 {savedBook.category}
                               </span>
                             )}
-                            <h4 className="mt-2 font-bold text-gray-900 line-clamp-2 group-hover:text-blue-700">
-                              {title}
-                            </h4>
+                            <Link href={`/books/${slug}`}>
+                              <h4 className="mt-2 font-bold text-gray-900 line-clamp-2 group-hover:text-blue-700">
+                                {title}
+                              </h4>
+                            </Link>
                             {savedBook.author && (
                               <p className="text-sm text-gray-500 mt-1 line-clamp-1">{savedBook.author}</p>
                             )}
@@ -570,7 +644,7 @@ export default function UserProfilePage() {
                               })}
                             </p>
                           </div>
-                        </Link>
+                        </article>
                       );
                     })}
                   </div>

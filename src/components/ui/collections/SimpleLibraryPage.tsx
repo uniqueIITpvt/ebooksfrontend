@@ -13,7 +13,7 @@ import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
 import {
   ArrowLeftIcon,
-  BookmarkIcon,
+  BookmarkIcon as BookmarkIconOutline,
   FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -21,7 +21,7 @@ import {
   StarIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
 export interface SimpleLibraryItem {
   id?: string;
@@ -66,11 +66,12 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 }: SimpleLibraryPageProps<T>) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const { openAuthModal, refreshUser } = useAuth();
+  const { openAuthModal, refreshUser, user } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
 
   const categories = useMemo(() => {
     return [...new Set(items.map((item) => item.category))];
@@ -108,6 +109,33 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   };
   const parsePrice = (price?: string | null) =>
     price ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0 : 0;
+  const isItemSaved = (item: T) => {
+    const itemId = getItemId(item);
+    const override = savedOverrides[itemId];
+    if (override !== undefined) return override;
+
+    const itemKeys = [item.slug, item.id, item._id, item.title, generateBookSlug(item.title)]
+      .filter(Boolean)
+      .map(String);
+
+    return (user?.savedBooks || []).some((savedBook) => {
+      const rawBook = typeof savedBook.bookId === 'object' ? savedBook.bookId : null;
+      const savedKeys = [
+        savedBook.slug,
+        savedBook.id,
+        savedBook._id,
+        savedBook.title,
+        typeof savedBook.bookId === 'string' ? savedBook.bookId : undefined,
+        rawBook?.slug,
+        rawBook?.id,
+        rawBook?._id,
+        rawBook?.title,
+      ].filter(Boolean).map(String);
+
+      return itemKeys.some((key) => savedKeys.includes(key));
+    });
+  };
+
   const handleFreeSummaryClaim = async (item: T, navigateAfterClaim: boolean) => {
     const identifier = item.slug || item.id || item._id;
     if (!identifier) return;
@@ -149,7 +177,14 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
     setSavingId(getItemId(item));
     try {
-      await authApi.toggleSavedBook(identifier);
+      const response = await authApi.toggleSavedBook(identifier);
+      if (response.success) {
+        const itemId = getItemId(item);
+        setSavedOverrides((current) => ({
+          ...current,
+          [itemId]: response.data?.saved ?? !isItemSaved(item),
+        }));
+      }
       await refreshUser();
     } catch (error: any) {
       alert(error?.message || 'Unable to save this item');
@@ -290,6 +325,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
     const isClaiming = claimingId === itemId;
     const isSaving = savingId === itemId;
+    const isSaved = isItemSaved(item);
 
     if (isFreeSummaryCard) {
       return (
@@ -297,13 +333,13 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
           key={itemId}
           className='group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'
         >
-          <Link href={getHref(item)} className='relative h-[270px] w-full overflow-hidden bg-white'>
+          <Link href={getHref(item)} className='relative h-[260px] w-full overflow-hidden bg-white'>
             {item.image ? (
               <Image
                 src={item.image}
                 alt={item.title}
                 fill
-                className='object-contain object-center p-2 transition-transform duration-300 group-hover:scale-[1.02]'
+                className='object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]'
                 style={{
                   objectFit: 'contain',
                   objectPosition: 'center',
@@ -355,10 +391,13 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   void handleSaveBook(item);
                 }}
                 disabled={isSaving}
-                className='flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-600 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+                className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${isSaved
+                    ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
+                    : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
+                  }`}
                 aria-label={`Save ${item.title}`}
               >
-                <BookmarkIcon className='h-6 w-6' />
+                {isSaved ? <BookmarkIconSolid className='h-6 w-6' /> : <BookmarkIconOutline className='h-6 w-6' />}
               </button>
             </div>
           </div>
@@ -429,7 +468,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             <div className='grid grid-cols-2 gap-1.5'>
               <Link href={getHref(item)}>
                 <button className='w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-1'>
-                   View Details
+                  View Details
                 </button>
               </Link>
               <button
@@ -446,9 +485,8 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                     language: item.language,
                   })
                 }
-                className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
-                  addedToCart ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800 hover:bg-slate-700'
-                }`}
+                className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${addedToCart ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800 hover:bg-slate-700'
+                  }`}
               >
                 <PlusIcon className='w-3 h-3' />
                 {addedToCart ? 'In Cart' : 'Add to Cart'}
