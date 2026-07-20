@@ -271,13 +271,17 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
           key={itemId}
           className='group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'
         >
-          <Link href={getHref(item)} className='relative h-[300px] w-full overflow-hidden bg-white'>
+          <Link href={getHref(item)} className='relative h-[240px] w-full overflow-hidden bg-white'>
             {item.image ? (
               <Image
                 src={item.image}
                 alt={item.title}
                 fill
                 className='object-contain object-center p-2 transition-transform duration-300 group-hover:scale-[1.02]'
+                style={{
+                  objectFit: 'contain',
+                  objectPosition: 'center',
+                }}
                 quality={100}
                 sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
               />

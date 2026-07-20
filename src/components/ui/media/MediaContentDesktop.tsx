@@ -151,14 +151,18 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   if (book.componentType === 'free-summaries') {
     return (
       <div className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'>
-        <Link href={href} className='relative h-[300px] w-full overflow-hidden bg-white'>
+        <Link href={href} className='relative h-[240px] w-full overflow-hidden bg-white'>
           {book.image ? (
             <Image
-              src={getOptimizedImageUrl(book.image, 640)}
+              src={getOptimizedImageUrl(book.image, 640) || book.image}
               alt={book.title}
               fill
               sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 260px'
               className='h-full w-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]'
+              style={{
+                objectFit: 'contain',
+                objectPosition: 'center',
+              }}
               priority={index < 3}
               loading={index < 3 ? 'eager' : 'lazy'}
             />
@@ -312,7 +316,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
                   isFreeItem
                     ? claimedReadTarget
                       ? () => router.push(claimedReadTarget || defaultReadTarget)
-                      : handleClaimEnroll
+                      : () => void handleClaimEnroll(true)
                     : handleAddToCart
                 }
               disabled={claiming}
@@ -349,7 +353,7 @@ interface SectionCarouselProps {
   sectionKey: string;
   cardHref: (b: PublicBookListItem) => string;
   subLabel?: string;
-  itemLimit?: 4 | 5;
+  itemLimit?: number;
   libraryItems?: LibraryItem[];
   cartFormat?: string;
 }
@@ -369,7 +373,12 @@ function SectionCarousel({
 }: SectionCarouselProps) {
   const router = useRouter();
   const displayItems = items.slice(0, itemLimit);
-  const gridColumns = itemLimit === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4';
+  const gridColumns =
+    itemLimit === 6
+      ? 'lg:grid-cols-3 xl:grid-cols-6'
+      : itemLimit === 5
+        ? 'xl:grid-cols-5'
+        : 'xl:grid-cols-4';
 
   return (
     <div className='mb-10'>
@@ -599,7 +608,7 @@ export default function MediaContentDesktop({
                 items={filteredFreeSummaries}
                 emptyMsg='No free summaries'
                 sectionKey='free'
-                itemLimit={LANDING_COLLAPSED_ITEM_LIMIT}
+                itemLimit={6}
                 cartFormat={selectedCartFormat}
                 cardHref={(b) => {
                   const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
