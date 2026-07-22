@@ -373,7 +373,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
               </div>
             )}
 
-            {displayPrice && (
+            {false && displayPrice && (
               <div className='flex items-center gap-1.5'>
                 <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
                 <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
@@ -383,11 +383,10 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
               <button
                 type='button'
-                onClick={() => void handleFreeSummaryClaim(item, true)}
-                disabled={isClaiming}
-                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
+                onClick={() => router.push(getHref(item))}
+                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
               >
-                {isClaiming ? 'Claiming...' : 'Read Free'}
+                Read Free
               </button>
               <button
                 type='button'

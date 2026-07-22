@@ -248,7 +248,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
             </div>
           )}
 
-          {displayPrice && (
+          {false && displayPrice && (
             <div className='flex items-center gap-1.5'>
               <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
               <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
@@ -258,15 +258,10 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
             <button
               type='button'
-              onClick={
-                claimedReadTarget
-                  ? () => router.push(claimedReadTarget || defaultReadTarget)
-                  : () => void handleClaimEnroll(true)
-              }
-              disabled={claiming}
-              className='flex h-9 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
+              onClick={() => router.push(href)}
+              className='flex h-9 w-full items-center justify-center rounded-lg bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
             >
-              {claiming ? 'Claiming...' : 'Read Free'}
+              Read Free
             </button>
             <button
               type='button'
