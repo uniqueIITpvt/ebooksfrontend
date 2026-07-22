@@ -98,8 +98,8 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   const checkoutId = book.id || book._id || itemKey;
   const checkoutSlug = book.slug || itemKey;
   const keepForeverTarget = isAudiobook
-    ? `/checkout?kind=audiobook&id=${checkoutId}&slug=${checkoutSlug}&mode=buy`
-    : `/checkout?id=${checkoutId}${cartFormat ? `&format=${encodeURIComponent(cartFormat)}` : ''}`;
+    ? `/audiobooks/${checkoutSlug}`
+    : `/books/${checkoutSlug}${cartFormat ? `?format=${encodeURIComponent(cartFormat)}` : ''}`;
   const displayPrice = book.price
     ? `${'\u20B9'}${book.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
     : null;

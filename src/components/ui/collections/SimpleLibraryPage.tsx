@@ -321,7 +321,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const hasUniquePlus =
       !!user?.subscriptionPlan &&
       user.subscriptionPlan !== 'none';
-    const keepForeverTarget = `/checkout?id=${item.id || item._id || itemId}`;
+    const keepForeverTarget = getHref(item);
     const displayPrice = item.price
       ? `${'\u20B9'}${item.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
       : null;
