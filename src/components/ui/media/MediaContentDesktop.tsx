@@ -359,24 +359,26 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         )}
 
         {/* Pages / type tag */}
-        <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+        {!isFreeItem && <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
           {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
           <span className='font-semibold text-[#16A34A]'>Free</span>
           {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
           {false && book.duration ? ` · ${book.duration}` : ''}
-        </p>
+        </p>}
 
         {/* Action button */}
         <div className='mt-3 grid grid-cols-[158px_42px] gap-2.5'>
           <button
-            onClick={handleUniquePlusAction}
+            onClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
             className={`flex h-10 w-[158px] items-center justify-center whitespace-nowrap rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
-              hasUniquePlus
+              isFreeItem
+                ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
+                : hasUniquePlus
                 ? 'bg-slate-950 text-white hover:bg-slate-800'
                 : 'bg-gradient-to-r from-[#5146F7] to-[#7356FF] text-white shadow-[0_10px_25px_rgba(83,70,247,0.35)] hover:brightness-110'
             }`}
           >
-            {hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+            {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
           </button>
           <button
             type='button'

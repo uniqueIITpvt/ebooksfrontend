@@ -315,6 +315,9 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const itemId = getItemId(item);
     const filledStars = Math.round(item.rating || 0);
     const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
+    const isFreeItem =
+      isFreeSummaryCard ||
+      (item.price ? (Number.parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0) <= 0 : false);
     const isClaiming = claimingId === itemId;
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
@@ -458,7 +461,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             </div>
           )}
 
-          {item.price && (
+          {!isFreeItem && item.price && (
             <div className='flex items-center gap-1.5'>
               <span className='text-sm font-bold text-slate-900'>{formatPrice(item.price)}</span>
               {item.originalPrice && (
@@ -485,15 +488,17 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   return;
                 }
 
-                router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
+                router.push(isFreeItem ? getHref(item) : hasUniquePlus ? keepForeverTarget : '/subscription');
               }}
               className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                hasUniquePlus
+                isFreeItem
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : hasUniquePlus
                   ? 'bg-slate-950 hover:bg-slate-800'
                   : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
             >
-              {hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+              {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
             </button>
           </div>
         </div>
