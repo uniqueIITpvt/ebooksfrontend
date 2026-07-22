@@ -322,6 +322,9 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
       !!user?.subscriptionPlan &&
       user.subscriptionPlan !== 'none';
     const keepForeverTarget = `/checkout?id=${item.id || item._id || itemId}`;
+    const displayPrice = item.price
+      ? `${'\u20B9'}${item.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
+      : null;
 
     if (isFreeSummaryCard) {
       return (
@@ -367,6 +370,13 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                 <StarIconSolid className='h-5 w-5 text-blue-600' />
                 <span className='text-base font-extrabold text-[#141454] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
                 <span className='text-sm font-medium text-slate-400 font-dm-sans'>({item.reviews || 0})</span>
+              </div>
+            )}
+
+            {displayPrice && (
+              <div className='flex items-center gap-1.5'>
+                <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
+                <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
               </div>
             )}
 
@@ -484,7 +494,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
             >
-              {hasUniquePlus ? 'Keep Forever for ₹299' : 'Read with Unique Plus'}
+              {hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
             </button>
           </div>
         </div>

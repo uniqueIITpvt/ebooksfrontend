@@ -100,6 +100,9 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   const keepForeverTarget = isAudiobook
     ? `/checkout?kind=audiobook&id=${checkoutId}&slug=${checkoutSlug}&mode=buy`
     : `/checkout?id=${checkoutId}${cartFormat ? `&format=${encodeURIComponent(cartFormat)}` : ''}`;
+  const displayPrice = book.price
+    ? `${'\u20B9'}${book.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
+    : null;
   const handleUniquePlusAction = useCallback(() => {
     if (!user) {
       const returnTo =
@@ -245,6 +248,13 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
             </div>
           )}
 
+          {displayPrice && (
+            <div className='flex items-center gap-1.5'>
+              <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
+              <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
+            </div>
+          )}
+
           <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
             <button
               type='button'
@@ -355,7 +365,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
 
         {/* Pages / type tag */}
         <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
-          {hasUniquePlus ? 'Read ' : <>&#8377;299 or </>}
+          {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
           <span className='font-semibold text-[#16A34A]'>Free</span>
           {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
           {false && book.duration ? ` · ${book.duration}` : ''}
@@ -371,7 +381,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
                 : 'bg-gradient-to-r from-[#5146F7] to-[#7356FF] text-white shadow-[0_10px_25px_rgba(83,70,247,0.35)] hover:brightness-110'
             }`}
           >
-            {hasUniquePlus ? <>&#8377;299 Keep Forever</> : 'Read with Unique Plus'}
+            {hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
           </button>
           <button
             type='button'
