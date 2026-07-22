@@ -331,15 +331,15 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
       return (
         <div
           key={itemId}
-          className='group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'
+          className='group flex flex-col overflow-visible rounded-lg bg-transparent px-3 py-4 transition-all duration-300 hover:-translate-y-1'
         >
-          <Link href={getHref(item)} className='relative h-[260px] w-full overflow-hidden bg-white'>
+          <Link href={getHref(item)} className='relative h-[260px] w-full overflow-hidden rounded-md bg-transparent'>
             {item.image ? (
               <Image
                 src={item.image}
                 alt={item.title}
                 fill
-                className='object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]'
+                className='rounded-md object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]'
                 style={{
                   objectFit: 'contain',
                   objectPosition: 'center',
@@ -354,14 +354,14 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             )}
           </Link>
 
-          <div className='flex flex-1 flex-col gap-2 p-3'>
+          <div className='flex flex-1 flex-col gap-2 px-0 pb-0 pt-3 font-dm-sans'>
             <div>
               <Link href={getHref(item)}>
-                <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
+                <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700 font-dm-sans'>
                   {item.title}
                 </h3>
               </Link>
-              <p className='mt-2 line-clamp-1 text-sm font-semibold text-slate-400'>
+              <p className='mt-2 line-clamp-1 text-sm font-medium text-slate-400 font-dm-sans'>
                 {item.author}
               </p>
             </div>
@@ -369,8 +369,8 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             {(item.rating ?? 0) > 0 && (
               <div className='flex items-center gap-3'>
                 <StarIconSolid className='h-5 w-5 text-blue-600' />
-                <span className='text-base font-extrabold text-[#141454]'>{(item.rating || 0).toFixed(1)}</span>
-                <span className='text-sm font-semibold text-slate-400'>({item.reviews || 0})</span>
+                <span className='text-base font-extrabold text-[#141454] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+                <span className='text-sm font-medium text-slate-400 font-dm-sans'>({item.reviews || 0})</span>
               </div>
             )}
 
@@ -379,7 +379,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                 type='button'
                 onClick={() => void handleFreeSummaryClaim(item, true)}
                 disabled={isClaiming}
-                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
               >
                 {isClaiming ? 'Claiming...' : 'Read Free'}
               </button>
@@ -391,7 +391,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   void handleSaveBook(item);
                 }}
                 disabled={isSaving}
-                className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${isSaved
+                className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
                     ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
                     : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
                   }`}

@@ -201,15 +201,15 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
 
   if (book.componentType === 'free-summaries') {
     return (
-      <div className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl'>
-        <Link href={href} className='relative h-[260px] w-full overflow-hidden bg-white'>
+      <div className='group flex h-full w-full flex-col overflow-visible rounded-lg bg-transparent px-3 py-4 transition-all duration-300 hover:-translate-y-1'>
+        <Link href={href} className='relative h-[260px] w-full overflow-hidden rounded-md bg-transparent'>
           {book.image ? (
             <Image
               src={getOptimizedImageUrl(book.image, 640) || book.image}
               alt={book.title}
               fill
               sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 260px'
-              className='h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]'
+              className='h-full w-full rounded-md object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]'
               style={{
                 objectFit: 'contain',
                 objectPosition: 'center',
@@ -224,14 +224,14 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           )}
         </Link>
 
-        <div className='flex flex-1 flex-col gap-2 p-3'>
+        <div className='flex flex-1 flex-col gap-2 px-0 pb-0 pt-3 font-dm-sans'>
           <div>
             <Link href={href}>
-              <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700'>
+              <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700 font-dm-sans'>
                 {book.title}
               </h3>
             </Link>
-            <p className='mt-2 line-clamp-1 text-sm font-semibold text-slate-400'>
+            <p className='mt-2 line-clamp-1 text-sm font-medium text-slate-400 font-dm-sans'>
               {book.author}
             </p>
           </div>
@@ -239,8 +239,8 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           {(book.rating ?? 0) > 0 && (
             <div className='flex items-center gap-3'>
               <StarIconSolid className='h-5 w-5 text-blue-600' />
-              <span className='text-base font-extrabold text-[#141454]'>{(book.rating || 0).toFixed(1)}</span>
-              <span className='text-sm font-semibold text-slate-400'>({book.reviews || 0})</span>
+              <span className='text-base font-extrabold text-[#141454] font-dm-sans'>{(book.rating || 0).toFixed(1)}</span>
+              <span className='text-sm font-medium text-slate-400 font-dm-sans'>({book.reviews || 0})</span>
             </div>
           )}
 
@@ -253,7 +253,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
                   : () => void handleClaimEnroll(true)
               }
               disabled={claiming}
-              className='flex h-9 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              className='flex h-9 w-full items-center justify-center rounded-lg bg-blue-600 text-base font-extrabold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
             >
               {claiming ? 'Claiming...' : 'Read Free'}
             </button>
@@ -265,7 +265,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
                 void handleSaveBook();
               }}
               disabled={saving}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${isSaved
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
                   ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
                   : 'border-slate-200 bg-white text-blue-600 hover:border-yellow-300 hover:bg-yellow-50'
                 }`}
