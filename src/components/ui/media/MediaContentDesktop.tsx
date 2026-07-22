@@ -58,7 +58,6 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   const { openAuthModal, refreshUser, user } = useAuth();
   const [claiming, setClaiming] = useState(false);
   const [saving, setSaving] = useState(false);
-  const filledStars = Math.round(book.rating || 0);
   const itemKey = book.slug || book.id || book._id || generateBookSlug(book.title);
   const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
 
@@ -186,7 +185,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     }
   }, [book, href, isSaved, openAuthModal, refreshUser]);
 
-  if (book.componentType === 'free-summaries') {
+  if (book.componentType === 'free-summaries' && subLabel?.toLowerCase() === 'free') {
     return (
       <div className='group flex h-full w-full flex-col overflow-visible rounded-lg bg-transparent px-3 py-4 transition-all duration-300 hover:-translate-y-1'>
         <Link href={href} className='relative h-[260px] w-full overflow-hidden rounded-md bg-transparent'>
@@ -267,21 +266,21 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   }
 
   return (
-    <div className='group flex h-full flex-col w-full bg-white rounded-lg border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden'>
+    <div className='group flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'>
       {/* Cover image */}
-      <div className='relative'>
+      <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
         <CoverImageFrame
           src={getOptimizedImageUrl(book.image, 640)}
           alt={book.title}
-          sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 230px'
+          sizes='190px'
           priority={index < 3}
           loading={index < 3 ? 'eager' : 'lazy'}
           quality={85}
-          className='rounded-none border-0 bg-gradient-to-br from-white to-slate-50 shadow-none'
-          imageClassName='transition-transform duration-500 group-hover:scale-[1.03]'
+          className='h-[285px] w-[190px] rounded-lg border-0 bg-transparent shadow-none'
+          imageClassName='transition-transform duration-[250ms] ease-out'
           fit='cover'
           showBackdrop={false}
-          fixedAspectRatio={3 / 4}
+          fixedAspectRatio={2 / 3}
           variant={book.type === 'Audiobook' ? 'audiobook' : 'book'}
         >
           {/* subLabel ribbon */}
@@ -295,8 +294,8 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       </div>
 
       {/* Details panel — always visible */}
-      <div className='flex flex-col gap-1.5 p-3 flex-1'>
-        <div className='mb-1 flex items-start justify-between gap-2'>
+      <div className='flex flex-col pt-3 font-dm-sans'>
+        <div className='hidden'>
           <span className='min-w-0 truncate bg-white text-slate-800 px-2 py-0.5 rounded-full text-[8px] font-bold tracking-widest uppercase border border-slate-200 shadow-sm font-dm-sans'>
             {book.category}
           </span>
@@ -308,25 +307,22 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         </div>
 
         {/* Title */}
-        <h3 className='text-[13px] font-bold text-slate-900 leading-snug line-clamp-2 font-syne'>{book.title}</h3>
+        <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{book.title}</h3>
 
         {/* Author */}
-        <p className='text-[11px] text-slate-500 font-dm-sans line-clamp-1'>{book.author}</p>
+        <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{book.author}</p>
 
         {/* Star rating */}
         {(book.rating ?? 0) > 0 && (
-          <div className='flex items-center gap-0.5'>
-            {Array.from({ length: 5 }).map((_, i) => (
-              i < filledStars
-                ? <StarIconSolid key={i} className='w-3 h-3 text-amber-400' />
-                : <StarIcon key={i} className='w-3 h-3 text-slate-200' />
-            ))}
-            <span className='text-[10px] text-slate-400 ml-1 font-dm-sans'>({book.reviews || 0})</span>
+          <div className='mt-2 flex items-center gap-2'>
+            <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
+            <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(book.rating || 0).toFixed(1)}</span>
+            <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({book.reviews || 0})</span>
           </div>
         )}
 
         {/* Price */}
-        {book.price && (
+        {false && book.price && (
           <div className='flex items-center gap-1.5'>
             {isFreeItem ? (
               <>
@@ -343,33 +339,40 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         )}
 
         {/* Pages / type tag */}
-        <p className='text-[10px] text-slate-400 font-dm-sans'>
-          {book.pages ? `${book.pages} pages` : book.type}
-          {book.duration ? ` · ${book.duration}` : ''}
+        <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+          {hasUniquePlus ? 'Read ' : <>&#8377;299 or </>}
+          <span className='font-semibold text-[#16A34A]'>Free</span>
+          {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+          {false && book.duration ? ` · ${book.duration}` : ''}
         </p>
 
         {/* Action button */}
-        <div className='mt-auto pt-2'>
+        <div className='mt-3 grid grid-cols-[158px_42px] gap-2.5'>
           <button
-            onClick={
-              isFreeItem
-                ? claimedReadTarget
-                  ? () => router.push(claimedReadTarget || defaultReadTarget)
-                  : () => void handleClaimEnroll(true)
-                : () => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')
-            }
-            disabled={claiming}
-            className={`w-full py-2 text-[10px] font-bold rounded-lg active:scale-95 transition-all font-dm-sans flex items-center justify-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed ${
-              isFreeItem
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : hasUniquePlus
-                  ? 'bg-slate-950 text-white hover:bg-slate-800'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            onClick={() => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')}
+            className={`flex h-10 w-[158px] items-center justify-center whitespace-nowrap rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
+              hasUniquePlus
+                ? 'bg-slate-950 text-white hover:bg-slate-800'
+                : 'bg-gradient-to-r from-[#5146F7] to-[#7356FF] text-white shadow-[0_10px_25px_rgba(83,70,247,0.35)] hover:brightness-110'
             }`}
           >
-            {isFreeItem
-              ? claiming ? 'Claiming...' : claimedReadTarget ? 'Read' : 'Claim / Enroll'
-              : hasUniquePlus ? 'Keep Forever for ₹299' : 'Read with Unique Plus'}
+            {hasUniquePlus ? <>&#8377;299 Keep Forever</> : 'Read with Unique Plus'}
+          </button>
+          <button
+            type='button'
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void handleSaveBook();
+            }}
+            disabled={saving}
+            className={`flex h-10 w-[42px] items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
+                ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
+                : 'border-[#E5E7EB] bg-white text-[#5146F7] hover:border-[#6D5CF6] hover:bg-violet-50'
+              }`}
+            aria-label={`Save ${book.title}`}
+          >
+            {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
           </button>
         </div>
       </div>
@@ -405,39 +408,50 @@ function SectionCarousel({
   cartFormat,
 }: SectionCarouselProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const displayItems = items.slice(0, itemLimit);
+  const isFreeSection = subLabel?.toLowerCase() === 'free';
+  const hasUniquePlus =
+    user?.subscriptionStatus === 'active' &&
+    !!user.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
   const gridColumns =
     itemLimit === 6
       ? 'lg:grid-cols-3 xl:grid-cols-6'
       : itemLimit === 5
         ? 'xl:grid-cols-5'
         : 'xl:grid-cols-4';
+  const gridClassName = isFreeSection
+    ? `grid grid-cols-1 sm:grid-cols-2 ${gridColumns} gap-4`
+    : 'grid grid-cols-1 justify-items-start gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
 
   return (
-    <div className='mb-10'>
-      <div className='flex items-center justify-between mb-6'>
+    <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 py-10 font-dm-sans'}>
+      <div className={isFreeSection ? 'flex items-center justify-between mb-6' : 'mb-10 flex items-center justify-between gap-8'}>
         <div className='flex-1'>
-          <h3 className='text-2xl font-bold text-slate-950 mb-2 flex items-center font-syne tracking-tight'>
-            <BookOpenIcon className='w-6 h-6 mr-3 text-indigo-600 shrink-0' />
+          <h3 className={isFreeSection ? 'text-2xl font-bold text-slate-950 mb-2 flex items-center font-syne tracking-tight' : 'text-[48px] font-bold leading-tight text-[#1E1B4B] font-dm-sans'}>
+            {isFreeSection && <BookOpenIcon className='w-6 h-6 mr-3 text-indigo-600 shrink-0' />}
             <span>{title}</span>
           </h3>
-          <div className='h-0.5 w-24 bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full' />
+          {isFreeSection && <div className='h-0.5 w-24 bg-gradient-to-r from-indigo-600 to-emerald-500 rounded-full' />}
         </div>
         <Button
           onClick={() => router.push(seeMoreHref)}
           variant='outline'
           size='sm'
-          className='bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 hover:border-indigo-700 hover:text-white transition-all text-xs font-dm-sans shadow-sm'
-          rightIcon={<ChevronRightIcon className='w-3 h-3' />}
+          className={isFreeSection
+            ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 hover:border-indigo-700 hover:text-white transition-all text-xs font-dm-sans shadow-sm'
+            : 'h-12 rounded-[14px] border-[1.5px] border-[#6D5CF6] bg-white px-7 text-[16px] font-semibold text-[#6D5CF6] shadow-none transition-colors duration-200 hover:bg-[#6D5CF6] hover:text-white hover:border-[#6D5CF6] font-dm-sans'}
+          rightIcon={<ChevronRightIcon className={isFreeSection ? 'w-3 h-3' : 'h-4 w-4'} />}
         >
           See More
         </Button>
       </div>
 
       {isLoading ? (
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridColumns} gap-4`}>
+        <div className={gridClassName}>
           {Array.from({ length: itemLimit }, (_, i) => (
-            <div key={`${sectionKey}-skeleton-${i}`} className='aspect-[2/3] w-full bg-slate-100 animate-pulse rounded-lg border border-slate-200' />
+            <div key={`${sectionKey}-skeleton-${i}`} className={isFreeSection ? 'aspect-[2/3] w-full bg-slate-100 animate-pulse rounded-lg border border-slate-200' : 'h-[300px] w-[200px] animate-pulse rounded-lg bg-slate-100'} />
           ))}
         </div>
       ) : items.length === 0 ? (
@@ -445,7 +459,7 @@ function SectionCarousel({
           <p className='text-slate-400 text-sm'>{emptyMsg}</p>
         </div>
       ) : (
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridColumns} gap-4`}>
+        <div className={gridClassName}>
           {displayItems.map((book, index) => (
             <BookCard
               key={(book as any)._id || book.id || `${sectionKey}-${index}`}
@@ -459,7 +473,7 @@ function SectionCarousel({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -983,3 +997,4 @@ export default function MediaContentDesktop({
     </>
   );
 }
+
