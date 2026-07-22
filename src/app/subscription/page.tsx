@@ -56,12 +56,25 @@ export default function SubscriptionPage() {
   const { user, isAuthenticated, refreshUser, openAuthModal } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [returnTo, setReturnTo] = useState('');
+  const hasUniquePlus =
+    !!user?.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
+
+  useEffect(() => {
+    setReturnTo(new URLSearchParams(window.location.search).get('returnTo') || '');
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       void refreshUser();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !hasUniquePlus || !returnTo.startsWith('/')) return;
+    router.replace(returnTo);
+  }, [hasUniquePlus, isAuthenticated, returnTo, router]);
 
   const handleSubscribe = async (planKey: string) => {
     if (

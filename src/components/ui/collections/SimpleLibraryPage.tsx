@@ -319,8 +319,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
     const hasUniquePlus =
-      user?.subscriptionStatus === 'active' &&
-      !!user.subscriptionPlan &&
+      !!user?.subscriptionPlan &&
       user.subscriptionPlan !== 'none';
     const keepForeverTarget = `/checkout?id=${item.id || item._id || itemId}`;
 
@@ -463,7 +462,22 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
           <div className='mt-auto pt-2'>
             <button
-              onClick={() => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')}
+              onClick={() => {
+                if (!user) {
+                  const returnTo =
+                    typeof window !== 'undefined'
+                      ? `${window.location.pathname}${window.location.search}`
+                      : '/';
+                  router.push(
+                    `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
+                      `/subscription?returnTo=${encodeURIComponent(returnTo)}`
+                    )}`
+                  );
+                  return;
+                }
+
+                router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
+              }}
               className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 hasUniquePlus
                   ? 'bg-slate-950 hover:bg-slate-800'

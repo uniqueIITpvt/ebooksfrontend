@@ -16,6 +16,19 @@ const parseUser = (value: string | null): User | null => {
   }
 };
 
+const getPostLoginReturnUrl = (returnUrl: string, user: User) => {
+  const hasUniquePlus =
+    !!user.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
+
+  if (!hasUniquePlus || !returnUrl.startsWith('/subscription')) {
+    return returnUrl.startsWith('/') ? returnUrl : '/';
+  }
+
+  const returnTo = new URLSearchParams(returnUrl.split('?')[1] || '').get('returnTo');
+  return returnTo && returnTo.startsWith('/') ? returnTo : '/';
+};
+
 export const AuthCallbackLoading = () => (
   <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
     Signing you in...
@@ -32,7 +45,7 @@ export default function AuthCallbackClient() {
 
     if (user) {
       authApi.setUser(user);
-      router.replace(returnUrl.startsWith('/') ? returnUrl : '/');
+      router.replace(getPostLoginReturnUrl(returnUrl, user));
       return;
     }
 

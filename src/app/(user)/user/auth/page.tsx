@@ -91,6 +91,20 @@ function AuthContent() {
     return () => window.clearTimeout(timer);
   }, [signupOtpCooldown]);
 
+  const getPostLoginReturnUrl = (target: string, signedInUser: NonNullable<Awaited<ReturnType<typeof login>>['user']>) => {
+    const hasUniquePlus =
+      !!signedInUser?.subscriptionPlan &&
+      signedInUser.subscriptionPlan !== 'none';
+
+    const decodedTarget = decodeURIComponent(target);
+    if (!hasUniquePlus || !decodedTarget.startsWith('/subscription')) {
+      return decodedTarget;
+    }
+
+    const returnTo = new URLSearchParams(decodedTarget.split('?')[1] || '').get('returnTo');
+    return returnTo && returnTo.startsWith('/') ? returnTo : '/';
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.email.trim() || !loginData.password) {
@@ -110,13 +124,15 @@ function AuthContent() {
       if (result.success && result.user) {
         // Check role and redirect accordingly
         const role = result.user.role;
+        const profileResponse = await authApi.getProfile();
+        const signedInUser = profileResponse.success && profileResponse.data ? profileResponse.data : result.user;
         onClose?.();
         if (role === 'admin' || role === 'superadmin') {
           router.replace('/admin/dashboard');
         } else {
           // If returnUrl exists, redirect there (for checkout/subscription flow)
           if (returnUrl) {
-            router.push(decodeURIComponent(returnUrl));
+            router.push(getPostLoginReturnUrl(returnUrl, signedInUser));
           } else {
             router.push('/');
           }

@@ -93,14 +93,29 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   });
   const claimedReadTarget = serverLibraryItem?.redirectTarget || null;
   const hasUniquePlus =
-    user?.subscriptionStatus === 'active' &&
-    !!user.subscriptionPlan &&
+    !!user?.subscriptionPlan &&
     user.subscriptionPlan !== 'none';
   const checkoutId = book.id || book._id || itemKey;
   const checkoutSlug = book.slug || itemKey;
   const keepForeverTarget = isAudiobook
     ? `/checkout?kind=audiobook&id=${checkoutId}&slug=${checkoutSlug}&mode=buy`
     : `/checkout?id=${checkoutId}${cartFormat ? `&format=${encodeURIComponent(cartFormat)}` : ''}`;
+  const handleUniquePlusAction = useCallback(() => {
+    if (!user) {
+      const returnTo =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : '/';
+      router.push(
+        `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
+          `/subscription?returnTo=${encodeURIComponent(returnTo)}`
+        )}`
+      );
+      return;
+    }
+
+    router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
+  }, [hasUniquePlus, keepForeverTarget, router, user]);
   const isSavedByUser = useMemo(() => {
     const bookKeys = [book.slug, book.id, book._id, book.title, generateBookSlug(book.title)]
       .filter(Boolean)
@@ -349,7 +364,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         {/* Action button */}
         <div className='mt-3 grid grid-cols-[158px_42px] gap-2.5'>
           <button
-            onClick={() => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')}
+            onClick={handleUniquePlusAction}
             className={`flex h-10 w-[158px] items-center justify-center whitespace-nowrap rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
               hasUniquePlus
                 ? 'bg-slate-950 text-white hover:bg-slate-800'
@@ -412,8 +427,7 @@ function SectionCarousel({
   const displayItems = items.slice(0, itemLimit);
   const isFreeSection = subLabel?.toLowerCase() === 'free';
   const hasUniquePlus =
-    user?.subscriptionStatus === 'active' &&
-    !!user.subscriptionPlan &&
+    !!user?.subscriptionPlan &&
     user.subscriptionPlan !== 'none';
   const gridColumns =
     itemLimit === 6
