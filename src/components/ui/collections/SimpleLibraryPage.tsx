@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
@@ -16,8 +15,6 @@ import {
   BookmarkIcon as BookmarkIconOutline,
   FunnelIcon,
   MagnifyingGlassIcon,
-  PlusIcon,
-  ShoppingCartIcon,
   StarIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -65,7 +62,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   variant = 'glass',
 }: SimpleLibraryPageProps<T>) {
   const router = useRouter();
-  const { addToCart, isInCart } = useCart();
   const { openAuthModal, refreshUser, user } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,8 +103,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     if (!price) return null;
     return `₹${price.replace(/^[₹$]/, '')}`;
   };
-  const parsePrice = (price?: string | null) =>
-    price ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0 : 0;
   const isItemSaved = (item: T) => {
     const itemId = getItemId(item);
     const override = savedOverrides[itemId];
@@ -319,13 +313,16 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
   const renderLandingCard = (item: T) => {
     const itemId = getItemId(item);
-    const itemSlug = item.slug || generateBookSlug(item.title);
-    const addedToCart = isInCart(itemId);
     const filledStars = Math.round(item.rating || 0);
     const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
     const isClaiming = claimingId === itemId;
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
+    const hasUniquePlus =
+      user?.subscriptionStatus === 'active' &&
+      !!user.subscriptionPlan &&
+      user.subscriptionPlan !== 'none';
+    const keepForeverTarget = `/checkout?id=${item.id || item._id || itemId}`;
 
     if (isFreeSummaryCard) {
       return (
@@ -464,40 +461,17 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
           <p className='text-[10px] text-slate-400'>{getMeta(item)}</p>
 
-          <div className='mt-auto pt-2 flex flex-col gap-1.5'>
-            <div className='grid grid-cols-2 gap-1.5'>
-              <Link href={getHref(item)}>
-                <button className='w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-1'>
-                  View Details
-                </button>
-              </Link>
-              <button
-                onClick={() =>
-                  addToCart({
-                    id: itemId,
-                    title: item.title,
-                    author: item.author,
-                    price: parsePrice(item.price),
-                    originalPrice: item.originalPrice ? parsePrice(item.originalPrice) : undefined,
-                    image: item.image || '',
-                    slug: itemSlug,
-                    category: item.category,
-                    language: item.language,
-                  })
-                }
-                className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${addedToCart ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800 hover:bg-slate-700'
-                  }`}
-              >
-                <PlusIcon className='w-3 h-3' />
-                {addedToCart ? 'In Cart' : 'Add to Cart'}
-              </button>
-            </div>
-            <Link href='/subscription' className='w-full'>
-              <button className='w-full py-2 bg-indigo-600 text-white text-[10px] font-bold rounded-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5'>
-                <StarIcon className='w-3 h-3' />
-                Subscribe
-              </button>
-            </Link>
+          <div className='mt-auto pt-2'>
+            <button
+              onClick={() => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')}
+              className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                hasUniquePlus
+                  ? 'bg-slate-950 hover:bg-slate-800'
+                  : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
+            >
+              {hasUniquePlus ? 'Keep Forever for ₹299' : 'Read with Unique Plus'}
+            </button>
           </div>
         </div>
       </div>

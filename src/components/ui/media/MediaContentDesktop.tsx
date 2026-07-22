@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   BookOpenIcon,
@@ -10,11 +9,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FunnelIcon,
-  ShoppingCartIcon,
   StarIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Button } from '../primitives/Button';
@@ -58,9 +55,7 @@ interface BookCardProps {
 
 function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }: BookCardProps) {
   const router = useRouter();
-  const { addToCart, isInCart } = useCart();
   const { openAuthModal, refreshUser, user } = useAuth();
-  const [added, setAdded] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [saving, setSaving] = useState(false);
   const filledStars = Math.round(book.rating || 0);
@@ -98,6 +93,15 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     return item.itemType === 'ebook';
   });
   const claimedReadTarget = serverLibraryItem?.redirectTarget || null;
+  const hasUniquePlus =
+    user?.subscriptionStatus === 'active' &&
+    !!user.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
+  const checkoutId = book.id || book._id || itemKey;
+  const checkoutSlug = book.slug || itemKey;
+  const keepForeverTarget = isAudiobook
+    ? `/checkout?kind=audiobook&id=${checkoutId}&slug=${checkoutSlug}&mode=buy`
+    : `/checkout?id=${checkoutId}${cartFormat ? `&format=${encodeURIComponent(cartFormat)}` : ''}`;
   const isSavedByUser = useMemo(() => {
     const bookKeys = [book.slug, book.id, book._id, book.title, generateBookSlug(book.title)]
       .filter(Boolean)
@@ -121,23 +125,6 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     });
   }, [book.id, book._id, book.slug, book.title, user?.savedBooks]);
   const isSaved = savedOverride ?? isSavedByUser;
-
-  const handleAddToCart = useCallback(() => {
-    addToCart({
-      id: book.id || book._id || book.title,
-      title: book.title,
-      author: book.author,
-      price: parsePrice(book.price),
-      originalPrice: book.originalPrice ? parsePrice(book.originalPrice) : undefined,
-      image: book.image || '',
-      slug: book.slug || generateBookSlug(book.title),
-      category: book.category,
-      format: cartFormat,
-      language: book.language,
-    });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  }, [book, addToCart, cartFormat]);
 
   const handleClaimEnroll = useCallback(async (navigateAfterClaim = true) => {
     const identifier = book.slug || book.id || book._id;
@@ -361,40 +348,29 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           {book.duration ? ` · ${book.duration}` : ''}
         </p>
 
-        {/* Action buttons */}
-        <div className='mt-auto pt-2 flex flex-col gap-1.5'>
-          <div className='grid grid-cols-2 gap-1.5'>
-            <Link href={href}>
-              <button className='w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded-lg hover:bg-blue-700 active:scale-95 transition-all font-dm-sans flex items-center justify-center gap-1'>
-                View Details
-              </button>
-            </Link>
-            <button
-              onClick={
-                isFreeItem
-                  ? claimedReadTarget
-                    ? () => router.push(claimedReadTarget || defaultReadTarget)
-                    : () => void handleClaimEnroll(true)
-                  : handleAddToCart
-              }
-              disabled={claiming}
-              className={`w-full py-2 text-white text-[10px] font-bold rounded-lg active:scale-95 transition-all font-dm-sans flex items-center justify-center gap-1 ${isFreeItem || added || isInCart(book.id || book._id || book.title, cartFormat)
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-slate-800 hover:bg-slate-700'
-                } disabled:opacity-70 disabled:cursor-not-allowed`}
-            >
-              <PlusIcon className='w-3 h-3' />
-              {isFreeItem
-                ? claiming ? 'Claiming...' : claimedReadTarget ? 'Read' : 'Claim / Enroll'
-                : added ? 'Added' : isInCart(book.id || book._id || book.title, cartFormat) ? 'In Cart' : 'Add to Cart'}
-            </button>
-          </div>
-          <Link href='/subscription' className={isFreeItem ? 'hidden' : 'w-full'}>
-            <button className='w-full py-2 bg-indigo-600 text-white text-[10px] font-bold rounded-lg hover:bg-indigo-700 active:scale-95 transition-all font-dm-sans flex items-center justify-center gap-1.5'>
-              <StarIcon className='w-3 h-3' />
-              Subscribe
-            </button>
-          </Link>
+        {/* Action button */}
+        <div className='mt-auto pt-2'>
+          <button
+            onClick={
+              isFreeItem
+                ? claimedReadTarget
+                  ? () => router.push(claimedReadTarget || defaultReadTarget)
+                  : () => void handleClaimEnroll(true)
+                : () => router.push(hasUniquePlus ? keepForeverTarget : '/subscription')
+            }
+            disabled={claiming}
+            className={`w-full py-2 text-[10px] font-bold rounded-lg active:scale-95 transition-all font-dm-sans flex items-center justify-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed ${
+              isFreeItem
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : hasUniquePlus
+                  ? 'bg-slate-950 text-white hover:bg-slate-800'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            }`}
+          >
+            {isFreeItem
+              ? claiming ? 'Claiming...' : claimedReadTarget ? 'Read' : 'Claim / Enroll'
+              : hasUniquePlus ? 'Keep Forever for ₹299' : 'Read with Unique Plus'}
+          </button>
         </div>
       </div>
     </div>
