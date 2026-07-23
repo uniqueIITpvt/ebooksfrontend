@@ -75,11 +75,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
         typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}`
           : '/';
-      router.push(
-        `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
-          `/subscription?returnTo=${encodeURIComponent(returnTo)}`
-        )}`
-      );
+      openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
       return;
     }
 

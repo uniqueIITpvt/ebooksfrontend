@@ -51,7 +51,7 @@ export default function BooksGridDesktop({
   columns = 4,
 }: BooksGridDesktopProps) {
   const router = useRouter();
-  const { refreshUser, user } = useAuth();
+  const { openAuthModal, refreshUser, user } = useAuth();
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
@@ -141,18 +141,14 @@ export default function BooksGridDesktop({
       typeof window !== 'undefined'
         ? `${window.location.pathname}${window.location.search}`
         : '/';
-    router.push(
-      `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
-        `/subscription?returnTo=${encodeURIComponent(returnTo)}`
-      )}`
-    );
+    openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
   };
   const handleSaveBook = async (item: PublicBookListItem, href: string) => {
     const identifier = item.slug || item.id || item._id;
     if (!identifier) return;
 
     if (!user) {
-      router.push(`/user/auth?mode=signin&returnUrl=${encodeURIComponent(href)}`);
+      openAuthModal('signin', href);
       return;
     }
 
