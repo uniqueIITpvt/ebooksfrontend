@@ -1,11 +1,12 @@
 ﻿'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  BookmarkIcon as BookmarkIconOutline,
   PlayIcon,
   PauseIcon,
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
 import { generateBookSlug } from '@/utils/slugify';
 import CoverImageFrame from './CoverImageFrame';
@@ -13,6 +14,7 @@ import type { PublicBookListItem } from '@/types/publicBook';
 import { getAudiobookHref, parsePriceValue } from '@/lib/audiobooks';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { authApi } from '@/services/api/authApi';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -43,7 +45,9 @@ interface BooksGridMobileProps {
 
 export default function BooksGridMobile({ items, className = '', onAudiobookSelect }: BooksGridMobileProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { refreshUser, user } = useAuth();
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
   const hasUniquePlus =
     !!user?.subscriptionPlan &&
@@ -94,6 +98,33 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
     parsePriceValue(item.price) <= 0;
   const getBookHref = (item: PublicBookListItem) =>
     `/books/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
+  const getItemId = (item: PublicBookListItem) => item._id || item.id || item.slug || item.title;
+  const isItemSaved = (item: PublicBookListItem) => {
+    const itemId = getItemId(item);
+    const override = savedOverrides[itemId];
+    if (override !== undefined) return override;
+
+    const itemKeys = [item.slug, item.id, item._id, item.title, generateBookSlug(item.title)]
+      .filter(Boolean)
+      .map(String);
+
+    return (user?.savedBooks || []).some((savedBook) => {
+      const rawBook = typeof savedBook.bookId === 'object' ? savedBook.bookId : null;
+      const savedKeys = [
+        savedBook.slug,
+        savedBook.id,
+        savedBook._id,
+        savedBook.title,
+        typeof savedBook.bookId === 'string' ? savedBook.bookId : undefined,
+        rawBook?.slug,
+        rawBook?.id,
+        rawBook?._id,
+        rawBook?.title,
+      ].filter(Boolean).map(String);
+
+      return itemKeys.some((key) => savedKeys.includes(key));
+    });
+  };
   const handleUniquePlusAction = (item: PublicBookListItem, href: string) => {
     if (isFreeItem(item) || hasUniquePlus) {
       router.push(href);
@@ -109,6 +140,32 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
         `/subscription?returnTo=${encodeURIComponent(returnTo)}`
       )}`
     );
+  };
+  const handleSaveBook = async (item: PublicBookListItem, href: string) => {
+    const identifier = item.slug || item.id || item._id;
+    if (!identifier) return;
+
+    if (!user) {
+      router.push(`/user/auth?mode=signin&returnUrl=${encodeURIComponent(href)}`);
+      return;
+    }
+
+    const itemId = getItemId(item);
+    setSavingId(itemId);
+    try {
+      const response = await authApi.toggleSavedBook(identifier);
+      if (response.success) {
+        setSavedOverrides((current) => ({
+          ...current,
+          [itemId]: response.data?.saved ?? !isItemSaved(item),
+        }));
+      }
+      await refreshUser();
+    } catch (error: any) {
+      alert(error?.message || 'Unable to save this item');
+    } finally {
+      setSavingId(null);
+    }
   };
   if (items.length === 0) {
     return (
@@ -174,7 +231,7 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                   </p>
                 )}
 
-                <div className='mt-2 flex flex-col gap-1.5'>
+                <div className='mt-2 grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
                   <button
                     type='button'
                     onClick={() => handleUniquePlusAction(item, getBookHref(item))}
@@ -187,6 +244,23 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                     }`}
                   >
                     {isFreeItem(item) ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                  </button>
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      void handleSaveBook(item, getBookHref(item));
+                    }}
+                    disabled={savingId === getItemId(item)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+                      isItemSaved(item)
+                        ? 'border-yellow-400 bg-yellow-400 text-white'
+                        : 'border-slate-200 bg-white text-blue-600'
+                    }`}
+                    aria-label={`Save ${item.title}`}
+                  >
+                    {isItemSaved(item) ? <BookmarkIconSolid className='h-4 w-4' /> : <BookmarkIconOutline className='h-4 w-4' />}
                   </button>
                 </div>
               </div>
@@ -267,7 +341,7 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                   </p>
                 )}
 
-                <div className='mt-2 flex flex-col gap-1.5'>
+                <div className='mt-2 grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
                   <button
                     type='button'
                     onClick={() => handleUniquePlusAction(item, getAudiobookHref(item))}
@@ -280,6 +354,23 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                     }`}
                   >
                     {isFreeItem(item) ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                  </button>
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      void handleSaveBook(item, getAudiobookHref(item));
+                    }}
+                    disabled={savingId === getItemId(item)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+                      isItemSaved(item)
+                        ? 'border-yellow-400 bg-yellow-400 text-white'
+                        : 'border-slate-200 bg-white text-blue-600'
+                    }`}
+                    aria-label={`Save ${item.title}`}
+                  >
+                    {isItemSaved(item) ? <BookmarkIconSolid className='h-4 w-4' /> : <BookmarkIconOutline className='h-4 w-4' />}
                   </button>
                 </div>
               </div>
