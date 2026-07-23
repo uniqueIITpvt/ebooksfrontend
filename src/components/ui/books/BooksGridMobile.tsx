@@ -18,6 +18,7 @@ import type { PublicBookListItem } from '@/types/publicBook';
 import { getAudiobookHref, parsePriceValue } from '@/lib/audiobooks';
 import { useCart } from '@/contexts/CartContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -49,7 +50,11 @@ interface BooksGridMobileProps {
 export default function BooksGridMobile({ items, className = '', onAudiobookSelect }: BooksGridMobileProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
+  const { user } = useAuth();
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
+  const hasUniquePlus =
+    !!user?.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
 
   useEffect(() => {
     // Inject blob animation styles only once
@@ -89,7 +94,28 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
 
   const formatPrice = (price?: string | null) => {
     if (!price) return null;
-    return `₹${price.replace(/^[₹$]/, '')}`;
+    return `₹${price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
+  };
+  const isFreeItem = (item: PublicBookListItem) =>
+    item.componentType === 'free-summaries' ||
+    parsePriceValue(item.price) <= 0;
+  const getBookHref = (item: PublicBookListItem) =>
+    `/books/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
+  const handleUniquePlusAction = (item: PublicBookListItem, href: string) => {
+    if (isFreeItem(item) || hasUniquePlus) {
+      router.push(href);
+      return;
+    }
+
+    const returnTo =
+      typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}`
+        : '/';
+    router.push(
+      `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
+        `/subscription?returnTo=${encodeURIComponent(returnTo)}`
+      )}`
+    );
   };
   const languageBadgeClassName = (language?: string) =>
     language?.toLowerCase() === 'hindi'
@@ -155,7 +181,7 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                   </div>
                 )}
 
-                {item.price && (
+                {!isFreeItem(item) && item.price && (
                   <div className='flex items-center gap-1'>
                     <span className='text-xs font-bold text-slate-900'>{formatPrice(item.price)}</span>
                     {item.originalPrice && (
@@ -167,40 +193,19 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                 <p className='text-[10px] text-slate-400'>{item.pages ? `${item.pages} pages` : item.duration}</p>
 
                 <div className='mt-auto pt-1 flex flex-col gap-1.5'>
-                  <div className='grid grid-cols-2 gap-1'>
-                    <Link href={`/books/${generateBookSlug(item.title)}`}>
-                      <button className='w-full py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1'>
-                         View Details
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() =>
-                        addToCart({
-                          id: item.id,
-                          title: item.title,
-                          author: item.author,
-                          price: parsePriceValue(item.price),
-                          originalPrice: item.originalPrice ? parsePriceValue(item.originalPrice) : undefined,
-                          image: item.image || '',
-                          slug: item.slug || generateBookSlug(item.title),
-                          category: item.category,
-                          language: item.language,
-                        })
-                      }
-                      className={`w-full py-1.5 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1 ${
-                        isInCart(item.id) ? 'bg-green-600' : 'bg-slate-800'
-                      }`}
-                    >
-                      <PlusIcon className='w-3 h-3' />
-                      {isInCart(item.id) ? 'In Cart' : 'Add to Cart'}
-                    </button>
-                  </div>
-                  <Link href='/subscription' className='w-full'>
-                    <button className='w-full py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1'>
-                      <StarIcon className='w-3 h-3' />
-                      Subscribe
-                    </button>
-                  </Link>
+                  <button
+                    type='button'
+                    onClick={() => handleUniquePlusAction(item, getBookHref(item))}
+                    className={`w-full py-2 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1 ${
+                      isFreeItem(item)
+                        ? 'bg-blue-600'
+                        : hasUniquePlus
+                          ? 'bg-slate-950'
+                          : 'bg-indigo-600'
+                    }`}
+                  >
+                    {isFreeItem(item) ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -275,7 +280,7 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                   </div>
                 )}
 
-                {item.price && (
+                {!isFreeItem(item) && item.price && (
                   <div className='flex items-center gap-1'>
                     <span className='text-xs font-bold text-slate-900'>{formatPrice(item.price)}</span>
                     {item.originalPrice && (
@@ -287,44 +292,19 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
                 <p className='text-[10px] text-slate-400'>{item.pages ? `${item.pages} pages` : item.duration || 'Audiobook'}</p>
 
                 <div className='mt-auto pt-1 flex flex-col gap-1.5'>
-                  <div className='grid grid-cols-2 gap-1'>
-                    <button
-                      type='button'
-                      onClick={() => handleAudiobookSelect(item)}
-                      className='w-full py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1'
-                    >
-                       View Details
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        addToCart({
-                          id: item.id,
-                          title: item.title,
-                          author: item.author,
-                          price: parsePriceValue(item.price),
-                          originalPrice: item.originalPrice ? parsePriceValue(item.originalPrice) : undefined,
-                          image: item.image || '',
-                          slug: item.slug || generateBookSlug(item.title),
-                          category: item.category,
-                          format: 'Audiobook',
-                          language: item.language,
-                        })
-                      }
-                      className={`w-full py-1.5 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1 ${
-                        isInCart(item.id) ? 'bg-green-600' : 'bg-slate-800'
-                      }`}
-                    >
-                      <PlusIcon className='w-3 h-3' />
-                      {isInCart(item.id) ? 'In Cart' : 'Add to Cart'}
-                    </button>
-                  </div>
-                  <Link href='/subscription' className='w-full'>
-                    <button className='w-full py-1.5 bg-indigo-600 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1'>
-                      <StarIcon className='w-3 h-3' />
-                      Subscribe
-                    </button>
-                  </Link>
+                  <button
+                    type='button'
+                    onClick={() => handleUniquePlusAction(item, getAudiobookHref(item))}
+                    className={`w-full py-2 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1 ${
+                      isFreeItem(item)
+                        ? 'bg-blue-600'
+                        : hasUniquePlus
+                          ? 'bg-slate-950'
+                          : 'bg-indigo-600'
+                    }`}
+                  >
+                    {isFreeItem(item) ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                  </button>
                 </div>
               </div>
             </div>

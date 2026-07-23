@@ -60,7 +60,7 @@ interface MobileShowcaseCardProps {
 function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
-  const { openAuthModal } = useAuth();
+  const { openAuthModal, user } = useAuth();
   const [claiming, setClaiming] = useState(false);
   const cartFormat =
     item.type === 'Audiobook'
@@ -78,7 +78,27 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
     Number.parseFloat(String(value || '0').replace(/[^0-9.]/g, '')) || 0;
   const formatPrice = (value?: string | null) => {
     if (!value) return null;
-    return `₹${String(value).replace(/^[₹$]/, '')}`;
+    return `₹${String(value).replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
+  };
+  const displayPrice = formatPrice(item.price);
+  const hasUniquePlus =
+    !!user?.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
+  const handleUniquePlusAction = () => {
+    if (!user) {
+      const returnTo =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : '/';
+      router.push(
+        `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
+          `/subscription?returnTo=${encodeURIComponent(returnTo)}`
+        )}`
+      );
+      return;
+    }
+
+    router.push(hasUniquePlus ? href : '/subscription');
   };
   const handleFreeSummaryClaim = async (navigateAfterClaim: boolean) => {
     const identifier = item.slug || item.id || item._id;
@@ -155,11 +175,10 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
           <div className='mt-auto grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
             <button
               type='button'
-              onClick={() => void handleFreeSummaryClaim(true)}
-              disabled={claiming}
-              className='flex h-8 w-full items-center justify-center rounded-lg bg-blue-600 text-[10px] font-extrabold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              onClick={() => router.push(href)}
+              className='flex h-8 w-full items-center justify-center rounded-lg bg-blue-600 text-[10px] font-semibold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
             >
-              {claiming ? 'Claiming...' : 'Read Free'}
+              Read Free
             </button>
             <button
               type='button'
@@ -227,69 +246,30 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
           </div>
         )}
 
-        <div className='flex items-center gap-1.5'>
-          {isFreeItem ? (
-            <>
-              {item.price && (
-                <span className='text-[11px] font-bold text-slate-400 line-through'>
-                  {formatPrice(item.price)}
-                </span>
-              )}
-              <span className='text-[10px] font-extrabold uppercase tracking-wide text-green-600'>Free</span>
-            </>
-          ) : (
-            <>
-              {item.price && <span className='text-[12px] font-bold text-slate-900'>{formatPrice(item.price)}</span>}
-              {item.originalPrice && (
-                <span className='text-[10px] text-slate-400 line-through'>{formatPrice(item.originalPrice)}</span>
-              )}
-            </>
-          )}
-        </div>
+        {!isFreeItem && (
+          <p className='truncate text-[10px] font-semibold text-[#1E1B4B]'>
+            {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+            <span className='font-semibold text-[#16A34A]'>Free</span>
+            {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+          </p>
+        )}
 
         <p className='text-[9px] text-slate-400'>{meta}</p>
 
         <div className='mt-auto flex flex-col gap-1.5 pt-1.5'>
-          <div className='grid grid-cols-2 gap-1.5'>
-            <Link href={href}>
-              <button className='flex w-full items-center justify-center rounded-lg bg-blue-600 py-1.5 text-[9px] font-bold text-white transition-all active:scale-95'>
-                View Details
-              </button>
-            </Link>
-            <button
-              type='button'
-              onClick={() => {
-                if (inCart) return;
-
-                addToCart({
-                  id: itemId,
-                  title: item.title,
-                  author: item.author,
-                  price: parsePrice(item.price),
-                  originalPrice: item.originalPrice ? parsePrice(item.originalPrice) : undefined,
-                  image: item.image || '',
-                  slug: item.slug || generateBookSlug(item.title),
-                  category: item.category,
-                  format: cartFormat,
-                  language: item.language,
-                });
-              }}
-              className={`flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[9px] font-bold text-white transition-all active:scale-95 ${
-                inCart ? 'bg-green-600' : 'bg-slate-800'
-              }`}
-            >
-              <PlusIcon className='h-2.5 w-2.5' />
-              {inCart ? 'In Cart' : 'Add Cart'}
-            </button>
-          </div>
-          {!isFreeItem && (
-            <Link href='/subscription' className='w-full'>
-              <button className='flex w-full items-center justify-center gap-1 rounded-lg bg-indigo-600 py-1.5 text-[9px] font-bold text-white transition-all active:scale-95'>
-                <StarIcon className='h-2.5 w-2.5' />
-                Subscribe
-              </button>
-            </Link>
-          )}
+          <button
+            type='button'
+            onClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+            className={`flex w-full items-center justify-center rounded-lg py-2 text-[10px] font-semibold text-white transition-all active:scale-95 ${
+              isFreeItem
+                ? 'bg-blue-600'
+                : hasUniquePlus
+                  ? 'bg-slate-950'
+                  : 'bg-indigo-600'
+            }`}
+          >
+            {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+          </button>
         </div>
       </div>
     </div>

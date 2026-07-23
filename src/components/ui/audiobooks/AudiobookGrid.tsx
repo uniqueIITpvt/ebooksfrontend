@@ -19,6 +19,7 @@ import {
 } from '@/lib/audiobooks';
 import { useCart } from '@/contexts/CartContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AudiobookGridProps {
   items: PublicBookListItem[];
@@ -34,7 +35,11 @@ const placeholderGradients = [
 export default function AudiobookGrid({ items }: AudiobookGridProps) {
   const router = useRouter();
   const { addToCart, isInCart } = useCart();
+  const { user } = useAuth();
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
+  const hasUniquePlus =
+    !!user?.subscriptionPlan &&
+    user.subscriptionPlan !== 'none';
 
   const handleTogglePreview = async (item: PublicBookListItem) => {
     const audioUrl = item.files?.audiobook?.url;
@@ -75,6 +80,27 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
     language?.toLowerCase() === 'hindi'
       ? 'bg-[#f28c18]'
       : 'bg-indigo-600';
+  const displayPrice = (item: PublicBookListItem) =>
+    item.price ? `₹${item.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}` : null;
+  const isFreeItem = (item: PublicBookListItem) =>
+    item.componentType === 'free-summaries' ||
+    parsePriceValue(item.price) <= 0;
+  const handleUniquePlusAction = (item: PublicBookListItem) => {
+    if (isFreeItem(item) || hasUniquePlus) {
+      router.push(getAudiobookHref(item));
+      return;
+    }
+
+    const returnTo =
+      typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}`
+        : '/';
+    router.push(
+      `/user/auth?mode=signin&returnUrl=${encodeURIComponent(
+        `/subscription?returnTo=${encodeURIComponent(returnTo)}`
+      )}`
+    );
+  };
 
   if (items.length === 0) {
     return (
@@ -179,10 +205,10 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
                   </div>
                 )}
 
-                {item.price && (
+                {!isFreeItem(item) && item.price && (
                   <div className='flex items-center gap-1.5'>
                     <span className='text-sm font-bold text-slate-900'>
-                      {formatPrice(item.price)}
+                      {displayPrice(item)}
                     </span>
                   </div>
                 )}
@@ -192,43 +218,18 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
                 </p>
 
                 <div className='mt-auto flex flex-col gap-1.5 pt-2'>
-                  <div className='grid grid-cols-2 gap-1.5'>
-                    <button
-                      type='button'
-                      onClick={() => router.push(getAudiobookHref(item))}
-                      className='flex w-full items-center justify-center gap-1 rounded-lg bg-blue-600 py-2 text-[10px] font-bold text-white transition-all hover:bg-blue-700'
-                    >
-                       View Details
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() =>
-                        addToCart({
-                          id: item.id,
-                          title: item.title,
-                          author: item.author,
-                          price: parsePriceValue(item.price),
-                          image: item.image || '',
-                          slug: item.slug || item.id,
-                          category: item.category,
-                          format: 'Audiobook',
-                          language: item.language,
-                        })
-                      }
-                      className={`flex w-full items-center justify-center gap-1 rounded-lg py-2 text-[10px] font-bold text-white transition-all ${
-                        inCart ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-800 hover:bg-slate-700'
-                      }`}
-                    >
-                      <PlusIcon className='h-3 w-3' />
-                      {inCart ? 'In Cart' : 'Add to Cart'}
-                    </button>
-                  </div>
                   <button
                     type='button'
-                    onClick={() => router.push('/subscription')}
-                    className='w-full rounded-lg bg-indigo-600 py-2 text-[10px] font-bold text-white transition-all hover:bg-indigo-700'
+                    onClick={() => handleUniquePlusAction(item)}
+                    className={`w-full rounded-lg py-2 text-[10px] font-bold text-white transition-all ${
+                      isFreeItem(item)
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : hasUniquePlus
+                          ? 'bg-slate-950 hover:bg-slate-800'
+                          : 'bg-indigo-600 hover:bg-indigo-700'
+                    }`}
                   >
-                    Subscribe
+                    {isFreeItem(item) ? 'Read Free' : hasUniquePlus ? `${displayPrice(item) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
                   </button>
                 </div>
               </div>
