@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
 import { authApi } from '@/services/api/authApi';
+import { LibraryCardDesktop, LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
 import {
   ArrowLeftIcon,
   BookmarkIcon as BookmarkIconOutline,
@@ -296,183 +297,74 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
       user.subscriptionPlan !== 'none';
     const keepForeverTarget = getHref(item);
     const displayPrice = formatDisplayPrice(item.price);
+    const priceLine = isFreeItem ? null : (
+      <>
+        {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+        <span className='font-semibold text-[#16A34A]'>Free</span>
+        {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+      </>
+    );
 
-    if (isFreeSummaryCard) {
-      return (
-        <div
-          key={itemId}
-          className='group mx-auto flex h-auto w-full max-w-[210px] flex-col overflow-visible rounded-lg bg-transparent px-0 py-0 transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
-        >
-          <Link href={getHref(item)} className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
-            {item.image ? (
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                className='rounded-lg object-cover object-center transition-transform duration-[250ms] ease-out'
-                quality={100}
-                sizes='190px'
-              />
-            ) : (
-              <div className='flex h-full w-full items-center justify-center'>
-                <span className='text-sm text-slate-400'>No Image</span>
-              </div>
-            )}
-          </Link>
+    const handlePrimaryClick = () => {
+      if (isFreeItem) {
+        router.push(getHref(item));
+        return;
+      }
 
-          <div className='flex flex-col px-0 pb-0 pt-3 font-dm-sans'>
-            <div>
-              <Link href={getHref(item)}>
-                <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] transition-colors hover:text-blue-700 font-dm-sans'>
-                  {item.title}
-                </h3>
-              </Link>
-              <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>
-                {item.author}
-              </p>
-            </div>
+      if (!user) {
+        const returnTo =
+          typeof window !== 'undefined'
+            ? `${window.location.pathname}${window.location.search}`
+            : '/';
+        openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
+        return;
+      }
 
-            {(item.rating ?? 0) > 0 && (
-              <div className='mt-2 flex items-center gap-2'>
-                <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
-                <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
-                <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
-              </div>
-            )}
-
-            {false && displayPrice && (
-              <div className='flex items-center gap-1.5'>
-                <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
-                <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
-              </div>
-            )}
-
-            <div className='mt-3 grid grid-cols-[minmax(0,1fr)_44px] gap-3'>
-              <button
-                type='button'
-                onClick={() => router.push(getHref(item))}
-                className='flex h-10 w-full items-center justify-center rounded-[10px] bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
-              >
-                Read Free
-              </button>
-              <button
-                type='button'
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  void handleSaveBook(item);
-                }}
-                disabled={isSaving}
-                className={`flex h-10 w-10 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
-                    ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
-                    : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
-                  }`}
-                aria-label={`Save ${item.title}`}
-              >
-                {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
+      router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
+    };
+    const handleCoverClick = () => router.push(getHref(item));
+    const handleSaveClick = () => void handleSaveBook(item);
+    const primaryLabel = isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus';
+    const primaryVariant = isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus';
 
     return (
-      <div
-        key={itemId}
-        className='group mx-auto flex h-auto w-full max-w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
-      >
-        <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
-          {item.image ? (
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              className='rounded-lg object-cover object-center transition-transform duration-[250ms] ease-out'
-              quality={100}
-              sizes='190px'
-            />
-          ) : (
-            <div className='w-full h-full flex items-center justify-center'>
-              <span className='text-slate-400 text-sm'>No Image</span>
-            </div>
-          )}
-
-        </div>
-
-        <div className='flex flex-col pt-3 font-dm-sans'>
-          <div className='hidden'>
-            <span className='inline-flex max-w-full items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700'>
-              <span className='truncate'>{item.category}</span>
-            </span>
-          </div>
-          <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{item.title}</h3>
-          <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{item.author}</p>
-
-          {(item.rating ?? 0) > 0 && (
-            <div className='mt-2 flex items-center gap-2'>
-              <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
-              <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
-              <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
-            </div>
-          )}
-
-          {!isFreeItem && (
-            <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
-              {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
-              <span className='font-semibold text-[#16A34A]'>Free</span>
-              {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
-            </p>
-          )}
-
-          <div className='mt-3 grid grid-cols-[minmax(0,1fr)_44px] gap-3'>
-            <button
-              type='button'
-              onClick={() => {
-                if (isFreeItem) {
-                  router.push(getHref(item));
-                  return;
-                }
-
-                if (!user) {
-                  const returnTo =
-                    typeof window !== 'undefined'
-                      ? `${window.location.pathname}${window.location.search}`
-                      : '/';
-                  openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
-                  return;
-                }
-
-                router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
-              }}
-              className={`flex h-10 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none text-white transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
-                isFreeItem
-                  ? 'bg-blue-600 hover:bg-blue-700'
-                  : hasUniquePlus
-                  ? 'bg-slate-950 hover:bg-slate-800'
-                  : 'bg-indigo-600 hover:bg-indigo-700'
-              }`}
-            >
-              {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-            </button>
-            <button
-              type='button'
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void handleSaveBook(item);
-              }}
-              disabled={isSaving}
-              className={`flex h-10 w-10 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
-                  ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
-                  : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
-                }`}
-              aria-label={`Save ${item.title}`}
-            >
-              {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
-            </button>
-          </div>
-        </div>
+      <div key={itemId} className='contents'>
+        <LibraryCardDesktop
+          image={item.image}
+          title={item.title}
+          author={item.author}
+          rating={item.rating}
+          reviews={item.reviews}
+          priceLine={priceLine}
+          primaryLabel={primaryLabel}
+          primaryVariant={primaryVariant}
+          onPrimaryClick={handlePrimaryClick}
+          onCoverClick={handleCoverClick}
+          isSaved={isSaved}
+          onSaveClick={handleSaveClick}
+          saveDisabled={isSaving}
+          saveLabel={`Save ${item.title}`}
+          coverVariant='book'
+          className='hidden sm:flex'
+        />
+        <LibraryCardMobile
+          image={item.image}
+          title={item.title}
+          author={item.author}
+          rating={item.rating}
+          reviews={item.reviews}
+          priceLine={priceLine}
+          primaryLabel={primaryLabel}
+          primaryVariant={primaryVariant}
+          onPrimaryClick={handlePrimaryClick}
+          onCoverClick={handleCoverClick}
+          isSaved={isSaved}
+          onSaveClick={handleSaveClick}
+          saveDisabled={isSaving}
+          saveLabel={`Save ${item.title}`}
+          coverVariant='book'
+          className='sm:hidden'
+        />
       </div>
     );
   };

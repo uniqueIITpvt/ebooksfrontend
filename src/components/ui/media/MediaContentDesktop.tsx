@@ -26,6 +26,7 @@ import { audiobooksApi } from '@/services/api/audiobooksApi';
 import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
+import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 
 const LANDING_ITEM_LIMIT = 4;
 const LANDING_COLLAPSED_ITEM_LIMIT = 5;
@@ -201,86 +202,56 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
 
   if (book.componentType === 'free-summaries' && subLabel?.toLowerCase() === 'free') {
     return (
-      <div className='group flex h-full w-full flex-col overflow-visible rounded-lg bg-transparent px-3 py-4 transition-all duration-300 hover:-translate-y-1'>
-        <Link href={href} className='relative h-[260px] w-full overflow-hidden rounded-md bg-transparent'>
-          {book.image ? (
-            <Image
-              src={getOptimizedImageUrl(book.image, 640) || book.image}
-              alt={book.title}
-              fill
-              sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 260px'
-              className='h-full w-full rounded-md object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]'
-              style={{
-                objectFit: 'contain',
-                objectPosition: 'center',
-              }}
-              priority={index < 3}
-              loading={index < 3 ? 'eager' : 'lazy'}
-            />
-          ) : (
-            <div className='flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-400'>
-              No Image
-            </div>
-          )}
-        </Link>
-
-        <div className='flex flex-1 flex-col gap-2 px-0 pb-0 pt-3 font-dm-sans'>
-          <div>
-            <Link href={href}>
-              <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700 font-dm-sans'>
-                {book.title}
-              </h3>
-            </Link>
-            <p className='mt-2 line-clamp-1 text-sm font-medium text-slate-400 font-dm-sans'>
-              {book.author}
-            </p>
-          </div>
-
-          {(book.rating ?? 0) > 0 && (
-            <div className='flex items-center gap-3'>
-              <StarIconSolid className='h-5 w-5 text-blue-600' />
-              <span className='text-base font-extrabold text-[#141454] font-dm-sans'>{(book.rating || 0).toFixed(1)}</span>
-              <span className='text-sm font-medium text-slate-400 font-dm-sans'>({book.reviews || 0})</span>
-            </div>
-          )}
-
-          {false && displayPrice && (
-            <div className='flex items-center gap-1.5'>
-              <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{displayPrice}</span>
-              <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
-            </div>
-          )}
-
-          <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
-            <button
-              type='button'
-              onClick={() => router.push(href)}
-              className='flex h-9 w-full items-center justify-center rounded-lg bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
-            >
-              Read Free
-            </button>
-            <button
-              type='button'
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void handleSaveBook();
-              }}
-              disabled={saving}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
-                  ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
-                  : 'border-slate-200 bg-white text-blue-600 hover:border-yellow-300 hover:bg-yellow-50'
-                }`}
-              aria-label={`Save ${book.title}`}
-            >
-              {isSaved ? <BookmarkIconSolid className='h-6 w-6' /> : <BookmarkIconOutline className='h-6 w-6' />}
-            </button>
-          </div>
-        </div>
-      </div>
+      <LibraryCardDesktop
+        image={book.image}
+        title={book.title}
+        author={book.author}
+        rating={book.rating}
+        reviews={book.reviews}
+        primaryLabel='Read Free'
+        primaryVariant='free'
+        onPrimaryClick={() => router.push(href)}
+        onCoverClick={() => router.push(href)}
+        isSaved={isSaved}
+        onSaveClick={() => void handleSaveBook()}
+        saveDisabled={saving}
+        saveLabel={`Save ${book.title}`}
+        coverVariant='book'
+        priority={index < 3}
+        loading={index < 3 ? 'eager' : 'lazy'}
+      />
     );
   }
 
+  return (
+    <LibraryCardDesktop
+      image={book.image}
+      title={book.title}
+      author={book.author}
+      rating={book.rating}
+      reviews={book.reviews}
+      priceLine={
+        isFreeItem ? null : (
+          <>
+            {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+            <span className='font-semibold text-[#16A34A]'>Free</span>
+            {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+          </>
+        )
+      }
+      primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+      primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+      onPrimaryClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+      onCoverClick={() => router.push(href)}
+      isSaved={isSaved}
+      onSaveClick={() => void handleSaveBook()}
+      saveDisabled={saving}
+      saveLabel={`Save ${book.title}`}
+      coverVariant={book.type === 'Audiobook' ? 'audiobook' : 'book'}
+      priority={index < 3}
+      loading={index < 3 ? 'eager' : 'lazy'}
+    />
+  );
   return (
     <div className='group flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'>
       {/* Cover image */}

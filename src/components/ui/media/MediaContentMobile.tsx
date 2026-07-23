@@ -23,6 +23,7 @@ import type { PublicBookListItem } from '@/types/publicBook';
 import { useAuth } from '@/contexts/AuthContext';
 import { libraryApi } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
+import { LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -107,6 +108,46 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
     }
   };
 
+  return (
+    <LibraryCardMobile
+      image={item.image}
+      title={item.title}
+      author={item.author}
+      rating={item.rating}
+      reviews={item.reviews}
+      priceLine={
+        isFreeItem ? null : (
+          <>
+            {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+            <span className='font-semibold text-[#16A34A]'>Free</span>
+            {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+          </>
+        )
+      }
+      primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+      primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+      onPrimaryClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+      onCoverClick={() => router.push(href)}
+      isSaved={false}
+      onSaveClick={() => {
+        if (item.componentType === 'free-summaries') {
+          void handleFreeSummaryClaim(false);
+          return;
+        }
+
+        if (!user) {
+          openAuthModal('signin', href);
+        }
+      }}
+      saveDisabled={claiming}
+      saveLabel={`Save ${item.title}`}
+      coverVariant={item.type === 'Audiobook' ? 'audiobook' : 'book'}
+      priority={index === 0}
+      loading={index === 0 ? 'eager' : 'lazy'}
+      className='animate-fade-in'
+    />
+  );
+
   if (item.componentType === 'free-summaries') {
     return (
       <div
@@ -118,7 +159,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
         <Link href={href} className='relative h-[170px] w-full overflow-hidden rounded-lg bg-transparent shadow-[0_10px_24px_rgba(0,0,0,0.10)]'>
           {item.image ? (
             <Image
-              src={item.image}
+              src={item.image || ''}
               alt={item.title}
               fill
               sizes='(max-width: 768px) 50vw, 200px'
