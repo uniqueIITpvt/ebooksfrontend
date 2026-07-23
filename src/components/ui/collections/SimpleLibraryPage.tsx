@@ -7,15 +7,12 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
-import { libraryApi } from '@/services/api/libraryApi';
-import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
 import {
   ArrowLeftIcon,
   BookmarkIcon as BookmarkIconOutline,
   FunnelIcon,
   MagnifyingGlassIcon,
-  StarIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
@@ -65,7 +62,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   const { openAuthModal, refreshUser, user } = useAuth();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [claimingId, setClaimingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
 
@@ -103,6 +99,11 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     if (!price) return null;
     return `₹${price.replace(/^[₹$]/, '')}`;
   };
+  const formatDisplayPrice = (price?: string | null) => {
+    if (!price) return null;
+    return `₹${price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
+  };
+
   const isItemSaved = (item: T) => {
     const itemId = getItemId(item);
     const override = savedOverrides[itemId];
@@ -128,33 +129,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
       return itemKeys.some((key) => savedKeys.includes(key));
     });
-  };
-
-  const handleFreeSummaryClaim = async (item: T, navigateAfterClaim: boolean) => {
-    const identifier = item.slug || item.id || item._id;
-    if (!identifier) return;
-
-    const href = getHref(item);
-    const token = tokenStore.getAccessToken();
-
-    if (!token) {
-      openAuthModal('signin', href);
-      return;
-    }
-
-    setClaimingId(getItemId(item));
-    try {
-      const response = await libraryApi.claim(identifier);
-      const nextReadTarget = `/read/${response.bookSlug || identifier}`;
-      window.dispatchEvent(new Event('library:changed'));
-      if (navigateAfterClaim) {
-        router.push(nextReadTarget);
-      }
-    } catch (error: any) {
-      alert(error?.message || 'Unable to claim this item');
-    } finally {
-      setClaimingId(null);
-    }
   };
 
   const handleSaveBook = async (item: T) => {
@@ -313,41 +287,33 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
   const renderLandingCard = (item: T) => {
     const itemId = getItemId(item);
-    const filledStars = Math.round(item.rating || 0);
     const isFreeSummaryCard = defaultMetaLabel === 'Free Summary';
     const isFreeItem =
       isFreeSummaryCard ||
       (item.price ? (Number.parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0) <= 0 : false);
-    const isClaiming = claimingId === itemId;
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
     const hasUniquePlus =
       !!user?.subscriptionPlan &&
       user.subscriptionPlan !== 'none';
     const keepForeverTarget = getHref(item);
-    const displayPrice = item.price
-      ? `${'\u20B9'}${item.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
-      : null;
+    const displayPrice = formatDisplayPrice(item.price);
 
     if (isFreeSummaryCard) {
       return (
         <div
           key={itemId}
-          className='group flex flex-col overflow-visible rounded-lg bg-transparent px-3 py-4 transition-all duration-300 hover:-translate-y-1'
+          className='group mx-auto flex h-auto w-full max-w-[210px] flex-col overflow-visible rounded-lg bg-transparent px-0 py-0 transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
         >
-          <Link href={getHref(item)} className='relative h-[260px] w-full overflow-hidden rounded-md bg-transparent'>
+          <Link href={getHref(item)} className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
             {item.image ? (
               <Image
                 src={item.image}
                 alt={item.title}
                 fill
-                className='rounded-md object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]'
-                style={{
-                  objectFit: 'contain',
-                  objectPosition: 'center',
-                }}
+                className='rounded-lg object-cover object-center transition-transform duration-[250ms] ease-out'
                 quality={100}
-                sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
+                sizes='190px'
               />
             ) : (
               <div className='flex h-full w-full items-center justify-center'>
@@ -356,23 +322,23 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
             )}
           </Link>
 
-          <div className='flex flex-1 flex-col gap-2 px-0 pb-0 pt-3 font-dm-sans'>
+          <div className='flex flex-col px-0 pb-0 pt-3 font-dm-sans'>
             <div>
               <Link href={getHref(item)}>
-                <h3 className='truncate text-[16px] font-extrabold leading-snug text-[#141454] transition-colors hover:text-blue-700 font-dm-sans'>
+                <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] transition-colors hover:text-blue-700 font-dm-sans'>
                   {item.title}
                 </h3>
               </Link>
-              <p className='mt-2 line-clamp-1 text-sm font-medium text-slate-400 font-dm-sans'>
+              <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>
                 {item.author}
               </p>
             </div>
 
             {(item.rating ?? 0) > 0 && (
-              <div className='flex items-center gap-3'>
-                <StarIconSolid className='h-5 w-5 text-blue-600' />
-                <span className='text-base font-extrabold text-[#141454] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
-                <span className='text-sm font-medium text-slate-400 font-dm-sans'>({item.reviews || 0})</span>
+              <div className='mt-2 flex items-center gap-2'>
+                <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
+                <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+                <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
               </div>
             )}
 
@@ -383,11 +349,11 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
               </div>
             )}
 
-            <div className='mt-auto grid grid-cols-[minmax(0,1fr)_50px] gap-3'>
+            <div className='mt-3 grid grid-cols-[minmax(0,1fr)_44px] gap-3'>
               <button
                 type='button'
                 onClick={() => router.push(getHref(item))}
-                className='flex h-11 w-full items-center justify-center rounded-lg bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
+                className='flex h-10 w-full items-center justify-center rounded-[10px] bg-blue-600 text-[12px] font-semibold leading-none text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
               >
                 Read Free
               </button>
@@ -399,13 +365,13 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   void handleSaveBook(item);
                 }}
                 disabled={isSaving}
-                className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
+                className={`flex h-10 w-10 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
                     ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
                     : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
                   }`}
                 aria-label={`Save ${item.title}`}
               >
-                {isSaved ? <BookmarkIconSolid className='h-6 w-6' /> : <BookmarkIconOutline className='h-6 w-6' />}
+                {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
               </button>
             </div>
           </div>
@@ -416,22 +382,17 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     return (
       <div
         key={itemId}
-        className='group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden'
+        className='group mx-auto flex h-auto w-full max-w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
       >
-        <div className='relative aspect-[3/4] w-full overflow-hidden bg-slate-100'>
+        <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
           {item.image ? (
             <Image
               src={item.image}
               alt={item.title}
               fill
-              className='object-contain object-center transition-transform duration-300 group-hover:scale-[1.02]'
+              className='rounded-lg object-cover object-center transition-transform duration-[250ms] ease-out'
               quality={100}
-              sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw'
-              style={{
-                imageRendering: 'auto',
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden',
-              }}
+              sizes='190px'
             />
           ) : (
             <div className='w-full h-full flex items-center justify-center'>
@@ -441,40 +402,40 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
 
         </div>
 
-        <div className='p-3 flex flex-col gap-1.5 flex-1'>
-          <div>
+        <div className='flex flex-col pt-3 font-dm-sans'>
+          <div className='hidden'>
             <span className='inline-flex max-w-full items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700'>
               <span className='truncate'>{item.category}</span>
             </span>
           </div>
-          <h3 className='text-[13px] font-bold text-slate-900 leading-snug line-clamp-2'>{item.title}</h3>
-          <p className='text-[11px] text-slate-500 line-clamp-1'>{item.author}</p>
+          <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{item.title}</h3>
+          <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{item.author}</p>
 
           {(item.rating ?? 0) > 0 && (
-            <div className='flex items-center gap-0.5'>
-              {Array.from({ length: 5 }).map((_, index) => (
-                index < filledStars
-                  ? <StarIconSolid key={index} className='w-3 h-3 text-amber-400' />
-                  : <StarIcon key={index} className='w-3 h-3 text-slate-200' />
-              ))}
-              <span className='text-[10px] text-slate-400 ml-1'>({item.reviews || 0})</span>
+            <div className='mt-2 flex items-center gap-2'>
+              <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
+              <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+              <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
             </div>
           )}
 
-          {!isFreeItem && item.price && (
-            <div className='flex items-center gap-1.5'>
-              <span className='text-sm font-bold text-slate-900'>{formatPrice(item.price)}</span>
-              {item.originalPrice && (
-                <span className='text-[11px] text-slate-400 line-through'>{formatPrice(item.originalPrice)}</span>
-              )}
-            </div>
+          {!isFreeItem && (
+            <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+              {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+              <span className='font-semibold text-[#16A34A]'>Free</span>
+              {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+            </p>
           )}
 
-          <p className='text-[10px] text-slate-400'>{getMeta(item)}</p>
-
-          <div className='mt-auto pt-2'>
+          <div className='mt-3 grid grid-cols-[minmax(0,1fr)_44px] gap-3'>
             <button
+              type='button'
               onClick={() => {
+                if (isFreeItem) {
+                  router.push(getHref(item));
+                  return;
+                }
+
                 if (!user) {
                   const returnTo =
                     typeof window !== 'undefined'
@@ -488,9 +449,9 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
                   return;
                 }
 
-                router.push(isFreeItem ? getHref(item) : hasUniquePlus ? keepForeverTarget : '/subscription');
+                router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
               }}
-              className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex h-10 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none text-white transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
                 isFreeItem
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : hasUniquePlus
@@ -499,6 +460,22 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
               }`}
             >
               {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+            </button>
+            <button
+              type='button'
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void handleSaveBook(item);
+              }}
+              disabled={isSaving}
+              className={`flex h-10 w-10 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
+                  ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
+                  : 'border-slate-200 bg-white text-blue-600 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+              aria-label={`Save ${item.title}`}
+            >
+              {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
             </button>
           </div>
         </div>

@@ -2,21 +2,15 @@
 
 import { useEffect } from 'react';
 import {
-  StarIcon,
-  ShoppingCartIcon,
   PlayIcon,
   PauseIcon,
-  PlusIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import Image from 'next/image';
-import Link from 'next/link';
 import { generateBookSlug } from '@/utils/slugify';
 import { useRouter } from 'next/navigation';
 import CoverImageFrame from './CoverImageFrame';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { getAudiobookHref, parsePriceValue } from '@/lib/audiobooks';
-import { useCart } from '@/contexts/CartContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -55,7 +49,6 @@ export default function BooksGridDesktop({
   columns = 4,
 }: BooksGridDesktopProps) {
   const router = useRouter();
-  const { addToCart, isInCart } = useCart();
   const { user } = useAuth();
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
   const hasUniquePlus =
@@ -123,11 +116,6 @@ export default function BooksGridDesktop({
       )}`
     );
   };
-  const languageBadgeClassName = (language?: string) =>
-    language?.toLowerCase() === 'hindi'
-      ? 'bg-[#f28c18]'
-      : 'bg-indigo-600';
-
   if (!items || items.length === 0) {
     return (
       <div className={`text-center py-16 ${className}`}>
@@ -147,18 +135,18 @@ export default function BooksGridDesktop({
               item.type === 'Books' ? (
                 <div
                   key={item.id}
-                  className='group flex flex-col mx-auto w-full max-w-[230px] bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden'
+                  className='group mx-auto flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
                   style={{
                     animationDelay: `${index * 100}ms`,
                   }}
                 >
-                  <div className='relative'>
+                  <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
                     <CoverImageFrame
                       src={item.image || undefined}
                       alt={item.title}
-                      sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 230px'
-                      className='rounded-none border-0 bg-slate-50 shadow-none'
-                      imageClassName='transition-transform duration-500 group-hover:scale-[1.02]'
+                      sizes='190px'
+                      className='h-[285px] w-[190px] rounded-lg border-0 bg-transparent shadow-none'
+                      imageClassName='transition-transform duration-[250ms] ease-out'
                       fit='cover'
                       showBackdrop={false}
                       fixedAspectRatio={3 / 4}
@@ -166,47 +154,41 @@ export default function BooksGridDesktop({
                     />
                   </div>
 
-                  <div className='flex flex-col gap-1.5 p-3 flex-1'>
-                    <div className='flex items-center justify-between gap-2'>
+                  <div className='flex flex-col pt-3 font-dm-sans'>
+                    <div className='hidden'>
                       <span className='inline-flex min-w-0 max-w-[70%] items-center rounded-md bg-slate-100 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-700'>
                         <span className='truncate'>{item.category}</span>
                       </span>
                       {(item as any).language && (
-                        <span className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-white ${languageBadgeClassName((item as any).language)}`}>
+                        <span className='inline-flex shrink-0 items-center rounded-md bg-indigo-600 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-white'>
                           {(item as any).language}
                         </span>
                       )}
                     </div>
-                    <h3 className='text-[13px] font-bold text-slate-900 leading-snug line-clamp-2'>{item.title}</h3>
-                    <p className='text-[11px] text-slate-500 line-clamp-1'>{item.author}</p>
+                    <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{item.title}</h3>
+                    <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{item.author}</p>
 
                     {(item.rating ?? 0) > 0 && (
-                      <div className='flex items-center gap-0.5'>
-                        {Array.from({ length: 5 }).map((_, starIndex) => (
-                          starIndex < Math.round(item.rating || 0)
-                            ? <StarIconSolid key={starIndex} className='w-3 h-3 text-amber-400' />
-                            : <StarIcon key={starIndex} className='w-3 h-3 text-slate-200' />
-                        ))}
-                        <span className='text-[10px] text-slate-400 ml-1'>({item.reviews || 0})</span>
+                      <div className='mt-2 flex items-center gap-2'>
+                        <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
+                        <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+                        <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
                       </div>
                     )}
 
-                    {!isFreeItem(item) && item.price && (
-                      <div className='flex items-center gap-1.5'>
-                        <span className='text-sm font-bold text-slate-900'>{formatPrice(item.price)}</span>
-                        {item.originalPrice && (
-                          <span className='text-[11px] text-slate-400 line-through'>{formatPrice(item.originalPrice)}</span>
-                        )}
-                      </div>
+                    {!isFreeItem(item) && (
+                      <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+                        {hasUniquePlus ? 'Read ' : <>{formatPrice(item.price) ? `${formatPrice(item.price)} or ` : ''}</>}
+                        <span className='font-semibold text-[#16A34A]'>Free</span>
+                        {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+                      </p>
                     )}
 
-                    <p className='text-[10px] text-slate-400'>{item.pages ? `${item.pages} pages` : item.duration}</p>
-
-                    <div className='mt-auto pt-2 flex flex-col gap-1.5'>
+                    <div className='mt-3 flex flex-col gap-1.5'>
                       <button
                         type='button'
                         onClick={() => handleUniquePlusAction(item, getBookHref(item))}
-                        className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
+                        className={`flex h-10 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none text-white transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
                           isFreeItem(item)
                             ? 'bg-blue-600 hover:bg-blue-700'
                             : hasUniquePlus
@@ -222,18 +204,18 @@ export default function BooksGridDesktop({
               ) : (
                 <div
                   key={item.id}
-                  className='group flex flex-col mx-auto w-full max-w-[230px] bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden'
+                  className='group mx-auto flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'
                   style={{
                     animationDelay: `${index * 100}ms`,
                   }}
                 >
-                  <div className='relative'>
+                  <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
                     <CoverImageFrame
                       src={item.image || undefined}
                       alt={item.title}
-                      sizes='(max-width: 640px) 75vw, (max-width: 1024px) 40vw, 230px'
-                      className='rounded-none border-0 bg-slate-50 shadow-none'
-                      imageClassName='transition-transform duration-500 group-hover:scale-[1.02]'
+                      sizes='190px'
+                      className='h-[285px] w-[190px] rounded-lg border-0 bg-transparent shadow-none'
+                      imageClassName='transition-transform duration-[250ms] ease-out'
                       fit='cover'
                       showBackdrop={false}
                       fixedAspectRatio={3 / 4}
@@ -265,47 +247,41 @@ export default function BooksGridDesktop({
                     </CoverImageFrame>
                   </div>
 
-                  <div className='flex flex-col gap-1.5 p-3 flex-1'>
-                    <div className='flex items-center justify-between gap-2'>
+                  <div className='flex flex-col pt-3 font-dm-sans'>
+                    <div className='hidden'>
                       <span className='inline-flex min-w-0 max-w-[70%] items-center rounded-md bg-slate-100 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-700'>
                         <span className='truncate'>{item.category}</span>
                       </span>
                       {(item as any).language && (
-                        <span className={`inline-flex shrink-0 items-center rounded-md px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-white ${languageBadgeClassName((item as any).language)}`}>
+                        <span className='inline-flex shrink-0 items-center rounded-md bg-indigo-600 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-white'>
                           {(item as any).language}
                         </span>
                       )}
                     </div>
-                    <h3 className='text-[13px] font-bold text-slate-900 leading-snug line-clamp-2'>{item.title}</h3>
-                    <p className='text-[11px] text-slate-500 line-clamp-1'>{item.author}</p>
+                    <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{item.title}</h3>
+                    <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{item.author}</p>
 
                     {(item.rating ?? 0) > 0 && (
-                      <div className='flex items-center gap-0.5'>
-                        {Array.from({ length: 5 }).map((_, starIndex) => (
-                          starIndex < Math.round(item.rating || 0)
-                            ? <StarIconSolid key={starIndex} className='w-3 h-3 text-amber-400' />
-                            : <StarIcon key={starIndex} className='w-3 h-3 text-slate-200' />
-                        ))}
-                        <span className='text-[10px] text-slate-400 ml-1'>({item.reviews || 0})</span>
+                      <div className='mt-2 flex items-center gap-2'>
+                        <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
+                        <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+                        <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
                       </div>
                     )}
 
-                    {!isFreeItem(item) && item.price && (
-                      <div className='flex items-center gap-1.5'>
-                        <span className='text-sm font-bold text-slate-900'>{formatPrice(item.price)}</span>
-                        {item.originalPrice && (
-                          <span className='text-[11px] text-slate-400 line-through'>{formatPrice(item.originalPrice)}</span>
-                        )}
-                      </div>
+                    {!isFreeItem(item) && (
+                      <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+                        {hasUniquePlus ? 'Read ' : <>{formatPrice(item.price) ? `${formatPrice(item.price)} or ` : ''}</>}
+                        <span className='font-semibold text-[#16A34A]'>Free</span>
+                        {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
+                      </p>
                     )}
 
-                    <p className='text-[10px] text-slate-400'>{item.pages ? `${item.pages} pages` : item.duration || 'Audiobook'}</p>
-
-                    <div className='mt-auto pt-2 flex flex-col gap-1.5'>
+                    <div className='mt-3 flex flex-col gap-1.5'>
                       <button
                         type='button'
                         onClick={() => handleUniquePlusAction(item, getAudiobookHref(item))}
-                        className={`w-full py-2 text-white text-[10px] font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
+                        className={`flex h-10 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none text-white transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
                           isFreeItem(item)
                             ? 'bg-blue-600 hover:bg-blue-700'
                             : hasUniquePlus

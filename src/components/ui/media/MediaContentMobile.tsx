@@ -8,8 +8,6 @@ import {
   ChevronRightIcon,
   HandRaisedIcon,
   ArrowRightIcon,
-  PlusIcon,
-  StarIcon,
   FunnelIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -22,7 +20,6 @@ import CoverImageFrame from '../books/CoverImageFrame';
 import { generateBookSlug } from '@/utils/slugify';
 import type { Category } from '@/services/api/categoriesApi';
 import type { PublicBookListItem } from '@/types/publicBook';
-import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { libraryApi } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
@@ -59,23 +56,11 @@ interface MobileShowcaseCardProps {
 
 function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps) {
   const router = useRouter();
-  const { addToCart, isInCart } = useCart();
   const { openAuthModal, user } = useAuth();
   const [claiming, setClaiming] = useState(false);
-  const cartFormat =
-    item.type === 'Audiobook'
-      ? 'Audiobook'
-      : item.format?.includes('E-book')
-        ? 'E-book'
-        : item.format?.find((format) => format !== 'Audiobook') || item.format?.[0];
-  const itemId = item.id || item._id || item.title;
-  const inCart = isInCart(itemId, cartFormat);
   const isFreeItem =
     item.componentType === 'free-summaries' ||
     Number.parseFloat(String(item.price || '0').replace(/[^0-9.]/g, '')) <= 0;
-  const filledStars = Math.round(item.rating || 0);
-  const parsePrice = (value?: string | null) =>
-    Number.parseFloat(String(value || '0').replace(/[^0-9.]/g, '')) || 0;
   const formatPrice = (value?: string | null) => {
     if (!value) return null;
     return `₹${String(value).replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
@@ -129,12 +114,12 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
   if (item.componentType === 'free-summaries') {
     return (
       <div
-        className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300'
+        className='group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out'
         style={{
           animationDelay: `${index * 100}ms`,
         }}
       >
-        <Link href={href} className='relative h-[190px] w-full overflow-hidden bg-white'>
+        <Link href={href} className='relative h-[170px] w-full overflow-hidden rounded-lg bg-transparent shadow-[0_10px_24px_rgba(0,0,0,0.10)]'>
           {item.image ? (
             <Image
               src={item.image}
@@ -152,31 +137,31 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
           )}
         </Link>
 
-        <div className='flex flex-1 flex-col gap-2 p-2.5'>
+        <div className='flex flex-col pt-2 font-dm-sans'>
           <div>
             <Link href={href}>
-              <h3 className='truncate text-[12px] font-extrabold leading-snug text-[#141454]'>
+              <h3 className='truncate text-[13px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>
                 {item.title}
               </h3>
             </Link>
-            <p className='mt-1 line-clamp-1 text-[10px] font-semibold text-slate-400'>
+            <p className='mt-1 truncate text-[11px] font-normal text-[#757575] font-dm-sans'>
               {item.author}
             </p>
           </div>
 
           {(item.rating ?? 0) > 0 && (
-            <div className='flex items-center gap-1.5'>
-              <StarIconSolid className='h-3.5 w-3.5 text-blue-600' />
-              <span className='text-xs font-extrabold text-[#141454]'>{(item.rating || 0).toFixed(1)}</span>
-              <span className='text-[10px] font-semibold text-slate-400'>({item.reviews || 0})</span>
+            <div className='mt-1.5 flex items-center gap-1.5'>
+              <StarIconSolid className='h-4 w-4 text-[#5146F7]' />
+              <span className='text-[20px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+              <span className='text-[11px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
             </div>
           )}
 
-          <div className='mt-auto grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
+          <div className='mt-2 grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
             <button
               type='button'
               onClick={() => router.push(href)}
-              className='flex h-8 w-full items-center justify-center rounded-lg bg-blue-600 text-[10px] font-semibold text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70'
+              className='flex h-9 w-full items-center justify-center rounded-[10px] bg-blue-600 text-[10px] font-semibold leading-none text-white transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans'
             >
               Read Free
             </button>
@@ -197,7 +182,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
 
   return (
     <div
-      className='group flex h-full w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300'
+      className='group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out'
       style={{
         animationDelay: `${index * 100}ms`,
       }}
@@ -208,7 +193,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
         sizes='(max-width: 768px) 50vw, 200px'
         priority={index === 0}
         loading={index === 0 ? 'eager' : 'lazy'}
-        className='rounded-none border-0 bg-gradient-to-br from-white to-slate-50 shadow-none'
+        className='h-[170px] w-full rounded-lg border-0 bg-transparent shadow-[0_10px_24px_rgba(0,0,0,0.10)]'
         imageClassName='transition-transform duration-300'
         fit='cover'
         showBackdrop={false}
@@ -216,8 +201,8 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
         variant={item.type === 'Audiobook' ? 'audiobook' : 'book'}
       />
 
-      <div className='flex flex-1 flex-col gap-1.5 p-2.5'>
-        <div className='mb-0.5 flex items-start justify-between gap-1.5'>
+      <div className='flex flex-col pt-2 font-dm-sans'>
+        <div className='hidden'>
           <span className='min-w-0 truncate rounded-full border border-slate-200 bg-white px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider text-slate-800 shadow-sm'>
             {item.category}
           </span>
@@ -228,39 +213,34 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
           )}
         </div>
 
-        <h3 className='line-clamp-2 text-[12px] font-bold leading-snug text-slate-900'>
+        <h3 className='truncate text-[13px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>
           {item.title}
         </h3>
-        <p className='line-clamp-1 text-[10px] text-slate-500'>
-          By {item.author}
+        <p className='mt-1 truncate text-[11px] font-normal text-[#757575] font-dm-sans'>
+          {item.author}
         </p>
 
         {(item.rating ?? 0) > 0 && (
-          <div className='flex items-center gap-0.5'>
-            {Array.from({ length: 5 }).map((_, i) => (
-              i < filledStars
-                ? <StarIconSolid key={i} className='h-2.5 w-2.5 text-amber-400' />
-                : <StarIcon key={i} className='h-2.5 w-2.5 text-slate-200' />
-            ))}
-            <span className='ml-1 text-[9px] text-slate-400'>({item.reviews || 0})</span>
+          <div className='mt-1.5 flex items-center gap-1.5'>
+            <StarIconSolid className='h-4 w-4 text-[#5146F7]' />
+            <span className='text-[20px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(item.rating || 0).toFixed(1)}</span>
+            <span className='text-[11px] font-medium text-[#666666] font-dm-sans'>({item.reviews || 0})</span>
           </div>
         )}
 
         {!isFreeItem && (
-          <p className='truncate text-[10px] font-semibold text-[#1E1B4B]'>
+          <p className='mt-1.5 truncate text-[10px] font-semibold text-[#1E1B4B] font-dm-sans'>
             {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
             <span className='font-semibold text-[#16A34A]'>Free</span>
             {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
           </p>
         )}
 
-        <p className='text-[9px] text-slate-400'>{meta}</p>
-
-        <div className='mt-auto flex flex-col gap-1.5 pt-1.5'>
+        <div className='mt-2 flex flex-col gap-1.5'>
           <button
             type='button'
             onClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
-            className={`flex w-full items-center justify-center rounded-lg py-2 text-[10px] font-semibold text-white transition-all active:scale-95 ${
+            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none text-white transition-all active:scale-95 font-dm-sans ${
               isFreeItem
                 ? 'bg-blue-600'
                 : hasUniquePlus
