@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -381,6 +382,7 @@ interface SectionCarouselProps {
   itemLimit?: number;
   libraryItems?: LibraryItem[];
   cartFormat?: string;
+  headerLeading?: ReactNode;
 }
 
 function SectionCarousel({
@@ -395,6 +397,7 @@ function SectionCarousel({
   itemLimit = LANDING_ITEM_LIMIT,
   libraryItems = [],
   cartFormat,
+  headerLeading,
 }: SectionCarouselProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -408,9 +411,14 @@ function SectionCarousel({
     : 'flex flex-wrap items-start gap-x-5 gap-y-10';
 
   return (
-    <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 py-10 font-dm-sans'}>
-      <div className={isFreeSection ? 'flex items-center justify-between mb-6' : 'mb-10 flex items-center justify-between gap-8'}>
-        <div className='flex-1'>
+    <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 pb-8 pt-0 font-dm-sans'}>
+      <div className={isFreeSection ? 'flex items-center justify-between mb-6' : 'relative mb-6 flex items-center justify-between gap-8'}>
+        <div className={isFreeSection ? 'flex-1' : 'min-w-0 flex-1'}>
+          {!isFreeSection && headerLeading ? (
+            <div className='absolute left-[-56px] top-1/2 -translate-y-1/2'>
+              {headerLeading}
+            </div>
+          ) : null}
           <h3 className={isFreeSection ? 'text-2xl font-bold text-slate-950 mb-2 flex items-center font-syne tracking-tight' : 'text-[48px] font-bold leading-tight text-[#1E1B4B] font-dm-sans'}>
             {isFreeSection && <BookOpenIcon className='w-6 h-6 mr-3 text-indigo-600 shrink-0' />}
             <span>{title}</span>
@@ -658,7 +666,7 @@ export default function MediaContentDesktop({
 
               {/* ── Left Filter Sidebar ── */}
               <aside
-                className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? ' w-12' : 'w-49'
+                className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? 'hidden' : 'w-49'
                   }`}
               >
                 {isFilterSidebarCollapsed ? (
@@ -835,6 +843,17 @@ export default function MediaContentDesktop({
                     sectionKey='new-release-books'
                     itemLimit={landingItemLimit}
                     cartFormat={selectedCartFormat}
+                    headerLeading={isFilterSidebarCollapsed ? (
+                      <button
+                        onClick={() => setIsFilterSidebarCollapsed(false)}
+                        className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-100 hover:text-blue-700'
+                        type='button'
+                        aria-label='Show filters'
+                        title='Show filters'
+                      >
+                        <FunnelIcon className='h-5 w-5' />
+                      </button>
+                    ) : null}
                     cardHref={(b) => {
                       const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
                       // If exactly one format is selected, include it as a URL parameter
