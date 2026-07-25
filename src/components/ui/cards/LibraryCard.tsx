@@ -60,7 +60,7 @@ export function LibraryCardDesktop({
   return (
     <div className={`group flex h-auto w-[150px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
       <div
-        className='relative h-[222px] w-full overflow-hidden rounded-lg bg-transparent transition-shadow duration-[250ms] ease-out'
+        className='relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-transparent transition-shadow duration-[250ms] ease-out'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}

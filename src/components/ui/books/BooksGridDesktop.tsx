@@ -176,7 +176,7 @@ export default function BooksGridDesktop({
 
   return (
     <div className={`${className}`}>
-      <div className='grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] items-start gap-x-5 gap-y-10'>
+      <div className='grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10'>
         {items.map((item, index) => {
           const isAudiobook = item.type === 'Audiobook';
           const href = isAudiobook ? getAudiobookHref(item) : getBookHref(item);

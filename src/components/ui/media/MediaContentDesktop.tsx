@@ -408,7 +408,7 @@ function SectionCarousel({
     user.subscriptionPlan !== 'none';
   const gridClassName = isFreeSection
     ? 'flex flex-wrap items-start gap-x-5 gap-y-8'
-    : 'grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] items-start gap-x-5 gap-y-10 overflow-hidden';
+    : 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10 overflow-hidden';
 
   return (
     <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 pb-8 pt-0 font-dm-sans'}>

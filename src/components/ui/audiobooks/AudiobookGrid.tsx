@@ -137,7 +137,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
 
   return (
     <div className={currentTrack ? 'pb-24 lg:pb-28' : ''}>
-      <div className='grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] items-start gap-x-5 gap-y-10'>
+      <div className='grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10'>
         {items.map((item) => {
           const audioUrl = item.files?.audiobook?.url;
           const isCurrentItem = currentTrack?.id === `audiobook-${item.id}`;
