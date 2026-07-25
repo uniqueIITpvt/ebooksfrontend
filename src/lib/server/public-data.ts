@@ -229,21 +229,21 @@ export const getHomePageData = cache(async (): Promise<PublicHomeData> => {
         })
       : Promise.resolve([]),
     fetchApiData<PublicBookListItem[]>('/books', {
-      query: { view: 'listing', type: 'Books', excludeComponentType: 'free-summaries', limit: 5 },
+      query: { view: 'listing', type: 'Books', excludeComponentType: 'free-summaries', limit: 6 },
       revalidate: 0,
     }),
     fetchApiData<PublicBookListItem[]>('/audiobooks', {
-      query: { view: 'listing', limit: 5 },
+      query: { view: 'listing', limit: 6 },
     }),
     fetchApiData<PublicBookListItem[]>('/books', {
       query: { view: 'listing', componentType: 'free-summaries', limit: 6 },
     }),
     fetchApiData<PublicBookListItem[]>('/books', {
-      query: { view: 'listing', componentType: 'trending-books', limit: 5 },
+      query: { view: 'listing', componentType: 'trending-books', limit: 6 },
       revalidate: 0,
     }),
     fetchApiData<PublicBookListItem[]>('/books', {
-      query: { view: 'listing', componentType: 'premium-summaries', limit: 5 },
+      query: { view: 'listing', componentType: 'premium-summaries', limit: 6 },
     }),
     fetchApiData<Category[]>('/categories', {
       query: { includeInactive: false, sortBy: 'sortOrder' },

@@ -30,7 +30,7 @@ import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 
 const LANDING_ITEM_LIMIT = 5;
-const LANDING_COLLAPSED_ITEM_LIMIT = 5;
+const LANDING_COLLAPSED_ITEM_LIMIT = 6;
 
 // Optimize Cloudinary image URLs for faster loading
 const getOptimizedImageUrl = (url?: string | null, width: number = 400): string | undefined => {
