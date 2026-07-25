@@ -60,7 +60,7 @@ export function LibraryCardDesktop({
   return (
     <div className={`group mx-auto flex h-auto w-[200px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
       <div
-        className='relative h-[255px] w-[180px] overflow-hidden rounded-lg bg-white p-2 shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'
+        className='relative h-[255px] w-[180px] overflow-hidden rounded-lg bg-transparent p-2 transition-shadow duration-[250ms] ease-out'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -162,7 +162,7 @@ export function LibraryCardMobile({
   return (
     <div className={`group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out ${className}`}>
       <div
-        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-white p-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.10)]'
+        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-transparent p-1.5'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
