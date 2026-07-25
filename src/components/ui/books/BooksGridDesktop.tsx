@@ -46,7 +46,6 @@ export default function BooksGridDesktop({
   items,
   className = '',
   onAudiobookSelect,
-  columns = 4,
 }: BooksGridDesktopProps) {
   const router = useRouter();
   const { openAuthModal, refreshUser, user } = useAuth();
@@ -177,11 +176,7 @@ export default function BooksGridDesktop({
 
   return (
     <div className={`${className}`}>
-      <div
-        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 ${
-          columns === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4'
-        } gap-x-6 gap-y-10`}
-      >
+      <div className='flex flex-wrap items-start gap-x-5 gap-y-10'>
         {items.map((item, index) => {
           const isAudiobook = item.type === 'Audiobook';
           const href = isAudiobook ? getAudiobookHref(item) : getBookHref(item);

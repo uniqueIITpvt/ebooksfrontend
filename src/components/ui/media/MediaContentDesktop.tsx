@@ -405,7 +405,7 @@ function SectionCarousel({
     user.subscriptionPlan !== 'none';
   const gridClassName = isFreeSection
     ? 'flex flex-wrap items-start gap-x-5 gap-y-8'
-    : 'grid grid-cols-1 justify-items-start gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+    : 'flex flex-wrap items-start gap-x-5 gap-y-10';
 
   return (
     <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 py-10 font-dm-sans'}>
@@ -658,7 +658,7 @@ export default function MediaContentDesktop({
 
               {/* ── Left Filter Sidebar ── */}
               <aside
-                className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? '-mt-24 w-12' : 'w-49'
+                className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? ' w-12' : 'w-49'
                   }`}
               >
                 {isFilterSidebarCollapsed ? (
@@ -674,7 +674,7 @@ export default function MediaContentDesktop({
                 ) : (
                   <>
                     {/* Format quick-filter (horizontal chips above sidebar panel) */}
-                    {uniqueFormats.length > 0 && (
+                    {/* {uniqueFormats.length > 0 && (
                       <div>
                         <p className='text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-2'>Format</p>
                         <div className='flex flex-nowrap gap-1.5'>
@@ -698,7 +698,7 @@ export default function MediaContentDesktop({
                           ))}
                         </div>
                       </div>
-                    )}
+                    )} */}
 
                     <div className='mt-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
                       {/* Header */}

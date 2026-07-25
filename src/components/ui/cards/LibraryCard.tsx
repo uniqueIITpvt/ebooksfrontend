@@ -96,7 +96,7 @@ export function LibraryCardDesktop({
         {(rating ?? 0) > 0 && (
           <div className='mt-1.5 flex items-center gap-1.5'>
             <StarIconSolid className='h-4 w-4 text-[#5146F7]' />
-            <span className='text-[20px] font-semibold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
+            <span className='font-semibold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
             <span className='text-[12px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
           </div>
         )}
@@ -198,7 +198,7 @@ export function LibraryCardMobile({
         {(rating ?? 0) > 0 && (
           <div className='mt-1 flex items-center gap-1.5'>
             <StarIconSolid className='h-3.5 w-3.5 text-[#5146F7]' />
-            <span className='text-[16px] font-semibold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
+            <span className='text-[10px] leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
             <span className='text-[10px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
           </div>
         )}
