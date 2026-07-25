@@ -58,9 +58,9 @@ export function LibraryCardDesktop({
   className = '',
 }: BaseLibraryCardProps) {
   return (
-    <div className={`group mx-auto flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
+    <div className={`group mx-auto flex h-auto w-[200px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
       <div
-        className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'
+        className='relative h-[255px] w-[180px] overflow-hidden rounded-lg bg-white p-2 shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -75,12 +75,12 @@ export function LibraryCardDesktop({
         <CoverImageFrame
           src={image || undefined}
           alt={title}
-          sizes='190px'
+          sizes='180px'
           priority={priority}
           loading={loading}
-          className='h-[285px] w-[190px] rounded-lg border-0 bg-transparent shadow-none'
+          className='h-full w-full rounded-md border-0 bg-transparent shadow-none'
           imageClassName='transition-transform duration-[250ms] ease-out'
-          fit='cover'
+          fit='contain'
           showBackdrop={false}
           fixedAspectRatio={2 / 3}
           variant={coverVariant}
@@ -89,29 +89,29 @@ export function LibraryCardDesktop({
         </CoverImageFrame>
       </div>
 
-      <div className='flex flex-col pt-3 font-dm-sans'>
-        <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
-        <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{author}</p>
+      <div className='flex flex-col pt-2.5 font-dm-sans'>
+        <h3 className='truncate text-[15px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
+        <p className='mt-1 truncate text-[12px] font-normal text-[#757575] font-dm-sans'>{author}</p>
 
         {(rating ?? 0) > 0 && (
-          <div className='mt-2 flex items-center gap-2'>
-            <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
-            <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
-            <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
+          <div className='mt-1.5 flex items-center gap-1.5'>
+            <StarIconSolid className='h-4 w-4 text-[#5146F7]' />
+            <span className='text-[20px] font-semibold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
+            <span className='text-[12px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
           </div>
         )}
 
         {priceLine ? (
-          <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
+          <p className='mt-1.5 truncate text-[12px] font-semibold text-[#1E1B4B] font-dm-sans'>
             {priceLine}
           </p>
         ) : null}
 
-        <div className='mt-3 grid grid-cols-[minmax(0,1fr)_44px] gap-3'>
+        <div className='mt-2.5 grid grid-cols-[minmax(0,1fr)_40px] gap-2.5'>
           <button
             type='button'
             onClick={onPrimaryClick}
-            className={`flex h-10 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
+            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
           >
             {primaryLabel}
           </button>
@@ -123,7 +123,7 @@ export function LibraryCardDesktop({
               onSaveClick();
             }}
             disabled={saveDisabled}
-            className={`flex h-10 w-10 items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+            className={`flex h-9 w-9 items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
               isSaved
                 ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
                 : 'border-[#E5E7EB] bg-white text-[#5146F7] hover:border-[#6D5CF6] hover:bg-violet-50'
@@ -162,7 +162,7 @@ export function LibraryCardMobile({
   return (
     <div className={`group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out ${className}`}>
       <div
-        className='relative h-[170px] w-full overflow-hidden rounded-lg bg-transparent shadow-[0_10px_24px_rgba(0,0,0,0.10)]'
+        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-white p-1.5 shadow-[0_10px_24px_rgba(0,0,0,0.10)]'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -180,9 +180,9 @@ export function LibraryCardMobile({
           sizes='(max-width: 768px) 50vw, 200px'
           priority={priority}
           loading={loading}
-          className='h-[170px] w-full rounded-lg border-0 bg-transparent shadow-none'
+          className='h-full w-full rounded-md border-0 bg-transparent shadow-none'
           imageClassName='transition-transform duration-300'
-          fit='cover'
+          fit='contain'
           showBackdrop={false}
           fixedAspectRatio={2 / 3}
           variant={coverVariant}
@@ -192,28 +192,28 @@ export function LibraryCardMobile({
       </div>
 
       <div className='flex flex-col pt-2 font-dm-sans'>
-        <h3 className='truncate text-[13px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
-        <p className='mt-1 truncate text-[11px] font-normal text-[#757575] font-dm-sans'>{author}</p>
+        <h3 className='truncate text-[12px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
+        <p className='mt-0.5 truncate text-[10px] font-normal text-[#757575] font-dm-sans'>{author}</p>
 
         {(rating ?? 0) > 0 && (
-          <div className='mt-1.5 flex items-center gap-1.5'>
-            <StarIconSolid className='h-4 w-4 text-[#5146F7]' />
-            <span className='text-[20px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
-            <span className='text-[11px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
+          <div className='mt-1 flex items-center gap-1.5'>
+            <StarIconSolid className='h-3.5 w-3.5 text-[#5146F7]' />
+            <span className='text-[16px] font-semibold leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
+            <span className='text-[10px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
           </div>
         )}
 
         {priceLine ? (
-          <p className='mt-1.5 truncate text-[10px] font-semibold text-[#1E1B4B] font-dm-sans'>
+          <p className='mt-1 truncate text-[10px] font-semibold text-[#1E1B4B] font-dm-sans'>
             {priceLine}
           </p>
         ) : null}
 
-        <div className='mt-2 grid grid-cols-[minmax(0,1fr)_34px] gap-2'>
+        <div className='mt-1.5 grid grid-cols-[minmax(0,1fr)_32px] gap-2'>
           <button
             type='button'
             onClick={onPrimaryClick}
-            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none transition-all active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
+            className={`flex h-8 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none transition-all active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
           >
             {primaryLabel}
           </button>
@@ -225,7 +225,7 @@ export function LibraryCardMobile({
               onSaveClick();
             }}
             disabled={saveDisabled}
-            className={`flex h-9 w-9 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+            className={`flex h-8 w-8 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
               isSaved
                 ? 'border-yellow-400 bg-yellow-400 text-white'
                 : 'border-slate-200 bg-white text-blue-600'
