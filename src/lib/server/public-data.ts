@@ -237,6 +237,7 @@ export const getHomePageData = cache(async (): Promise<PublicHomeData> => {
     }),
     fetchApiData<PublicBookListItem[]>('/books', {
       query: { view: 'listing', componentType: 'free-summaries', limit: 6 },
+      revalidate: 0,
     }),
     fetchApiData<PublicBookListItem[]>('/books', {
       query: { view: 'listing', componentType: 'trending-books', limit: 6 },
