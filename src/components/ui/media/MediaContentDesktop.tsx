@@ -29,7 +29,7 @@ import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 
-const LANDING_ITEM_LIMIT = 4;
+const LANDING_ITEM_LIMIT = 5;
 const LANDING_COLLAPSED_ITEM_LIMIT = 5;
 
 // Optimize Cloudinary image URLs for faster loading
@@ -408,7 +408,7 @@ function SectionCarousel({
     user.subscriptionPlan !== 'none';
   const gridClassName = isFreeSection
     ? 'flex flex-wrap items-start gap-x-5 gap-y-8'
-    : 'flex flex-wrap items-start gap-x-5 gap-y-10';
+    : 'grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] items-start gap-x-5 gap-y-10 overflow-hidden';
 
   return (
     <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 pb-8 pt-0 font-dm-sans'}>
@@ -429,10 +429,8 @@ function SectionCarousel({
           onClick={() => router.push(seeMoreHref)}
           variant='outline'
           size='sm'
-          className={isFreeSection
-            ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 hover:border-indigo-700 hover:text-white transition-all text-xs font-dm-sans shadow-sm'
-            : 'h-12 rounded-[14px] border-[1.5px] border-[#6D5CF6] bg-white px-7 text-[16px] font-semibold text-[#6D5CF6] shadow-none transition-colors duration-200 hover:bg-[#6D5CF6] hover:text-white hover:border-[#6D5CF6] font-dm-sans'}
-          rightIcon={<ChevronRightIcon className={isFreeSection ? 'w-3 h-3' : 'h-4 w-4'} />}
+          className='bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 hover:border-indigo-700 hover:text-white transition-all text-xs font-dm-sans shadow-sm'
+          rightIcon={<ChevronRightIcon className='w-3 h-3' />}
         >
           See More
         </Button>

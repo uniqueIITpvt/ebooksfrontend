@@ -468,7 +468,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
           </div>
 
           <div className="flex-1 min-w-0 lg:pt-6">
-            <div className={variant === 'landing' ? 'flex flex-wrap items-start gap-x-5 gap-y-10' : `grid ${variant === 'glass' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-6`}>
+            <div className={variant === 'landing' ? 'grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] items-start gap-x-5 gap-y-10' : `grid ${variant === 'glass' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-6`}>
               {filteredItems.length === 0 ? (
                 <div className='col-span-full text-center py-12'>
                   <p className='text-slate-600'>{emptyMessage}</p>

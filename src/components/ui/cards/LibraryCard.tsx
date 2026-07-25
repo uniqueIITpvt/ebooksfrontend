@@ -58,9 +58,9 @@ export function LibraryCardDesktop({
   className = '',
 }: BaseLibraryCardProps) {
   return (
-    <div className={`group flex h-auto w-[170px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
+    <div className={`group flex h-auto w-[150px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
       <div
-        className='relative h-[245px] w-[170px] overflow-hidden rounded-lg bg-transparent p-1.5 transition-shadow duration-[250ms] ease-out'
+        className='relative h-[222px] w-full overflow-hidden rounded-lg bg-transparent transition-shadow duration-[250ms] ease-out'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -75,7 +75,7 @@ export function LibraryCardDesktop({
         <CoverImageFrame
           src={image || undefined}
           alt={title}
-          sizes='170px'
+          sizes='150px'
           priority={priority}
           loading={loading}
           className='h-full w-full rounded-md border-0 bg-transparent shadow-none'
@@ -90,8 +90,8 @@ export function LibraryCardDesktop({
       </div>
 
       <div className='flex flex-col pt-2.5 font-dm-sans'>
-        <h3 className='truncate text-[14px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
-        <p className='mt-1 truncate text-[12px] font-normal text-[#757575] font-dm-sans'>{author}</p>
+        <h3 className='truncate text-[13px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
+        <p className='mt-1 truncate text-[11px] font-normal text-[#757575] font-dm-sans'>{author}</p>
 
         {(rating ?? 0) > 0 && (
           <div className='mt-1.5 flex items-center gap-1.5'>
@@ -102,16 +102,16 @@ export function LibraryCardDesktop({
         )}
 
         {priceLine ? (
-          <p className='mt-1.5 truncate text-[12px] font-semibold text-[#1E1B4B] font-dm-sans'>
+          <p className='mt-1.5 truncate text-[11px] font-semibold text-[#1E1B4B] font-dm-sans'>
             {priceLine}
           </p>
         ) : null}
 
-        <div className='mt-2.5 grid grid-cols-[minmax(0,1fr)_36px] gap-2'>
+        <div className='mt-2.5 grid grid-cols-[minmax(0,1fr)_32px] gap-1.5'>
           <button
             type='button'
             onClick={onPrimaryClick}
-            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[11px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
+            className={`flex h-8 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
           >
             {primaryLabel}
           </button>
@@ -123,7 +123,7 @@ export function LibraryCardDesktop({
               onSaveClick();
             }}
             disabled={saveDisabled}
-            className={`flex h-9 w-9 items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+            className={`flex h-8 w-8 items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
               isSaved
                 ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
                 : 'border-[#E5E7EB] bg-white text-[#5146F7] hover:border-[#6D5CF6] hover:bg-violet-50'
@@ -162,7 +162,7 @@ export function LibraryCardMobile({
   return (
     <div className={`group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out ${className}`}>
       <div
-        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-transparent p-1.5'
+        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-transparent'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
