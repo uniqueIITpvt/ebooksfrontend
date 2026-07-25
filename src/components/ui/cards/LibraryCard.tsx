@@ -58,9 +58,9 @@ export function LibraryCardDesktop({
   className = '',
 }: BaseLibraryCardProps) {
   return (
-    <div className={`group mx-auto flex h-auto w-[200px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
+    <div className={`group flex h-auto w-[170px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5 ${className}`}>
       <div
-        className='relative h-[255px] w-[180px] overflow-hidden rounded-lg bg-transparent p-2 transition-shadow duration-[250ms] ease-out'
+        className='relative h-[245px] w-[170px] overflow-hidden rounded-lg bg-transparent p-1.5 transition-shadow duration-[250ms] ease-out'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -75,7 +75,7 @@ export function LibraryCardDesktop({
         <CoverImageFrame
           src={image || undefined}
           alt={title}
-          sizes='180px'
+          sizes='170px'
           priority={priority}
           loading={loading}
           className='h-full w-full rounded-md border-0 bg-transparent shadow-none'
@@ -90,7 +90,7 @@ export function LibraryCardDesktop({
       </div>
 
       <div className='flex flex-col pt-2.5 font-dm-sans'>
-        <h3 className='truncate text-[15px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
+        <h3 className='truncate text-[14px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
         <p className='mt-1 truncate text-[12px] font-normal text-[#757575] font-dm-sans'>{author}</p>
 
         {(rating ?? 0) > 0 && (
@@ -107,11 +107,11 @@ export function LibraryCardDesktop({
           </p>
         ) : null}
 
-        <div className='mt-2.5 grid grid-cols-[minmax(0,1fr)_40px] gap-2.5'>
+        <div className='mt-2.5 grid grid-cols-[minmax(0,1fr)_36px] gap-2'>
           <button
             type='button'
             onClick={onPrimaryClick}
-            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
+            className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[11px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
           >
             {primaryLabel}
           </button>

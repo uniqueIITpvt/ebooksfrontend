@@ -403,14 +403,8 @@ function SectionCarousel({
   const hasUniquePlus =
     !!user?.subscriptionPlan &&
     user.subscriptionPlan !== 'none';
-  const gridColumns =
-    itemLimit === 6
-      ? 'lg:grid-cols-3 xl:grid-cols-6'
-      : itemLimit === 5
-        ? 'xl:grid-cols-5'
-        : 'xl:grid-cols-4';
   const gridClassName = isFreeSection
-    ? `grid grid-cols-1 sm:grid-cols-2 ${gridColumns} gap-4`
+    ? 'flex flex-wrap items-start gap-x-5 gap-y-8'
     : 'grid grid-cols-1 justify-items-start gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
 
   return (
