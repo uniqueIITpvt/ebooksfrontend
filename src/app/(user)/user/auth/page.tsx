@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { API_CONFIG } from '@/config/api';
+import { hasActiveSubscription } from '@/lib/subscription';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -92,9 +93,7 @@ function AuthContent() {
   }, [signupOtpCooldown]);
 
   const getPostLoginReturnUrl = (target: string, signedInUser: NonNullable<Awaited<ReturnType<typeof login>>['user']>) => {
-    const hasUniquePlus =
-      !!signedInUser?.subscriptionPlan &&
-      signedInUser.subscriptionPlan !== 'none';
+    const hasUniquePlus = hasActiveSubscription(signedInUser);
 
     const decodedTarget = decodeURIComponent(target);
     if (!hasUniquePlus || !decodedTarget.startsWith('/subscription')) {

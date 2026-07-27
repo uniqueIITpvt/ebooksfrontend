@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
 import { authApi, type SavedBook } from '@/services/api/authApi';
 import { generateBookSlug } from '@/utils/slugify';
+import { formatSubscriptionPlanLabel, hasActiveSubscription } from '@/lib/subscription';
 
 export default function UserProfilePage() {
   const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
@@ -38,6 +39,7 @@ export default function UserProfilePage() {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
+  const hasUserActiveSubscription = hasActiveSubscription(user);
   const [otpMessage, setOtpMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [otpSent, setOtpSent] = useState(false);
 
@@ -327,7 +329,7 @@ export default function UserProfilePage() {
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
                     {user.role}
                   </span>
-                  {user.subscriptionPlan && user.subscriptionPlan !== 'none' && (
+                  {hasUserActiveSubscription && (
                     <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium capitalize">
                       {user.subscriptionPlan} Plan
                     </span>
@@ -340,7 +342,7 @@ export default function UserProfilePage() {
                   href="/subscription"
                   className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  {user.subscriptionPlan && user.subscriptionPlan !== 'none' ? 'Manage Plan' : 'Subscribe'}
+                  {hasUserActiveSubscription ? 'Manage Plan' : 'Subscribe'}
                 </Link>
                 <button
                   onClick={() => logout()}
@@ -432,7 +434,7 @@ export default function UserProfilePage() {
                   </div>
                   <p className="text-sm text-gray-500 mb-1">Subscription</p>
                   <p className="font-semibold text-gray-900 capitalize">
-                    {user.subscriptionPlan && user.subscriptionPlan !== 'none' 
+                    {hasUserActiveSubscription
                       ? user.subscriptionPlan 
                       : 'Free'}
                   </p>
@@ -444,9 +446,9 @@ export default function UserProfilePage() {
                   </div>
                   <p className="text-sm text-gray-500 mb-1">Books Access</p>
                   <p className="font-semibold text-gray-900">
-                    {user.subscriptionPlan === 'pro' ? 'Unlimited' : 
-                     user.subscriptionPlan === 'premium' ? 'Premium + Standard' :
-                     user.subscriptionPlan === 'basic' ? 'Standard Only' : 'Limited'}
+                    {hasUserActiveSubscription && user.subscriptionPlan === 'pro' ? 'Unlimited' :
+                     hasUserActiveSubscription && user.subscriptionPlan === 'premium' ? 'Premium + Standard' :
+                     hasUserActiveSubscription && user.subscriptionPlan === 'basic' ? 'Standard Only' : 'Limited'}
                   </p>
                 </div>
 
@@ -475,14 +477,19 @@ export default function UserProfilePage() {
             {activeTab === 'subscription' && (
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Current Subscription</h3>
-                {user.subscriptionPlan && user.subscriptionPlan !== 'none' ? (
+                {hasUserActiveSubscription ? (
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="inline-block px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold capitalize mb-2">
                           {user.subscriptionPlan}
                         </span>
-                        <p className="text-gray-600">Status: <span className="font-semibold text-green-600 capitalize">{user.subscriptionStatus}</span></p>
+                        <p className="text-gray-600">
+                          Status:{' '}
+                          <span className="font-semibold text-green-600">
+                            {formatSubscriptionPlanLabel(user.subscriptionPlan)}
+                          </span>
+                        </p>
                         {user.subscriptionEndDate && (
                           <p className="text-gray-600 mt-1">
                             Valid until: {new Date(user.subscriptionEndDate).toLocaleDateString('en-US', { 

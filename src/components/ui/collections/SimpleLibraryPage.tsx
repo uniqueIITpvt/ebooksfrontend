@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/primitives/Button';
 import { generateBookSlug } from '@/utils/slugify';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop, LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
+import { hasActiveSubscription } from '@/lib/subscription';
 import {
   ArrowLeftIcon,
   BookmarkIcon as BookmarkIconOutline,
@@ -292,9 +293,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
       (item.price ? (Number.parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0) <= 0 : false);
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
-    const hasUniquePlus =
-      !!user?.subscriptionPlan &&
-      user.subscriptionPlan !== 'none';
+    const hasUniquePlus = hasActiveSubscription(user);
     const keepForeverTarget = getHref(item);
     const displayPrice = formatDisplayPrice(item.price);
     const priceLine = isFreeItem ? null : (

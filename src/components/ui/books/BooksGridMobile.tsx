@@ -13,6 +13,7 @@ import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContex
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -47,9 +48,7 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
 
   useEffect(() => {
     // Inject blob animation styles only once

@@ -28,6 +28,7 @@ import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 const LANDING_ITEM_LIMIT = 5;
 const LANDING_COLLAPSED_ITEM_LIMIT = 6;
@@ -94,9 +95,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     return item.itemType === 'ebook';
   });
   const claimedReadTarget = serverLibraryItem?.redirectTarget || null;
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
   const checkoutId = book.id || book._id || itemKey;
   const checkoutSlug = book.slug || itemKey;
   const keepForeverTarget = isAudiobook
@@ -403,9 +402,7 @@ function SectionCarousel({
   const { user } = useAuth();
   const displayItems = items.slice(0, itemLimit);
   const isFreeSection = subLabel?.toLowerCase() === 'free';
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
   const gridClassName = isFreeSection
     ? 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-8'
     : 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10 overflow-hidden';

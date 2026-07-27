@@ -6,6 +6,7 @@ import { authApi } from "@/services/api/authApi";
 import { useRouter } from "next/navigation";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/primitives/Button";
+import { getActiveSubscriptionPlan, hasActiveSubscription } from "@/lib/subscription";
 
 const plans = [
   {
@@ -57,9 +58,8 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [returnTo, setReturnTo] = useState('');
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
+  const activePlan = getActiveSubscriptionPlan(user);
 
   useEffect(() => {
     setReturnTo(new URLSearchParams(window.location.search).get('returnTo') || '');
@@ -78,9 +78,8 @@ export default function SubscriptionPage() {
 
   const handleSubscribe = async (planKey: string) => {
     if (
-      user?.subscriptionStatus === 'active' &&
-      user.subscriptionPlan &&
-      PLAN_RANK[planKey] < PLAN_RANK[user.subscriptionPlan]
+      activePlan &&
+      PLAN_RANK[planKey] < PLAN_RANK[activePlan]
     ) {
       return;
     }
@@ -113,11 +112,9 @@ export default function SubscriptionPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan) => {
-            const isCurrentPlan = user?.subscriptionPlan === plan.planKey;
+            const isCurrentPlan = activePlan === plan.planKey;
             const hasHigherActivePlan =
-              user?.subscriptionStatus === 'active' &&
-              !!user.subscriptionPlan &&
-              PLAN_RANK[plan.planKey] < PLAN_RANK[user.subscriptionPlan];
+              !!activePlan && PLAN_RANK[plan.planKey] < PLAN_RANK[activePlan];
 
             return (
             <div
@@ -165,7 +162,7 @@ export default function SubscriptionPage() {
                 disabled={isCurrentPlan || hasHigherActivePlan}
               >
                 {isCurrentPlan
-                  ? "Current Plan"
+                  ? plan.name
                   : hasHigherActivePlan
                   ? "Available After Current Plan"
                   : `Get Started with ${plan.name}`}

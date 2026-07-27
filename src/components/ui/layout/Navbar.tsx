@@ -29,8 +29,14 @@ import MobileSearch from '../primitives/MobileSearch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { Crown } from 'lucide-react';
+import {
+  formatSubscriptionPlanLabel,
+  getActiveSubscriptionPlan,
+  hasActiveSubscription,
+} from '@/lib/subscription';
 
 const API_URL = API_CONFIG.API_BASE_URL;
+const NAVBAR_LOGO_FALLBACK = '/TechIITlogo-transparent.png';
 
 // Login Button Component
 function LoginButton() {
@@ -57,6 +63,8 @@ function LoginButton() {
 
   // Only show user menu for regular users, not admins (admins should use admin dashboard)
   if (isAuthenticated && user && user.role === 'user') {
+    const activePlan = getActiveSubscriptionPlan(user);
+
     return (
       <div className="relative" ref={dropdownRef}>
         <button
@@ -83,10 +91,10 @@ function LoginButton() {
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
             <div className="px-4 py-2 border-b border-gray-100">
               <p className="font-semibold text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
-              {user.subscriptionPlan && user.subscriptionPlan !== 'none' && (
+              <p className="max-w-full truncate text-xs text-gray-500" title={user.email}>{user.email}</p>
+              {activePlan && (
                 <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  {user.subscriptionPlan.charAt(0).toUpperCase() + user.subscriptionPlan.slice(1)}
+                  {formatSubscriptionPlanLabel(activePlan)}
                 </span>
               )}
             </div>
@@ -235,6 +243,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
   const { totalItems } = useCart();
   const { user, openAuthModal } = useAuth();
   const router = useRouter();
+  const [logoSrc, setLogoSrc] = useState(siteLogo || NAVBAR_LOGO_FALLBACK);
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -252,6 +261,11 @@ export default function Navbar({ siteLogo }: NavbarProps) {
   const isBooksRoute = pathname === '/books' && !isAudiobooksRoute;
   const savedBooksCount = user?.savedBooks?.length || 0;
   const SavedBooksIcon = savedBooksCount > 0 ? BookmarkSolidIcon : BookmarkIcon;
+  const hasPremiumAccess = hasActiveSubscription(user);
+
+  useEffect(() => {
+    setLogoSrc(siteLogo || NAVBAR_LOGO_FALLBACK);
+  }, [siteLogo]);
 
   const isNavItemActive = (item: NavItem) => {
     if (item.name === 'Audiobooks') return isAudiobooksRoute;
@@ -335,12 +349,13 @@ export default function Navbar({ siteLogo }: NavbarProps) {
             <div className='flex-shrink-0 flex items-center'>
               <Link href='/'>
                 <Image
-                  src={siteLogo || '/file.svg'}
+                  src={logoSrc}
                   alt='TechUniqueIIT Research Center'
                   width={240}
                   height={120}
                   loading='eager'
                   className='h-16 sm:h-20 w-auto object-contain'
+                  onError={() => setLogoSrc(NAVBAR_LOGO_FALLBACK)}
                 />
               </Link>
             </div>
@@ -539,7 +554,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                 className='hidden items-center gap-1.5 whitespace-nowrap px-2 py-2 text-sm font-bold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:inline-flex'
               >
                 <Crown className='h-5 w-5 flex-shrink-0 fill-orange-500 text-orange-500' />
-                <span>Go Premium</span>
+                <span>{hasPremiumAccess ? 'Upgrade' : 'Go Premium'}</span>
               </Link>
 
               {/* Login/User Button */}

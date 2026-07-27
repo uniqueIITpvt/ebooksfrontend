@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, type User } from '@/services/api/authApi';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 const parseUser = (value: string | null): User | null => {
   if (!value) return null;
@@ -17,9 +18,7 @@ const parseUser = (value: string | null): User | null => {
 };
 
 const getPostLoginReturnUrl = (returnUrl: string, user: User) => {
-  const hasUniquePlus =
-    !!user.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
 
   if (!hasUniquePlus || !returnUrl.startsWith('/subscription')) {
     return returnUrl.startsWith('/') ? returnUrl : '/';

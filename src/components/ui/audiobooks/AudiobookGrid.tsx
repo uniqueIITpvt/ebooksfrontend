@@ -16,6 +16,7 @@ import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContex
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 interface AudiobookGridProps {
   items: PublicBookListItem[];
@@ -27,9 +28,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
 
   const handleTogglePreview = async (item: PublicBookListItem) => {
     const audioUrl = item.files?.audiobook?.url;

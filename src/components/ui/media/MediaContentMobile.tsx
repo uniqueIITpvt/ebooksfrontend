@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { libraryApi } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
 import { LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -67,9 +68,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
     return `₹${String(value).replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
   };
   const displayPrice = formatPrice(item.price);
-  const hasUniquePlus =
-    !!user?.subscriptionPlan &&
-    user.subscriptionPlan !== 'none';
+  const hasUniquePlus = hasActiveSubscription(user);
   const handleUniquePlusAction = () => {
     if (!user) {
       const returnTo =
