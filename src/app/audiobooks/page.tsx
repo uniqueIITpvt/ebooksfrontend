@@ -8,8 +8,6 @@ import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
 import BooksHero, { type BooksHeroBanner } from '@/components/ui/books/BooksHero';
 import {
-  AUDIOBOOK_SORT_OPTIONS,
-  isAudiobookSortOption,
   parsePriceValue,
   type AudiobookSortOption,
 } from '@/lib/audiobooks';
@@ -235,6 +233,8 @@ export default function AudiobooksPage() {
               formats={formats}
               formatCounts={formatCounts}
               typeCount={audiobooks.length}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
               resultsCount={sortedItems.length}
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
@@ -247,57 +247,14 @@ export default function AudiobooksPage() {
           </div>
 
           <div className='mt-6 min-w-0 flex-1 lg:mt-0'>
-            <div className='mb-6 rounded-[28px] border border-gray-200 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)] sm:flex sm:items-center sm:justify-between sm:gap-6'>
-              <div>
-                <div className='text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500'>
-                  Browsing
-                </div>
-                <h2 className='mt-1 font-serif text-2xl text-slate-900'>
-                  New Release Audiobooks
-                </h2>
-                <p className='mt-1 text-sm text-slate-500'>
-                  {sortedItems.length} result{sortedItems.length === 1 ? '' : 's'} with current filters applied.
-                </p>
-              </div>
-
-              <div className='mt-4 flex flex-wrap items-center gap-3 sm:mt-0 sm:justify-end'>
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className='inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-slate-700 transition hover:border-blue-500 hover:text-slate-900 lg:hidden'
-                  type='button'
-                >
-                  <FunnelIcon className='h-4 w-4 text-blue-600' />
-                  Filters
-                </button>
-
-                <label className='flex items-center gap-3 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-600'>
-                  <span className='text-xs font-semibold uppercase tracking-[0.22em] text-slate-500'>
-                    Sort
-                  </span>
-                  <select
-                    value={sortBy}
-                    onChange={(event) =>
-                      setSortBy(
-                        isAudiobookSortOption(event.target.value)
-                          ? event.target.value
-                          : DEFAULT_SORT
-                      )
-                    }
-                    className='bg-transparent font-medium text-slate-900 outline-none'
-                  >
-                    {AUDIOBOOK_SORT_OPTIONS.map((option) => (
-                      <option
-                        key={option.value}
-                        value={option.value}
-                        className='bg-white text-slate-900'
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className='mb-4 inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-slate-700 transition hover:border-blue-500 hover:text-slate-900 lg:hidden'
+              type='button'
+            >
+              <FunnelIcon className='h-4 w-4 text-blue-600' />
+              Filters
+            </button>
 
             <AudiobookGrid items={sortedItems} />
           </div>

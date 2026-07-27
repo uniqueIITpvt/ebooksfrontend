@@ -5,6 +5,11 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import {
+  AUDIOBOOK_SORT_OPTIONS,
+  isAudiobookSortOption,
+  type AudiobookSortOption,
+} from '@/lib/audiobooks';
 
 interface AudiobookFiltersProps {
   searchTerm: string;
@@ -22,6 +27,8 @@ interface AudiobookFiltersProps {
   formats: string[];
   formatCounts: Record<string, number>;
   typeCount?: number;
+  sortBy?: AudiobookSortOption;
+  setSortBy?: (sort: AudiobookSortOption) => void;
   resultsCount: number;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
@@ -79,6 +86,8 @@ export default function AudiobookFilters({
   formats,
   formatCounts,
   typeCount = 0,
+  sortBy,
+  setSortBy,
   resultsCount,
   isSidebarOpen,
   setIsSidebarOpen,
@@ -179,6 +188,35 @@ export default function AudiobookFilters({
             )}
           </div>
         </div>
+
+        {sortBy && setSortBy ? (
+          <div>
+            <label className='mb-2 block text-[11px] font-semibold uppercase tracking-[0.24em] text-[#736a81]'>
+              Sort
+            </label>
+            <select
+              value={sortBy}
+              onChange={(event) =>
+                setSortBy(
+                  isAudiobookSortOption(event.target.value)
+                    ? event.target.value
+                    : AUDIOBOOK_SORT_OPTIONS[0].value
+                )
+              }
+              className='w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+            >
+              {AUDIOBOOK_SORT_OPTIONS.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className='bg-white text-slate-900'
+                >
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
 
         <div>
           <div className='mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500'>
