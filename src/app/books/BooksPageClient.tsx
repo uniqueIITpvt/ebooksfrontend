@@ -603,9 +603,9 @@ export default function BooksPageClient({
               }}
               categories={categories.map((category) => category.name)}
               languages={languages.map((language) => language.name)}
-              formats={formats}
+              formats={[]}
               categoryCounts={categoryCounts}
-              formatCounts={formatCounts}
+              formatCounts={{}}
               languageCounts={languageCounts}
               typeCounts={typeCounts}
               resultsCount={sortedItems.length}

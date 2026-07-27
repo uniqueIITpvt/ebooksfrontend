@@ -157,31 +157,32 @@ export default function BooksSidebar({
           </div>
         </div>
 
-        {/* Format */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Format</label>
-          <div className="space-y-2">
-            {formats.map(format => (
-              <label key={format} className="flex items-center group cursor-pointer">
-                <input
-                  type="checkbox"
-                  value={format}
-                  checked={selectedFormats.includes(format)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedFormats([...selectedFormats, format]);
-                    } else {
-                      setSelectedFormats(selectedFormats.filter(fmt => fmt !== format));
-                    }
-                  }}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                />
-                <span className="ml-2 text-sm text-gray-700">{format}</span>
-                <CountBadge count={formatCounts[format] ?? 0} />
-              </label>
-            ))}
+        {formats.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">Format</label>
+            <div className="space-y-2">
+              {formats.map(format => (
+                <label key={format} className="flex items-center group cursor-pointer">
+                  <input
+                    type="checkbox"
+                    value={format}
+                    checked={selectedFormats.includes(format)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedFormats([...selectedFormats, format]);
+                      } else {
+                        setSelectedFormats(selectedFormats.filter(fmt => fmt !== format));
+                      }
+                    }}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{format}</span>
+                  <CountBadge count={formatCounts[format] ?? 0} />
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Type */}
         <div>
