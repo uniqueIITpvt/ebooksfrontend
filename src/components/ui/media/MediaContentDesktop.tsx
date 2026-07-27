@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import type { ReactNode } from 'react';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   BookOpenIcon,
@@ -497,6 +497,11 @@ export default function MediaContentDesktop({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
+  const filterBoundaryRef = useRef<HTMLDivElement>(null);
+  const premiumContentRef = useRef<HTMLDivElement>(null);
+  const bookOfDayRef = useRef<HTMLDivElement>(null);
+  const filterSidebarRef = useRef<HTMLElement>(null);
+  const [fixedFilterStyle, setFixedFilterStyle] = useState<CSSProperties | undefined>();
 
   const loadLibraryItems = useCallback(async () => {
     const token = tokenStore.getAccessToken();
@@ -524,6 +529,60 @@ export default function MediaContentDesktop({
       window.removeEventListener('library:changed', loadLibraryItems);
     };
   }, [loadLibraryItems]);
+
+  useEffect(() => {
+    const updateFilterPosition = () => {
+      if (isFilterSidebarCollapsed) {
+        setFixedFilterStyle(undefined);
+        return;
+      }
+
+      const boundary = filterBoundaryRef.current;
+      const bookOfDay = bookOfDayRef.current;
+      const sidebar = filterSidebarRef.current;
+
+      if (!boundary || !sidebar) {
+        setFixedFilterStyle(undefined);
+        return;
+      }
+
+      const topOffset = 112;
+      const boundaryRect = boundary.getBoundingClientRect();
+      const bookOfDayRect = bookOfDay?.getBoundingClientRect();
+      const sidebarRect = sidebar.getBoundingClientRect();
+      const isBeforeBookOfDay =
+        !bookOfDayRect || bookOfDayRect.top > window.innerHeight;
+      const isInsideFilterSections =
+        boundaryRect.top <= topOffset &&
+        isBeforeBookOfDay;
+
+      if (!isInsideFilterSections) {
+        setFixedFilterStyle(
+          bookOfDayRect && bookOfDayRect.top <= window.innerHeight
+            ? { display: 'none' }
+            : undefined
+        );
+        return;
+      }
+
+      setFixedFilterStyle({
+        position: 'fixed',
+        top: topOffset,
+        left: sidebarRect.left,
+        width: sidebarRect.width || 300,
+        zIndex: 20,
+      });
+    };
+
+    updateFilterPosition();
+    window.addEventListener('scroll', updateFilterPosition, { passive: true });
+    window.addEventListener('resize', updateFilterPosition);
+
+    return () => {
+      window.removeEventListener('scroll', updateFilterPosition);
+      window.removeEventListener('resize', updateFilterPosition);
+    };
+  }, [isFilterSidebarCollapsed]);
 
   const allBooks = useMemo(() => [
     ...newReleaseBooks,
@@ -660,11 +719,12 @@ export default function MediaContentDesktop({
 
         <div className='relative z-10 mt-6 w-full px-3 lg:px-5'>
           <div className='mx-auto max-w-[1300px]'>
-            <div className='flex gap-6'>
+            <div ref={filterBoundaryRef} className='flex items-start gap-6'>
 
               {/* ── Left Filter Sidebar ── */}
               <aside
-                className={`flex-shrink-0 sticky top-24 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? 'hidden' : 'w-49'
+                ref={filterSidebarRef}
+                className={`flex-shrink-0 self-start transition-all duration-300 ${isFilterSidebarCollapsed ? 'hidden' : 'w-[300px]'
                   }`}
               >
                 {isFilterSidebarCollapsed ? (
@@ -706,7 +766,10 @@ export default function MediaContentDesktop({
                       </div>
                     )} */}
 
-                    <div className='mt-3 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden'>
+                    <div
+                      className='mt-3 flex w-full max-h-[calc(100vh-128px)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'
+                      style={fixedFilterStyle}
+                    >
                       {/* Header */}
                       <div className='flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50'>
                         <div className='flex items-center gap-2'>
@@ -740,7 +803,7 @@ export default function MediaContentDesktop({
                         </div>
                       </div>
 
-                      <div className='p-4 space-y-5 max-h-[calc(100vh-140px)] overflow-y-auto'>
+                      <div className='min-h-0 flex-1 space-y-5 overflow-y-auto p-4'>
 
                         {/* Search */}
                         <div>
@@ -897,31 +960,33 @@ export default function MediaContentDesktop({
                   />
                 )}
                 {filteredPremiumSummaries.length > 0 && (
-                  <SectionCarousel
-                    title='Premium Content'
-                    seeMoreHref='/premium-summaries'
-                    isLoading={false}
-                    items={filteredPremiumSummaries}
-                    emptyMsg='No premium content'
-                    sectionKey='premium'
-                    itemLimit={landingItemLimit}
-                    cartFormat={selectedCartFormat}
-                    cardHref={(b) => {
-                      const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
-                      // If exactly one format is selected, include it as a URL parameter
-                      if (selectedFormats.length === 1) {
-                        return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
-                      }
-                      return baseUrl;
-                    }}
-                    subLabel='Premium'
-                  />
+                  <div ref={premiumContentRef}>
+                    <SectionCarousel
+                      title='Premium Content'
+                      seeMoreHref='/premium-summaries'
+                      isLoading={false}
+                      items={filteredPremiumSummaries}
+                      emptyMsg='No premium content'
+                      sectionKey='premium'
+                      itemLimit={landingItemLimit}
+                      cartFormat={selectedCartFormat}
+                      cardHref={(b) => {
+                        const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
+                        // If exactly one format is selected, include it as a URL parameter
+                        if (selectedFormats.length === 1) {
+                          return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
+                        }
+                        return baseUrl;
+                      }}
+                      subLabel='Premium'
+                    />
+                  </div>
                 )}
 
               </div>{/* end flex-1 main content */}
             </div>{/* end flex gap-6 */}
 
-            <div className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
+            <div ref={bookOfDayRef} className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
               <div className='absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none' />
               <div className='absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none' />
 
