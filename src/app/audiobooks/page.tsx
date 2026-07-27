@@ -6,7 +6,7 @@ import { ArrowLeftIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { API_CONFIG } from '@/config/api';
 import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
-import BooksHero, { type BooksHeroBanner } from '@/components/ui/books/BooksHero';
+import TopTrendingStrip from '@/components/ui/books/TopTrendingStrip';
 import {
   parsePriceValue,
   type AudiobookSortOption,
@@ -45,7 +45,6 @@ function getPublishTimestamp(value?: string) {
 export default function AudiobooksPage() {
   const router = useRouter();
   const [audiobooks, setAudiobooks] = useState<PublicBookListItem[]>([]);
-  const [heroBanners, setHeroBanners] = useState<BooksHeroBanner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -71,23 +70,6 @@ export default function AudiobooksPage() {
     };
 
     fetchAudiobooks();
-  }, []);
-
-  useEffect(() => {
-    const fetchHeroBanners = async () => {
-      try {
-        const response = await fetch(`${API_URL}/banners/position/audiobooks_hero`);
-        if (!response.ok) return;
-
-        const data = await response.json();
-        const rows = Array.isArray(data) ? data : data.data || [];
-        setHeroBanners(rows);
-      } catch (error) {
-        console.error('Error fetching audiobook hero banners:', error);
-      }
-    };
-
-    fetchHeroBanners();
   }, []);
 
   const categories = useMemo(
@@ -190,11 +172,11 @@ export default function AudiobooksPage() {
 
   return (
     <div className='min-h-screen bg-gray-50 text-slate-900'>
-      <BooksHero
-        banners={heroBanners}
-        title='Listen & Learn'
-        subtitle='Explore audiobooks and audio learning resources designed for everyday growth'
-        ctaHref='/audiobooks'
+      <TopTrendingStrip
+        title='Top 10 Trending Audiobook in India'
+        subtitle='Check out the most popular and trending audiobooks right now.'
+        items={audiobooks}
+        viewAllHref='/audiobooks'
       />
 
       <section className='relative overflow-hidden border-b border-gray-200 bg-white'>

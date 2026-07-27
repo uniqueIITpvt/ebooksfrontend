@@ -1,20 +1,16 @@
 import { Suspense } from 'react';
 
 import BooksPageClient from './BooksPageClient';
-import { getBooksHeroBanners, getBooksPageData } from '@/lib/server/public-data';
+import { getBooksPageData } from '@/lib/server/public-data';
 
 export default async function BooksPage() {
-  const [{ allBooks, categories, languages }, heroBanners] = await Promise.all([
-    getBooksPageData(),
-    getBooksHeroBanners('books_hero'),
-  ]);
+  const { allBooks, categories, languages } = await getBooksPageData();
 
   return (
     <Suspense fallback={null}>
       <BooksPageClient
         allBooks={allBooks}
         categories={categories}
-        heroBanners={heroBanners}
         languages={languages}
       />
     </Suspense>

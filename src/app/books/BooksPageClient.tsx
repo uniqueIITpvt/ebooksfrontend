@@ -8,11 +8,11 @@ import {
   ChevronRightIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
-import BooksHero, { type BooksHeroBanner } from '@/components/ui/books/BooksHero';
 import BooksSidebar from '@/components/ui/books/BooksSidebar';
 import BooksGrid from '@/components/ui/books/BooksGrid';
 import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
+import TopTrendingStrip from '@/components/ui/books/TopTrendingStrip';
 import {
   AUDIOBOOK_SORT_OPTIONS,
   isAudiobookSortOption,
@@ -26,7 +26,6 @@ import type { PublicBookListItem } from '@/types/publicBook';
 interface BooksPageClientProps {
   allBooks: PublicBookListItem[];
   categories: Category[];
-  heroBanners: BooksHeroBanner[];
   languages: LanguageRecord[];
 }
 
@@ -76,7 +75,6 @@ function normalizeQueryString(params: URLSearchParams) {
 export default function BooksPageClient({
   allBooks,
   categories,
-  heroBanners,
   languages,
 }: BooksPageClientProps) {
   const searchParams = useSearchParams();
@@ -546,11 +544,11 @@ export default function BooksPageClient({
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <BooksHero
-        banners={heroBanners}
-        title='Read & Grow'
-        subtitle='Explore ebooks and learning resources designed for everyday growth'
-        ctaHref='/#free-summaries-section'
+      <TopTrendingStrip
+        title='Top 10 Trending eBook in India'
+        subtitle='Check out the most popular and trending ebooks right now.'
+        items={allBooks.filter((book) => book.type === 'Books')}
+        viewAllHref='/books'
       />
 
       <div className='mx-auto max-w-[1300px]'>
