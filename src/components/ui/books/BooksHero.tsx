@@ -15,11 +15,19 @@ export interface BooksHeroBanner {
 interface BooksHeroProps {
   banners: BooksHeroBanner[];
   className?: string;
+  title?: string;
+  subtitle?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
 }
 
 export default function BooksHero({
   banners,
   className = '',
+  title = 'Listen & Learn',
+  subtitle = 'Explore ebooks, audiobooks, and learning resources designed for everyday growth',
+  ctaHref = '/#free-summaries-section',
+  ctaLabel = 'Start With Free learning',
 }: BooksHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const activeBanners = useMemo(
@@ -94,16 +102,16 @@ export default function BooksHero({
       <div className='absolute inset-y-0 left-5 z-20 flex w-[46%] items-center justify-center sm:left-10 md:left-14 lg:left-20 xl:left-28'>
         <div className='pointer-events-auto max-w-[520px] text-left'>
           <h2 className='text-2xl font-extrabold tracking-normal text-blue-950 sm:text-3xl md:text-4xl lg:text-5xl'>
-            Listen &amp; Learn
+            {title}
           </h2>
           <p className='mt-2 text-xs font-semibold leading-snug text-blue-950 sm:text-sm md:text-lg lg:text-xl'>
-            Explore ebooks, audiobooks, and learning resources designed for everyday growth
+            {subtitle}
           </p>
           <Link
-            href='/#free-summaries-section'
+            href={ctaHref}
             className='mt-4 inline-flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-600 md:px-7 md:py-3 md:text-base'
           >
-            Start With Free learning
+            {ctaLabel}
           </Link>
         </div>
       </div>

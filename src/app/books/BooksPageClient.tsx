@@ -546,7 +546,12 @@ export default function BooksPageClient({
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <BooksHero banners={heroBanners} />
+      <BooksHero
+        banners={heroBanners}
+        title='Read & Grow'
+        subtitle='Explore ebooks and learning resources designed for everyday growth'
+        ctaHref='/#free-summaries-section'
+      />
 
       <div className='mx-auto max-w-[1300px]'>
         <div className='px-4 py-6 sm:px-6 lg:px-8'>

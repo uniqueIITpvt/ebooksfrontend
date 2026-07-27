@@ -27,6 +27,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  MenuItem,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -50,7 +51,7 @@ interface Banner {
   link?: string;
   isActive: boolean;
   order: number;
-  position: 'home_hero' | 'home_middle' | 'home_bottom';
+  position: 'home_hero' | 'books_hero' | 'audiobooks_hero' | 'home_middle' | 'home_bottom';
   createdAt: string;
   updatedAt: string;
 }
@@ -62,7 +63,7 @@ interface BannerFormData {
   link: string;
   isActive: boolean;
   order: number;
-  position: 'home_hero' | 'home_middle' | 'home_bottom';
+  position: 'home_hero' | 'books_hero' | 'audiobooks_hero' | 'home_middle' | 'home_bottom';
 }
 
 const initialFormData: BannerFormData = {
@@ -275,6 +276,10 @@ export default function BannersPage() {
     switch (position) {
       case 'home_hero':
         return 'Home Hero';
+      case 'books_hero':
+        return 'Books Hero';
+      case 'audiobooks_hero':
+        return 'Audiobooks Hero';
       case 'home_middle':
         return 'Home Middle';
       case 'home_bottom':
@@ -320,6 +325,7 @@ export default function BannersPage() {
             <TableRow>
               <TableCell>Image</TableCell>
               <TableCell>Title</TableCell>
+              <TableCell>Position</TableCell>
               <TableCell>Order</TableCell>
               <TableCell>Status</TableCell>
               <TableCell align="right">Actions</TableCell>
@@ -328,7 +334,7 @@ export default function BannersPage() {
           <TableBody>
             {banners.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={6} align="center">
                   <Typography variant="body2" color="text.secondary">
                     No banners found. Click "Add New Banner" to create one.
                   </Typography>
@@ -383,6 +389,7 @@ export default function BannersPage() {
                       </Typography>
                     )}
                   </TableCell>
+                  <TableCell>{getPositionLabel(banner.position)}</TableCell>
                   <TableCell>{banner.order}</TableCell>
                   <TableCell>
                     <Chip
@@ -466,6 +473,25 @@ export default function BannersPage() {
 
             {/* Order Row */}
             <Box sx={{ display: 'flex', gap: 2, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                label="Position"
+                value={formData.position}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    position: e.target.value as BannerFormData['position'],
+                  }))
+                }
+              >
+                <MenuItem value="home_hero">Home Hero</MenuItem>
+                <MenuItem value="books_hero">Books Hero</MenuItem>
+                <MenuItem value="audiobooks_hero">Audiobooks Hero</MenuItem>
+                <MenuItem value="home_middle">Home Middle</MenuItem>
+                <MenuItem value="home_bottom">Home Bottom</MenuItem>
+              </TextField>
               <TextField
                 fullWidth
                 size="small"

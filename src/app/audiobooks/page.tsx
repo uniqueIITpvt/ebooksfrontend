@@ -6,6 +6,7 @@ import { ArrowLeftIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { API_CONFIG } from '@/config/api';
 import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
+import BooksHero, { type BooksHeroBanner } from '@/components/ui/books/BooksHero';
 import {
   AUDIOBOOK_SORT_OPTIONS,
   isAudiobookSortOption,
@@ -46,6 +47,7 @@ function getPublishTimestamp(value?: string) {
 export default function AudiobooksPage() {
   const router = useRouter();
   const [audiobooks, setAudiobooks] = useState<PublicBookListItem[]>([]);
+  const [heroBanners, setHeroBanners] = useState<BooksHeroBanner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -71,6 +73,23 @@ export default function AudiobooksPage() {
     };
 
     fetchAudiobooks();
+  }, []);
+
+  useEffect(() => {
+    const fetchHeroBanners = async () => {
+      try {
+        const response = await fetch(`${API_URL}/banners/position/audiobooks_hero`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const rows = Array.isArray(data) ? data : data.data || [];
+        setHeroBanners(rows);
+      } catch (error) {
+        console.error('Error fetching audiobook hero banners:', error);
+      }
+    };
+
+    fetchHeroBanners();
   }, []);
 
   const categories = useMemo(
@@ -173,6 +192,13 @@ export default function AudiobooksPage() {
 
   return (
     <div className='min-h-screen bg-gray-50 text-slate-900'>
+      <BooksHero
+        banners={heroBanners}
+        title='Listen & Learn'
+        subtitle='Explore audiobooks and audio learning resources designed for everyday growth'
+        ctaHref='/audiobooks'
+      />
+
       <section className='relative overflow-hidden border-b border-gray-200 bg-white'>
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.10),transparent_35%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.10),transparent_32%),linear-gradient(180deg,#ffffff_0%,#f8fafc_62%)]' />
         <div className='absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blue-300/70 to-transparent' />

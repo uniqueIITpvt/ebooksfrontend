@@ -204,8 +204,8 @@ export const getPublicShellData = cache(async (): Promise<SiteShellData> => {
   };
 });
 
-export const getBooksHeroBanners = cache(async (): Promise<Banner[]> => {
-  return (await fetchApiData<Banner[]>('/banners/position/any', {
+export const getBooksHeroBanners = cache(async (position: 'books_hero' | 'audiobooks_hero' = 'books_hero'): Promise<Banner[]> => {
+  return (await fetchApiData<Banner[]>(`/banners/position/${position}`, {
     revalidate: SHELL_REVALIDATE_SECONDS,
   })) ?? [];
 });
@@ -224,7 +224,7 @@ export const getHomePageData = cache(async (): Promise<PublicHomeData> => {
     categories,
   ] = await Promise.all([
     bannerEnabled
-      ? fetchApiData<Banner[]>('/banners', {
+      ? fetchApiData<Banner[]>('/banners/position/home_hero', {
           revalidate: SHELL_REVALIDATE_SECONDS,
         })
       : Promise.resolve([]),
