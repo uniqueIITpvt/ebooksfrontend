@@ -123,12 +123,13 @@ function AuthContent() {
       if (result.success && result.user) {
         // Check role and redirect accordingly
         const role = result.user.role;
-        const profileResponse = await authApi.getProfile();
-        const signedInUser = profileResponse.success && profileResponse.data ? profileResponse.data : result.user;
         onClose?.();
         if (role === 'admin' || role === 'superadmin') {
           router.replace('/admin/dashboard');
+          void authApi.getProfile();
         } else {
+          const profileResponse = await authApi.getProfile();
+          const signedInUser = profileResponse.success && profileResponse.data ? profileResponse.data : result.user;
           // If returnUrl exists, redirect there (for checkout/subscription flow)
           if (returnUrl) {
             router.push(getPostLoginReturnUrl(returnUrl, signedInUser));

@@ -53,6 +53,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
+        const isStoredAdmin =
+          storedUser.role === 'admin' || storedUser.role === 'superadmin';
+
+        if (isStoredAdmin) {
+          setUser(storedUser);
+          setIsLoading(false);
+        }
+
         const refreshResponse = await authApi.refreshToken();
         if (refreshResponse.success) {
           const response = await authApi.getProfile();

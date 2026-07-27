@@ -168,7 +168,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                   href='mailto:unquebookpublishinghouse@gmail.com'
                   className='text-slate-300 hover:text-white transition-colors'
                 >
-                  unquebookpublishinghouse@gmail.com
+                  {/* unquebookpublishinghouse@gmail.com */}
                 </a>
               </div>
             </div>
