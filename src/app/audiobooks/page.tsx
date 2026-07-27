@@ -234,6 +234,7 @@ export default function AudiobooksPage() {
               languageCounts={languageCounts}
               formats={formats}
               formatCounts={formatCounts}
+              typeCount={audiobooks.length}
               resultsCount={sortedItems.length}
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}

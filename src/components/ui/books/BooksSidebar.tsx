@@ -85,6 +85,10 @@ export default function BooksSidebar({
       {count}
     </span>
   );
+  const typeOptions = [
+    { value: 'Books', label: 'Books', count: typeCounts.Books ?? 0 },
+    { value: 'Audiobook', label: 'Audiobooks', count: typeCounts.Audiobook ?? 0 },
+  ].filter((option) => option.count > 0);
 
   const SidebarContent = () => (
     <div className="h-full lg:h-auto bg-white border-r lg:border border-gray-200 lg:rounded-xl lg:shadow-sm flex flex-col">
@@ -185,45 +189,30 @@ export default function BooksSidebar({
         )}
 
         {/* Type */}
-        <div>
+        {typeOptions.length > 0 && <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">Type</label>
           <div className="space-y-2">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                value="Books"
-                checked={selectedTypes.includes('Books')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTypes([...selectedTypes, 'Books']);
-                  } else {
-                    setSelectedTypes(selectedTypes.filter(type => type !== 'Books'));
-                  }
-                }}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <span className="ml-2 text-sm text-gray-700">Books</span>
-              <CountBadge count={typeCounts.Books ?? 0} />
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                value="Audiobook"
-                checked={selectedTypes.includes('Audiobook')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTypes([...selectedTypes, 'Audiobook']);
-                  } else {
-                    setSelectedTypes(selectedTypes.filter(type => type !== 'Audiobook'));
-                  }
-                }}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <span className="ml-2 text-sm text-gray-700">Audiobooks</span>
-              <CountBadge count={typeCounts.Audiobook ?? 0} />
-            </label>
+            {typeOptions.map((option) => (
+              <label key={option.value} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={option.value}
+                  checked={selectedTypes.includes(option.value)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedTypes([...selectedTypes, option.value]);
+                    } else {
+                      setSelectedTypes(selectedTypes.filter(type => type !== option.value));
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                <CountBadge count={option.count} />
+              </label>
+            ))}
           </div>
-        </div>
+        </div>}
 
         {/* Language */}
         <div>

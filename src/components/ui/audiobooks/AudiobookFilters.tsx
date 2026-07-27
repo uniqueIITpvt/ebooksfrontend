@@ -21,6 +21,7 @@ interface AudiobookFiltersProps {
   languageCounts: Record<string, number>;
   formats: string[];
   formatCounts: Record<string, number>;
+  typeCount?: number;
   resultsCount: number;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
@@ -77,6 +78,7 @@ export default function AudiobookFilters({
   languageCounts,
   formats,
   formatCounts,
+  typeCount = 0,
   resultsCount,
   isSidebarOpen,
   setIsSidebarOpen,
@@ -175,6 +177,21 @@ export default function AudiobookFilters({
                 <XMarkIcon className='h-4 w-4' />
               </button>
             )}
+          </div>
+        </div>
+
+        <div>
+          <div className='mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500'>
+            Type
+          </div>
+          <div className='space-y-1.5'>
+            <FilterOption
+              label='Audiobook'
+              value='Audiobook'
+              count={typeCount}
+              checked
+              onToggle={() => undefined}
+            />
           </div>
         </div>
 
