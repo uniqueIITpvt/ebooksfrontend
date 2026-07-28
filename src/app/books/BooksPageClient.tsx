@@ -517,7 +517,7 @@ export default function BooksPageClient({
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60'>
       <TopTrendingStrip
         title='Top 10 Trending eBook in India'
         subtitle='Check out the most popular and trending ebooks right now.'

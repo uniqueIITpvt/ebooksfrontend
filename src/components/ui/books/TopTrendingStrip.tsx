@@ -37,7 +37,7 @@ export default function TopTrendingStrip({
   };
 
   return (
-    <section className='bg-[#eeeeee]'>
+    <section className='bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60'>
       <div className='mx-auto max-w-[1300px] px-4 py-10 sm:px-6 lg:px-8'>
         <div className='flex items-start justify-between gap-6'>
           <div>
@@ -49,12 +49,12 @@ export default function TopTrendingStrip({
             </p>
           </div>
 
-          <Link
+          {/* <Link
             href={viewAllHref}
             className='shrink-0 text-base font-bold text-black underline underline-offset-2 transition hover:text-blue-700'
           >
             View all
-          </Link>
+          </Link> */}
         </div>
 
         <div className='relative mt-12'>
