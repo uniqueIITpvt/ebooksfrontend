@@ -38,7 +38,7 @@ export default function BookDetailClient({
   const router = useRouter();
   const { user, refreshUser, openAuthModal } = useAuth();
   const { addToCart, isInCart } = useCart();
-  const [selectedFormat, setSelectedFormat] = useState('');
+  const selectedFormat: string = 'E-book';
   const [isFavorited, setIsFavorited] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -58,19 +58,6 @@ export default function BookDetailClient({
       currency: 'INR',
       minimumFractionDigits: 2,
     }).format(value);
-
-  useEffect(() => {
-    // Check if format is specified in URL parameters (from landing page selection)
-    const urlParams = new URLSearchParams(window.location.search);
-    const formatFromUrl = urlParams.get('format');
-    
-    if (formatFromUrl && ['Hardcover', 'Paperback', 'E-book'].includes(formatFromUrl)) {
-      setSelectedFormat(formatFromUrl);
-    } else {
-      // Always set default format to Hardcover
-      setSelectedFormat('Hardcover');
-    }
-  }, [currentBook]);
 
   useEffect(() => {
     const currentBookId = String(currentBook.id || (currentBook as any)._id || '');
@@ -475,29 +462,6 @@ export default function BookDetailClient({
                 </span>
               )}
             </div>
-
-            {!isFreeBook && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Format
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {['Hardcover', 'Paperback', 'E-book'].map((format) => (
-                    <button
-                      key={format}
-                      onClick={() => setSelectedFormat(format)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        selectedFormat === format
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      {format}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {!isFreeBook && (
               <div>

@@ -49,7 +49,6 @@ export default function BooksFilters({
   const hasActiveFilters = 
     searchTerm !== '' || 
     selectedCategory !== 'All Categories' || 
-    selectedFormat !== 'All Formats' || 
     selectedType !== 'All Types';
 
   return (
@@ -171,27 +170,6 @@ export default function BooksFilters({
                 </select>
               </div>
 
-              {/* Format Filter */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Format
-                </label>
-                <select
-                  value={selectedFormat}
-                  onChange={(e) => setSelectedFormat(e.target.value)}
-                  className='
-                    w-full px-3 py-2.5 
-                    border border-gray-300 rounded-lg 
-                    text-sm bg-white
-                    focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  '
-                >
-                  <option value='All Formats'>All Formats</option>
-                  {formats.map(format => (
-                    <option key={format} value={format}>{format}</option>
-                  ))}
-                </select>
-              </div>
             </div>
           )}
         </div>
@@ -261,26 +239,6 @@ export default function BooksFilters({
                   <option value='All Types'>All Types</option>
                   <option value='Books'>Reading Books</option>
                   <option value='Audiobook'>Audiobooks</option>
-                </select>
-                <FunnelIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none' />
-              </div>
-
-              {/* Format Filter */}
-              <div className='relative'>
-                <select
-                  value={selectedFormat}
-                  onChange={(e) => setSelectedFormat(e.target.value)}
-                  className='
-                    appearance-none bg-white border border-gray-300 
-                    rounded-xl px-4 py-3.5 pr-10 text-base
-                    focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                    min-w-[140px] shadow-sm
-                  '
-                >
-                  <option value='All Formats'>All Formats</option>
-                  {formats.map(format => (
-                    <option key={format} value={format}>{format}</option>
-                  ))}
                 </select>
                 <FunnelIcon className='absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none' />
               </div>

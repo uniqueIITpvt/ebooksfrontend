@@ -68,7 +68,7 @@ function CheckoutContent() {
   };
 
   const getBookCheckoutFormat = (bookData: Book) =>
-    selectedBookFormat || (bookData.format?.includes('Hardcover') ? 'Hardcover' : bookData.format?.[0] || 'E-book');
+    selectedBookFormat || (bookData.format?.includes('E-book') ? 'E-book' : bookData.format?.[0] || 'E-book');
 
   const getBookFormatPrice = (bookData: Book, format: string) => {
     const basePrice = parseCurrency(bookData.price);
@@ -156,9 +156,7 @@ function CheckoutContent() {
   const needsAddress = fromCart
     ? cartNeedsAddress
     : book
-      ? selectedBookFormat
-        ? PHYSICAL_FORMATS.includes(selectedBookFormat)
-        : (book.format?.some(f => PHYSICAL_FORMATS.includes(f)) ?? false)
+      ? PHYSICAL_FORMATS.includes(getBookCheckoutFormat(book))
       : false;
 
   // Plan data for subscription checkout
@@ -236,9 +234,10 @@ function CheckoutContent() {
         const found = response.data.find(b => b.id === bookId || (b as any)._id === bookId);
         setBook(found || null);
         // Skip address step for digital formats (ebook, PDF, etc.)
-        const isPhysical = selectedBookFormat
-          ? PHYSICAL_FORMATS.includes(selectedBookFormat)
-          : (found?.format?.some(f => PHYSICAL_FORMATS.includes(f)) ?? false);
+        const checkoutFormat = found
+          ? selectedBookFormat || (found.format?.includes('E-book') ? 'E-book' : found.format?.[0] || 'E-book')
+          : selectedBookFormat || 'E-book';
+        const isPhysical = PHYSICAL_FORMATS.includes(checkoutFormat);
         if (!isPhysical) setCurrentStep('account');
       }
     } catch (error) {
