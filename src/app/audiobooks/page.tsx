@@ -177,6 +177,7 @@ export default function AudiobooksPage() {
         subtitle='Check out the most popular and trending audiobooks right now.'
         items={audiobooks}
         viewAllHref='/audiobooks'
+        itemHrefPrefix='/audiobooks'
       />
 
       <section className='relative overflow-hidden border-b border-gray-200 bg-white'>
