@@ -10,11 +10,9 @@ import {
 } from '@heroicons/react/24/outline';
 import BooksSidebar from '@/components/ui/books/BooksSidebar';
 import BooksGrid from '@/components/ui/books/BooksGrid';
-import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
 import TopTrendingStrip from '@/components/ui/books/TopTrendingStrip';
 import {
-  AUDIOBOOK_SORT_OPTIONS,
   isAudiobookSortOption,
   parsePriceValue,
   type AudiobookSortOption,
@@ -139,10 +137,6 @@ export default function BooksPageClient({
       Object.keys(buildCounts(audiobookItems.map((item) => item.language))).sort(),
     [audiobookItems]
   );
-  const audiobookFormats = useMemo(
-    () => Object.keys(buildFormatCounts(audiobookItems)).sort(),
-    [audiobookItems]
-  );
 
   const audiobookCategoryCounts = useMemo(
     () => buildCounts(audiobookItems.map((item) => item.category)),
@@ -150,10 +144,6 @@ export default function BooksPageClient({
   );
   const audiobookLanguageCounts = useMemo(
     () => buildCounts(audiobookItems.map((item) => item.language)),
-    [audiobookItems]
-  );
-  const audiobookFormatCounts = useMemo(
-    () => buildFormatCounts(audiobookItems),
     [audiobookItems]
   );
   const formatCounts = useMemo(() => buildFormatCounts(allBooks), [allBooks]);
@@ -463,24 +453,31 @@ export default function BooksPageClient({
         <section className='mx-auto max-w-[1300px] px-4 py-8 sm:px-6 lg:px-8'>
           <div className='lg:flex lg:gap-8 xl:gap-10'>
             <div className='lg:w-[320px] xl:w-[340px] lg:flex-shrink-0'>
-              <AudiobookFilters
+              <BooksSidebar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 selectedCategories={selectedCategories}
                 setSelectedCategories={setSelectedCategories}
                 selectedFormats={selectedFormats}
                 setSelectedFormats={setSelectedFormats}
+                selectedTypes={selectedTypes}
+                setSelectedTypes={setSelectedTypes}
                 selectedLanguages={selectedLanguages}
                 setSelectedLanguages={setSelectedLanguages}
                 categories={audiobookCategories}
                 categoryCounts={audiobookCategoryCounts}
                 languages={audiobookLanguages}
                 languageCounts={audiobookLanguageCounts}
-                formats={audiobookFormats}
-                formatCounts={audiobookFormatCounts}
+                formats={[]}
+                formatCounts={{}}
+                typeCounts={{ Audiobook: audiobookItems.length }}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
                 resultsCount={sortedItems.length}
                 isSidebarOpen={isSidebarOpen}
                 setIsSidebarOpen={setIsSidebarOpen}
+                searchPlaceholder='Search audiobooks...'
+                lockedType='Audiobook'
               />
             </div>
 
@@ -508,29 +505,6 @@ export default function BooksPageClient({
                     <FunnelIcon className='h-4 w-4 text-blue-600' />
                     Filters
                   </button>
-
-                  <label className='flex items-center gap-3 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-600'>
-                    <span className='text-xs font-semibold uppercase tracking-[0.22em] text-slate-500'>
-                      Sort
-                    </span>
-                    <select
-                      value={sortBy}
-                      onChange={(event) =>
-                        setSortBy(event.target.value as AudiobookSortOption)
-                      }
-                      className='bg-transparent font-medium text-slate-900 outline-none'
-                    >
-                      {AUDIOBOOK_SORT_OPTIONS.map((option) => (
-                        <option
-                          key={option.value}
-                          value={option.value}
-                          className='bg-white text-slate-900'
-                        >
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
                 </div>
               </div>
 

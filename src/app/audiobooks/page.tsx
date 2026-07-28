@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ChevronRightIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { API_CONFIG } from '@/config/api';
-import AudiobookFilters from '@/components/ui/audiobooks/AudiobookFilters';
+import BooksSidebar from '@/components/ui/books/BooksSidebar';
 import AudiobookGrid from '@/components/ui/audiobooks/AudiobookGrid';
 import TopTrendingStrip from '@/components/ui/books/TopTrendingStrip';
 import {
@@ -25,16 +25,6 @@ function buildCounts(values: Array<string | null | undefined>) {
   }, {});
 }
 
-function buildFormatCounts(items: PublicBookListItem[]) {
-  return items.reduce<Record<string, number>>((accumulator, item) => {
-    item.format.forEach((format) => {
-      accumulator[format] = (accumulator[format] ?? 0) + 1;
-    });
-
-    return accumulator;
-  }, {});
-}
-
 function getPublishTimestamp(value?: string) {
   if (!value) return 0;
 
@@ -49,9 +39,11 @@ export default function AudiobooksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Audiobook']);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<AudiobookSortOption>(DEFAULT_SORT);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchAudiobooks = async () => {
@@ -80,11 +72,6 @@ export default function AudiobooksPage() {
     () => Object.keys(buildCounts(audiobooks.map((item) => item.language))).sort(),
     [audiobooks]
   );
-  const formats = useMemo(
-    () => Object.keys(buildFormatCounts(audiobooks)).sort(),
-    [audiobooks]
-  );
-
   const categoryCounts = useMemo(
     () => buildCounts(audiobooks.map((item) => item.category)),
     [audiobooks]
@@ -93,11 +80,6 @@ export default function AudiobooksPage() {
     () => buildCounts(audiobooks.map((item) => item.language)),
     [audiobooks]
   );
-  const formatCounts = useMemo(
-    () => buildFormatCounts(audiobooks),
-    [audiobooks]
-  );
-
   const filteredItems = useMemo(
     () =>
       audiobooks.filter((item) => {
@@ -148,28 +130,6 @@ export default function AudiobooksPage() {
     return items;
   }, [filteredItems, sortBy]);
 
-  const compactNumber = useMemo(
-    () =>
-      new Intl.NumberFormat('en-US', {
-        notation: 'compact',
-        maximumFractionDigits: 1,
-      }),
-    []
-  );
-
-  const audiobookStats = useMemo(() => {
-    const freeTitles = audiobooks.filter(
-      (item) => parsePriceValue(item.price) === 0
-    ).length;
-
-    return {
-      total: audiobooks.length,
-      free: freeTitles,
-      premium: audiobooks.length - freeTitles,
-      categories: categories.length,
-    };
-  }, [audiobooks, categories.length]);
-
   return (
     <div className='min-h-screen bg-gray-50 text-slate-900'>
       <TopTrendingStrip
@@ -199,33 +159,49 @@ export default function AudiobooksPage() {
 
       <section className='mx-auto max-w-[1300px] sm:px-6 lg:px-4'>
         <div className='lg:flex lg:gap-8 xl:gap-10'>
-          <div className='lg:w-[320px] xl:w-[340px] lg:flex-shrink-0'>
-            <AudiobookFilters
+          <div
+            className={`lg:flex-shrink-0 transition-all duration-300 ${
+              isFilterSidebarCollapsed ? 'lg:w-12 xl:w-12' : 'lg:w-[320px] xl:w-[340px]'
+            }`}
+          >
+            {isFilterSidebarCollapsed && (
+              <button
+                onClick={() => setIsFilterSidebarCollapsed(false)}
+                className='hidden h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-100 hover:text-blue-700 lg:inline-flex'
+                type='button'
+                aria-label='Show filters'
+                title='Show filters'
+              >
+                <ChevronRightIcon className='h-5 w-5' />
+              </button>
+            )}
+            <BooksSidebar
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
               selectedFormats={selectedFormats}
               setSelectedFormats={setSelectedFormats}
+              selectedTypes={selectedTypes}
+              setSelectedTypes={setSelectedTypes}
               selectedLanguages={selectedLanguages}
               setSelectedLanguages={setSelectedLanguages}
               categories={categories}
               categoryCounts={categoryCounts}
               languages={languages}
               languageCounts={languageCounts}
-              formats={formats}
-              formatCounts={formatCounts}
-              typeCount={audiobooks.length}
+              formats={[]}
+              formatCounts={{}}
+              typeCounts={{ Audiobook: audiobooks.length }}
               sortBy={sortBy}
               setSortBy={setSortBy}
               resultsCount={sortedItems.length}
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
-              stats={{
-                total: compactNumber.format(audiobookStats.total),
-                free: compactNumber.format(audiobookStats.free),
-                categories: compactNumber.format(audiobookStats.categories),
-              }}
+              searchPlaceholder='Search audiobooks...'
+              lockedType='Audiobook'
+              onDesktopCollapse={() => setIsFilterSidebarCollapsed(true)}
+              className={isFilterSidebarCollapsed ? 'lg:hidden' : ''}
             />
           </div>
 

@@ -7,6 +7,8 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import type { AudiobookSortOption } from '@/lib/audiobooks';
+import { AUDIOBOOK_SORT_OPTIONS } from '@/lib/audiobooks';
 
 interface BooksSidebarProps {
   searchTerm: string;
@@ -31,6 +33,10 @@ interface BooksSidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   onDesktopCollapse?: () => void;
+  searchPlaceholder?: string;
+  lockedType?: 'Books' | 'Audiobook';
+  sortBy?: AudiobookSortOption;
+  setSortBy?: (sortBy: AudiobookSortOption) => void;
 }
 
 export default function BooksSidebar({
@@ -55,7 +61,11 @@ export default function BooksSidebar({
   className = '',
   isSidebarOpen,
   setIsSidebarOpen,
-  onDesktopCollapse
+  onDesktopCollapse,
+  searchPlaceholder = 'Search books...',
+  lockedType,
+  sortBy,
+  setSortBy
 }: BooksSidebarProps) {
 
   const clearFilters = () => {
@@ -69,13 +79,13 @@ export default function BooksSidebar({
   const hasActiveFilters = 
     searchTerm !== '' || 
     selectedCategories.length > 0 || 
-    selectedTypes.length > 0 ||
+    (lockedType ? false : selectedTypes.length > 0) ||
     selectedLanguages.length > 0;
 
   const activeFilterCount =
     (searchTerm ? 1 : 0) +
     selectedCategories.length +
-    selectedTypes.length +
+    (lockedType ? 0 : selectedTypes.length) +
     selectedLanguages.length;
 
   const CountBadge = ({ count }: { count: number }) => (
@@ -86,7 +96,10 @@ export default function BooksSidebar({
   const typeOptions = [
     { value: 'Books', label: 'Books', count: typeCounts.Books ?? 0 },
     { value: 'Audiobook', label: 'Audiobooks', count: typeCounts.Audiobook ?? 0 },
-  ].filter((option) => option.count > 0);
+  ].filter((option) => {
+    if (lockedType) return option.value === lockedType && option.count > 0;
+    return option.count > 0;
+  });
 
   const SidebarContent = () => (
     <div className="h-full lg:h-auto bg-white border-r lg:border border-gray-200 lg:rounded-xl lg:shadow-sm flex flex-col">
@@ -143,7 +156,7 @@ export default function BooksSidebar({
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search books..."
+              placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -159,6 +172,24 @@ export default function BooksSidebar({
           </div>
         </div>
 
+        {/* Sort */}
+        {sortBy && setSortBy && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Sort</label>
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as AudiobookSortOption)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+            >
+              {AUDIOBOOK_SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Type */}
         {typeOptions.length > 0 && <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">Type</label>
@@ -168,15 +199,17 @@ export default function BooksSidebar({
                 <input
                   type="checkbox"
                   value={option.value}
-                  checked={selectedTypes.includes(option.value)}
+                  checked={lockedType === option.value || selectedTypes.includes(option.value)}
+                  disabled={lockedType === option.value}
                   onChange={(e) => {
+                    if (lockedType) return;
                     if (e.target.checked) {
                       setSelectedTypes([...selectedTypes, option.value]);
                     } else {
                       setSelectedTypes(selectedTypes.filter(type => type !== option.value));
                     }
                   }}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-80"
                 />
                 <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                 <CountBadge count={option.count} />
