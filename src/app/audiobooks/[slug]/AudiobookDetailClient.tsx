@@ -477,10 +477,6 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
           previousIndex === timedWordIndex ? previousIndex : timedWordIndex
         );
 
-        if (timedWordIndex >= 0 && activeTab !== 'transcript' && time > 0) {
-          setActiveTab('transcript');
-        }
-
         return;
       }
 
@@ -493,12 +489,9 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
           previousIndex === estimatedWordIndex ? previousIndex : estimatedWordIndex
         );
 
-        if (activeTab !== 'transcript' && time > 0) {
-          setActiveTab('transcript');
-        }
       }
     },
-    [activeTab, estimatedWordTimings, transcriptWords, useTranscriptWordTimings]
+    [estimatedWordTimings, transcriptWords, useTranscriptWordTimings]
   );
 
   // Audio sync and word highlighting
