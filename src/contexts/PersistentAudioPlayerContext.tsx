@@ -85,7 +85,12 @@ export function PersistentAudioPlayerProvider({
         nextTime >= currentTrack.previewDurationSeconds
       ) {
         audio.pause();
-        setCurrentTime(currentTrack.previewDurationSeconds);
+        audio.removeAttribute('src');
+        audio.load();
+        setCurrentTrack(null);
+        setCurrentTime(0);
+        setDuration(0);
+        setIsPlaying(false);
       }
     };
     const handleLoadedMetadata = () => setDuration(audio.duration || 0);
