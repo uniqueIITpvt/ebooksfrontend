@@ -11,8 +11,6 @@ import {
   EyeIcon,
   ArrowPathIcon,
   UserIcon,
-  MinusIcon,
-  PlusIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -135,7 +133,7 @@ function CheckoutContent() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>('address');
   const [isFetchingZip, setIsFetchingZip] = useState(false);
-  const [quantity, setQuantity] = useState(initialQty);
+  const [quantity] = useState(initialQty);
   const [subscriptionUpgradeCredit, setSubscriptionUpgradeCredit] = useState(0);
   
   const [addressData, setAddressData] = useState<AddressData>({
@@ -1095,7 +1093,6 @@ function CheckoutContent() {
                         <div className="flex-1 min-w-0">
                           <p className="text-gray-800 text-sm font-semibold leading-snug line-clamp-1">{item.title}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <span className="text-gray-500">Qty: {item.quantity}</span>
                             <span className="rounded-full bg-orange-50 px-2 py-0.5 font-medium text-orange-700">
                               Format: {displayFormat}
                             </span>
@@ -1132,29 +1129,7 @@ function CheckoutContent() {
                           {book.category}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-indigo-600 font-bold">{displayPrice}</div>
-                        <div className="flex items-center border border-blue-200 rounded-lg overflow-hidden bg-white">
-                          <button
-                            type="button"
-                            onClick={() => setQuantity(current => Math.max(1, current - 1))}
-                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                            disabled={quantity <= 1}
-                            aria-label="Decrease quantity"
-                          >
-                            <MinusIcon className="w-4 h-4" />
-                          </button>
-                          <span className="w-9 text-center text-sm font-semibold text-gray-800">{quantity}</span>
-                          <button
-                            type="button"
-                            onClick={() => setQuantity(current => current + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-blue-50"
-                            aria-label="Increase quantity"
-                          >
-                            <PlusIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
+                      <div className="text-indigo-600 font-bold">{displayPrice}</div>
                     </div>
                   </div>
                 ) : audiobook ? (
@@ -1220,12 +1195,6 @@ function CheckoutContent() {
                     <div className="flex justify-between text-green-600">
                       <span>Upgrade credit</span>
                       <span>- ₹{subscriptionUpgradeCredit.toFixed(2)}</span>
-                    </div>
-                  )}
-                  {book && (
-                    <div className="flex justify-between text-gray-600">
-                      <span>Quantity</span>
-                      <span>x{quantity}</span>
                     </div>
                   )}
                   {gstPercentage > 0 && (

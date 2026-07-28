@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCartIcon,
   TrashIcon,
-  PlusIcon,
-  MinusIcon,
   ArrowLeftIcon,
   TagIcon,
   ShieldCheckIcon,
@@ -20,7 +18,7 @@ import { useCart } from '@/contexts/CartContext';
 
 export default function CartPage() {
   const router = useRouter();
-  const { cartItems, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice, totalSavings } = useCart();
+  const { cartItems, removeFromCart, clearCart, totalItems, totalPrice, totalSavings } = useCart();
   const [mounted, setMounted] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
@@ -153,27 +151,8 @@ export default function CartPage() {
                       )}
                     </div>
 
-                    {/* Quantity + Actions */}
+                    {/* Actions */}
                     <div className="flex items-center gap-4 mt-3 flex-wrap">
-                      {/* Quantity control */}
-                      <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                        <button
-                          onClick={() => item.quantity === 1 ? handleRemove(item.id, item.format) : updateQuantity(item.id, item.quantity - 1, item.format)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                        >
-                          <MinusIcon className="w-4 h-4" />
-                        </button>
-                        <span className="w-10 text-center font-semibold text-gray-800 text-sm">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1, item.format)}
-                          className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-                        >
-                          <PlusIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-
                       {/* Remove */}
                       <button
                         onClick={() => handleRemove(item.id, item.format)}

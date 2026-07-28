@@ -41,7 +41,7 @@ export default function BookDetailClient({
   const selectedFormat: string = 'E-book';
   const [isFavorited, setIsFavorited] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const quantity = 1;
   const [currentBook, setCurrentBook] = useState(book);
   const [userRating, setUserRating] = useState<number>(0);
   const [cartFeedback, setCartFeedback] = useState<'added' | null>(null);
@@ -462,29 +462,6 @@ export default function BookDetailClient({
                 </span>
               )}
             </div>
-
-            {!isFreeBook && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantity
-                </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50 flex items-center justify-center font-semibold"
-                  >
-                    -
-                  </button>
-                  <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50 flex items-center justify-center font-semibold"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div className="flex flex-col gap-4">
               {actionButtons}
