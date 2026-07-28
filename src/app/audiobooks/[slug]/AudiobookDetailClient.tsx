@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { BACKEND_URL } from '@/config/backend-url.config';
 import { audiobooksApi } from '@/services/api/audiobooksApi';
@@ -466,24 +466,18 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     };
   };
 
-  // Audio sync and word highlighting
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-
+  const updateHighlightedWordForTime = useCallback(
+    (time: number) => {
       if (useTranscriptWordTimings) {
         const timedWordIndex = transcriptWords.findIndex(
-          (word) => audio.currentTime >= word.startTime && audio.currentTime < word.endTime
+          (word) => time >= word.startTime && time < word.endTime
         );
 
-        if (timedWordIndex !== currentWordIndex) {
-          setCurrentWordIndex(timedWordIndex);
-        }
+        setCurrentWordIndex((previousIndex) =>
+          previousIndex === timedWordIndex ? previousIndex : timedWordIndex
+        );
 
-        if (timedWordIndex >= 0 && activeTab !== 'transcript' && audio.currentTime > 0) {
+        if (timedWordIndex >= 0 && activeTab !== 'transcript' && time > 0) {
           setActiveTab('transcript');
         }
 
@@ -492,16 +486,29 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
 
       if (!estimatedWordTimings.length) return;
 
-      const estimatedWordIndex = findEstimatedWordIndex(estimatedWordTimings, audio.currentTime);
-      
-      if (estimatedWordIndex >= 0 && estimatedWordIndex !== currentWordIndex) {
-        setCurrentWordIndex(estimatedWordIndex);
-        
-        // Auto-switch to transcript tab when audio starts
-        if (activeTab !== 'transcript' && audio.currentTime > 0) {
+      const estimatedWordIndex = findEstimatedWordIndex(estimatedWordTimings, time);
+
+      if (estimatedWordIndex >= 0) {
+        setCurrentWordIndex((previousIndex) =>
+          previousIndex === estimatedWordIndex ? previousIndex : estimatedWordIndex
+        );
+
+        if (activeTab !== 'transcript' && time > 0) {
           setActiveTab('transcript');
         }
       }
+    },
+    [activeTab, estimatedWordTimings, transcriptWords, useTranscriptWordTimings]
+  );
+
+  // Audio sync and word highlighting
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+      updateHighlightedWordForTime(audio.currentTime);
     };
 
     const handleLoadedMetadata = () => {
@@ -522,7 +529,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentWordIndex, activeTab, transcriptWords, estimatedWordTimings, useTranscriptWordTimings]);
+  }, [updateHighlightedWordForTime]);
 
   // Load voices for speech synthesis
   useEffect(() => {
@@ -567,11 +574,13 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     if (persistentAudio.duration > 0) {
       setDuration(persistentAudio.duration);
     }
+    updateHighlightedWordForTime(persistentAudio.currentTime);
   }, [
     isPersistentTrack,
     persistentAudio.currentTime,
     persistentAudio.duration,
     persistentAudio.isPlaying,
+    updateHighlightedWordForTime,
   ]);
 
   // Restore rating state from localStorage on page load
