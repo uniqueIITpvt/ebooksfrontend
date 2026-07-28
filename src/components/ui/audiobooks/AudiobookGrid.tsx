@@ -27,7 +27,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
   const { openAuthModal, refreshUser, user } = useAuth();
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
-  const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
+  const { currentTrack, isPlaying, pause, playTrack } = usePersistentAudioPlayer();
   const hasUniquePlus = hasActiveSubscription(user);
 
   const handleTogglePreview = async (item: PublicBookListItem) => {
@@ -36,14 +36,22 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
     if (!audioUrl) return;
 
     try {
-      await toggleTrack({
-        id: `audiobook-${item.id}`,
+      const previewTrackId = `audiobook-preview-${item.id}`;
+
+      if (currentTrack?.id === previewTrackId && isPlaying) {
+        pause();
+        return;
+      }
+
+      await playTrack({
+        id: previewTrackId,
         title: item.title,
         author: item.author,
         image: item.image,
         url: audioUrl,
         href: getAudiobookHref(item),
-      });
+        previewDurationSeconds: 10,
+      }, 0);
     } catch {
     }
   };
@@ -139,7 +147,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
       <div className='grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10'>
         {items.map((item) => {
           const audioUrl = item.files?.audiobook?.url;
-          const isCurrentItem = currentTrack?.id === `audiobook-${item.id}`;
+          const isCurrentItem = currentTrack?.id === `audiobook-preview-${item.id}`;
           const free = isFreeItem(item);
           const priceLine = free ? null : (
             <>

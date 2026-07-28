@@ -25,6 +25,7 @@ export interface PersistentAudioTrack {
   image?: string | null;
   url: string;
   href?: string;
+  previewDurationSeconds?: number;
 }
 
 interface PersistentAudioPlayerContextValue {
@@ -75,7 +76,18 @@ export function PersistentAudioPlayerProvider({
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime || 0);
+    const handleTimeUpdate = () => {
+      const nextTime = audio.currentTime || 0;
+      setCurrentTime(nextTime);
+
+      if (
+        currentTrack?.previewDurationSeconds &&
+        nextTime >= currentTrack.previewDurationSeconds
+      ) {
+        audio.pause();
+        setCurrentTime(currentTrack.previewDurationSeconds);
+      }
+    };
     const handleLoadedMetadata = () => setDuration(audio.duration || 0);
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
@@ -96,7 +108,7 @@ export function PersistentAudioPlayerProvider({
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [currentTrack?.previewDurationSeconds]);
 
   const playTrack = async (track: PersistentAudioTrack, startAt?: number) => {
     const audio = audioRef.current;
@@ -181,11 +193,23 @@ export function PersistentAudioPlayerProvider({
     setIsPlaying(false);
   };
 
+  const previewDuration =
+    currentTrack?.previewDurationSeconds && currentTrack.previewDurationSeconds > 0
+      ? currentTrack.previewDurationSeconds
+      : 0;
+  const displayDuration = previewDuration || duration;
+  const displayCurrentTime = previewDuration
+    ? Math.min(currentTime, previewDuration)
+    : currentTime;
+  const displayProgress = displayDuration
+    ? Math.min(100, (displayCurrentTime / displayDuration) * 100)
+    : 0;
+
   const handleProgressClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!duration) return;
+    if (!displayDuration) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-    const nextTime = ((event.clientX - rect.left) / rect.width) * duration;
+    const nextTime = ((event.clientX - rect.left) / rect.width) * displayDuration;
     seek(nextTime);
   };
 
@@ -220,7 +244,7 @@ export function PersistentAudioPlayerProvider({
             <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white/95 text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur">
               <div
                 className="h-1 bg-blue-600 transition-all"
-                style={{ width: `${duration ? Math.min(100, (currentTime / duration) * 100) : 0}%` }}
+                style={{ width: `${displayProgress}%` }}
               />
               <div className="flex items-center gap-3 p-3">
                 <Link
@@ -253,7 +277,7 @@ export function PersistentAudioPlayerProvider({
                     {currentTrack.title}
                   </Link>
                   <div className="truncate text-xs text-slate-500">
-                    {currentTrack.author || 'Audiobook'} | {formatTime(currentTime)} / {formatTime(duration)}
+                    {currentTrack.author || 'Audiobook'} | {formatTime(displayCurrentTime)} / {formatTime(displayDuration)}
                   </div>
                 </div>
 
@@ -417,7 +441,7 @@ export function PersistentAudioPlayerProvider({
                     <SpeakerWaveIcon className="h-8 w-8 text-white drop-shadow" />
                   </div>
                   <div className="flex w-full items-center gap-5">
-                    <span className="w-12 text-right text-[13px] font-bold text-white">{formatTime(currentTime)}</span>
+                    <span className="w-12 text-right text-[13px] font-bold text-white">{formatTime(displayCurrentTime)}</span>
                     <button
                       type="button"
                       onClick={handleProgressClick}
@@ -427,11 +451,11 @@ export function PersistentAudioPlayerProvider({
                       <span className="block h-1 overflow-hidden rounded-full bg-white/35">
                         <span
                           className="block h-full rounded-full bg-white transition-all"
-                          style={{ width: `${duration ? Math.min(100, (currentTime / duration) * 100) : 0}%` }}
+                          style={{ width: `${displayProgress}%` }}
                         />
                       </span>
                     </button>
-                    <span className="w-12 text-[13px] font-bold text-white">{formatTime(duration)}</span>
+                    <span className="w-12 text-[13px] font-bold text-white">{formatTime(displayDuration)}</span>
                   </div>
                 </div>
               </div>
