@@ -669,21 +669,6 @@ export default function MediaContentMobile({
                 </div>
               </div>
 
-              {uniqueFormats.length > 0 && (
-                <div>
-                  <p className='mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-600'>Format</p>
-                  {uniqueFormats.map((format) => (
-                    <FilterCheckbox
-                      key={format}
-                      label={format}
-                      count={formatCounts[format] ?? 0}
-                      checked={selectedFormats.includes(format)}
-                      onChange={() => toggleFilterValue(setSelectedFormats, format)}
-                    />
-                  ))}
-                </div>
-              )}
-
               <div>
                 <p className='mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-600'>Type</p>
                 {['Books', 'Audiobook'].map((type) => (
