@@ -508,7 +508,9 @@ export default function BooksPageClient({
                 </div>
               </div>
 
-              <AudiobookGrid items={sortedItems} />
+              <div className='bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 px-3 py-5 sm:px-6 sm:py-8 lg:px-8'>
+                <AudiobookGrid items={sortedItems} />
+              </div>
             </div>
           </div>
         </section>
@@ -743,21 +745,22 @@ export default function BooksPageClient({
                 </div>
               </div>
             ) : (
-              <BooksGrid
-                items={sortedItems}
-                className="bg-gray-50"
-                onFilterClick={() => setIsSidebarOpen(true)}
-                hasActiveFilters={hasActiveFilters}
-                desktopColumns={isFilterSidebarCollapsed ? 5 : 4}
-                onAudiobookSelect={(item) => {
-                  if (item.type !== 'Audiobook') return;
-                  router.push('/books?type=Audiobook');
-                  setIsAudiobookPlaying(false);
-                  if (audiobookAudioRef.current) {
-                    audiobookAudioRef.current.pause();
-                  }
-                }}
-              />
+              <div className='bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 px-3 py-5 sm:px-6 sm:py-8 lg:px-8'>
+                <BooksGrid
+                  items={sortedItems}
+                  onFilterClick={() => setIsSidebarOpen(true)}
+                  hasActiveFilters={hasActiveFilters}
+                  desktopColumns={isFilterSidebarCollapsed ? 5 : 4}
+                  onAudiobookSelect={(item) => {
+                    if (item.type !== 'Audiobook') return;
+                    router.push('/books?type=Audiobook');
+                    setIsAudiobookPlaying(false);
+                    if (audiobookAudioRef.current) {
+                      audiobookAudioRef.current.pause();
+                    }
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

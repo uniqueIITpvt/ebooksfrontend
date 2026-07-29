@@ -161,7 +161,7 @@ export default function AudiobooksPage() {
         <div className='lg:flex lg:gap-8 xl:gap-10'>
           <div
             className={`lg:flex-shrink-0 transition-all duration-300 ${
-              isFilterSidebarCollapsed ? 'lg:w-12 xl:w-12' : 'lg:w-[320px] xl:w-[340px]'
+              isFilterSidebarCollapsed ? 'lg:w-12 xl:w-12' : 'lg:w-64 xl:w-62'
             }`}
           >
             {isFilterSidebarCollapsed && (
@@ -215,7 +215,9 @@ export default function AudiobooksPage() {
               Filters
             </button>
 
-            <AudiobookGrid items={sortedItems} />
+            <div className='bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 px-3 py-5 sm:px-6 sm:py-8 lg:px-8'>
+              <AudiobookGrid items={sortedItems} />
+            </div>
           </div>
         </div>
       </section>
