@@ -162,7 +162,7 @@ export function LibraryCardMobile({
   return (
     <div className={`group flex h-auto w-full flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out ${className}`}>
       <div
-        className='relative h-[155px] w-full overflow-hidden rounded-lg bg-transparent'
+        className='relative h-[118px] w-full overflow-hidden rounded-lg bg-transparent min-[390px]:h-[126px]'
         onClick={onCoverClick}
         role={onCoverClick ? 'button' : undefined}
         tabIndex={onCoverClick ? 0 : undefined}
@@ -192,28 +192,28 @@ export function LibraryCardMobile({
       </div>
 
       <div className='flex flex-col pt-2 font-dm-sans'>
-        <h3 className='truncate text-[12px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{title}</h3>
-        <p className='mt-0.5 truncate text-[10px] font-normal text-[#757575] font-dm-sans'>{author}</p>
+        <h3 className='truncate text-[10px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans min-[390px]:text-[11px]'>{title}</h3>
+        <p className='mt-0.5 truncate text-[9px] font-normal text-[#757575] font-dm-sans'>{author}</p>
 
         {(rating ?? 0) > 0 && (
-          <div className='mt-1 flex items-center gap-1.5'>
-            <StarIconSolid className='h-3.5 w-3.5 text-[#5146F7]' />
-            <span className='text-[10px] leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
-            <span className='text-[10px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
+          <div className='mt-1 flex items-center gap-1'>
+            <StarIconSolid className='h-3 w-3 text-[#5146F7]' />
+            <span className='text-[9px] leading-none text-[#1E1B4B] font-dm-sans'>{(rating || 0).toFixed(1)}</span>
+            <span className='text-[9px] font-medium text-[#666666] font-dm-sans'>({reviews || 0})</span>
           </div>
         )}
 
         {priceLine ? (
-          <p className='mt-1 truncate text-[10px] font-semibold text-[#1E1B4B] font-dm-sans'>
+          <p className='mt-1 truncate text-[8px] font-semibold text-[#1E1B4B] font-dm-sans min-[390px]:text-[9px]'>
             {priceLine}
           </p>
         ) : null}
 
-        <div className='mt-1.5 grid grid-cols-[minmax(0,1fr)_32px] gap-2'>
+        <div className='mt-1.5 grid grid-cols-[minmax(0,1fr)_26px] gap-1.5'>
           <button
             type='button'
             onClick={onPrimaryClick}
-            className={`flex h-8 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none transition-all active:scale-95 font-dm-sans ${primaryButtonClass(primaryVariant)}`}
+            className={`flex h-8 w-full items-center justify-center overflow-hidden rounded-[8px] px-1 text-center text-[7px] font-semibold leading-tight transition-all active:scale-95 font-dm-sans min-[390px]:text-[8px] ${primaryButtonClass(primaryVariant)}`}
           >
             {primaryLabel}
           </button>
@@ -225,14 +225,14 @@ export function LibraryCardMobile({
               onSaveClick();
             }}
             disabled={saveDisabled}
-            className={`flex h-8 w-8 items-center justify-center rounded-[10px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
+            className={`flex h-7 w-[26px] items-center justify-center rounded-[8px] border shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${
               isSaved
                 ? 'border-yellow-400 bg-yellow-400 text-white'
                 : 'border-slate-200 bg-white text-blue-600'
             }`}
             aria-label={saveLabel || `Save ${title}`}
           >
-            {isSaved ? <BookmarkIconSolid className='h-4 w-4' /> : <BookmarkIconOutline className='h-4 w-4' />}
+            {isSaved ? <BookmarkIconSolid className='h-3.5 w-3.5' /> : <BookmarkIconOutline className='h-3.5 w-3.5' />}
           </button>
         </div>
       </div>

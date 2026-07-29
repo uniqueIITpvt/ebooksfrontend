@@ -303,7 +303,7 @@ interface MediaContentMobileProps {
   allCategoryNames?: string[];
 }
 
-const LANDING_ITEM_LIMIT = 4;
+const LANDING_ITEM_LIMIT = 3;
 
 export default function MediaContentMobile({
   newReleaseBooks,
@@ -335,7 +335,7 @@ export default function MediaContentMobile({
   const isLoadingPremiumSummaries = false;
   const isLoadingCategories = false;
 
-  const itemsPerPage = 4; // Keep each landing hub to 4 cards; full lists live behind See More.
+  const itemsPerPage = 3; // Keep each landing hub to 3 cards; full lists live behind See More.
   
   // Refs for swipe containers
   const booksContainerRef = useRef<HTMLDivElement>(null);
@@ -749,7 +749,7 @@ export default function MediaContentMobile({
 
           <div
             ref={freeSummariesContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            className='grid grid-cols-3 gap-x-3 gap-y-6 mb-8 touch-pan-y'
             onTouchStart={(e) => {
               setActivePager({
                 currentPage: currentFreeSummaryPage,
@@ -827,7 +827,7 @@ export default function MediaContentMobile({
           {/* Books Grid - 2 columns with swipe */}
           <div 
             ref={booksContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            className='grid grid-cols-3 gap-x-3 gap-y-6 mb-8 touch-pan-y'
             onTouchStart={(e) => {
               setActivePager({
                 currentPage: currentBookPage,
@@ -890,7 +890,7 @@ export default function MediaContentMobile({
 
           <div
             ref={audiobooksContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            className='grid grid-cols-3 gap-x-3 gap-y-6 mb-8 touch-pan-y'
             onTouchStart={(e) => {
               setActivePager({
                 currentPage: currentAudiobookPage,
@@ -952,7 +952,7 @@ export default function MediaContentMobile({
 
           <div
             ref={trendingBooksContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            className='grid grid-cols-3 gap-x-3 gap-y-6 mb-8 touch-pan-y'
             onTouchStart={(e) => {
               setActivePager({
                 currentPage: currentTrendingBookPage,
@@ -1014,7 +1014,7 @@ export default function MediaContentMobile({
 
           <div
             ref={premiumSummariesContainerRef}
-            className='grid grid-cols-2 gap-4 mb-6 touch-pan-y'
+            className='grid grid-cols-3 gap-x-3 gap-y-6 mb-8 touch-pan-y'
             onTouchStart={(e) => {
               setActivePager({
                 currentPage: currentPremiumSummaryPage,
