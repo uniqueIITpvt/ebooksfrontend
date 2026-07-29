@@ -13,7 +13,6 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { Button } from '../primitives/Button';
 import Image from 'next/image';
 import Link from 'next/link';
 import CoverImageFrame from '../books/CoverImageFrame';
@@ -737,14 +736,14 @@ export default function MediaContentMobile({
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => router.push('/free-summaries')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+              className="inline-flex h-8 w-[112px] shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 text-[12px] font-semibold text-white shadow-sm transition active:scale-95"
             >
               See More
-            </Button>
+              <ChevronRightIcon className='h-3.5 w-3.5' />
+            </button>
           </div>
 
           <div
@@ -792,26 +791,26 @@ export default function MediaContentMobile({
         {/* New Release Books Section */}
         <div className='mb-8'>
           {/* Header */}
-          <div className='flex items-center justify-between mb-6'>
-            <div className='flex-1'>
-              <h3 className='text-lg font-bold text-slate-900 mb-2 flex items-center'>
-                <BookOpenIcon className='w-4 h-4 mr-2 text-black' />
-                <span className='text-black'>New Release Books</span>
+          <div className='flex items-start justify-between gap-1.5 mb-6'>
+            <div className='min-w-0 flex-1'>
+              <h3 className='mb-2 flex items-center text-[15px] font-bold text-slate-900 min-[390px]:text-base'>
+                <BookOpenIcon className='mr-1.5 h-3.5 w-3.5 shrink-0 text-black' />
+                <span className='truncate whitespace-nowrap text-black'>New Release Books</span>
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => router.push('/books')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+              className="inline-flex h-8 w-[112px] shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 text-[12px] font-semibold text-white shadow-sm transition active:scale-95"
             >
               See More
-            </Button>
+              <ChevronRightIcon className='h-3.5 w-3.5' />
+            </button>
             <button
               type='button'
               onClick={() => setIsFilterOpen(true)}
-              className='ml-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold text-slate-800 shadow-sm active:scale-95'
+              className='ml-1 inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-2 text-[10px] font-semibold text-slate-800 shadow-sm active:scale-95'
               aria-label='Open filters'
             >
               <FunnelIcon className='h-3.5 w-3.5' />
@@ -878,14 +877,14 @@ export default function MediaContentMobile({
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => router.push('/audiobooks')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+              className="inline-flex h-8 w-[112px] shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 text-[12px] font-semibold text-white shadow-sm transition active:scale-95"
             >
               See More
-            </Button>
+              <ChevronRightIcon className='h-3.5 w-3.5' />
+            </button>
           </div>
 
           <div
@@ -940,14 +939,14 @@ export default function MediaContentMobile({
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => router.push('/trending-books')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+              className="inline-flex h-8 w-[112px] shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 text-[12px] font-semibold text-white shadow-sm transition active:scale-95"
             >
               See More
-            </Button>
+              <ChevronRightIcon className='h-3.5 w-3.5' />
+            </button>
           </div>
 
           <div
@@ -1002,14 +1001,14 @@ export default function MediaContentMobile({
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
-            <Button
+            <button
+              type="button"
               onClick={() => router.push('/premium-summaries')}
-              variant="outline"
-              size="sm"
-              rightIcon={<ChevronRightIcon className='w-4 h-4' />}
+              className="inline-flex h-8 w-[112px] shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 text-[12px] font-semibold text-white shadow-sm transition active:scale-95"
             >
               See More
-            </Button>
+              <ChevronRightIcon className='h-3.5 w-3.5' />
+            </button>
           </div>
 
           <div
