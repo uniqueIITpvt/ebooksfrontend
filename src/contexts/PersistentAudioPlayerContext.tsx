@@ -218,6 +218,11 @@ export function PersistentAudioPlayerProvider({
     seek(nextTime);
   };
 
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    close();
+  };
+
   const value = useMemo(
     () => ({
       currentTrack,
@@ -243,18 +248,18 @@ export function PersistentAudioPlayerProvider({
       {currentTrack && (
         <>
           <div
-            className="fixed inset-x-3 bottom-3 lg:hidden sm:left-auto sm:right-6 sm:w-[390px]"
+            className="fixed inset-x-3 bottom-4 lg:hidden sm:left-auto sm:right-6 sm:w-[390px]"
             style={{ zIndex: 2147483000 }}
           >
-            <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white/95 text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur">
+            <div className="min-h-[106px] overflow-hidden rounded-2xl border border-blue-100 bg-white/95 text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.22)] backdrop-blur">
               <div
                 className="h-1 bg-blue-600 transition-all"
                 style={{ width: `${displayProgress}%` }}
               />
-              <div className="flex items-center gap-3 p-3">
+              <div className="flex items-center gap-3 p-4">
                 <Link
                   href={currentTrack.href || '#'}
-                  className="relative h-14 w-12 shrink-0 overflow-hidden rounded-xl border border-blue-100 bg-blue-50"
+                  className="relative h-16 w-14 shrink-0 overflow-hidden rounded-xl border border-blue-100 bg-blue-50"
                 >
                   {currentTrack.image ? (
                     <Image
@@ -304,8 +309,8 @@ export function PersistentAudioPlayerProvider({
                 </button>
                 <button
                   type="button"
-                  onClick={close}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
+                  onClick={handleClose}
+                  className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50"
                   aria-label="Close audio player"
                 >
                   <XMarkIcon className="h-5 w-5" />
@@ -327,12 +332,11 @@ export function PersistentAudioPlayerProvider({
             }}
           >
             <div
-              className="relative overflow-hidden border-t border-slate-500/70 bg-[#25313b] px-5 text-white shadow-[0_-18px_42px_rgba(15,23,42,0.38)]"
+              className="relative h-[164px] overflow-hidden border-t border-slate-500/70 bg-[#25313b] px-5 text-white shadow-[0_-18px_42px_rgba(15,23,42,0.38)] lg:h-24"
               style={{
                 background: '#25313b',
                 boxShadow: '0 -18px 42px rgba(15,23,42,0.38)',
                 color: '#fff',
-                height: 96,
                 overflow: 'hidden',
                 position: 'relative',
               }}
@@ -366,7 +370,7 @@ export function PersistentAudioPlayerProvider({
                 style={{
                   background: 'rgba(37, 49, 59, 0.95)',
                   bottom: 0,
-                  height: 68,
+                  height: 'calc(100% - 28px)',
                   left: 0,
                   position: 'absolute',
                   right: 0,
@@ -375,16 +379,16 @@ export function PersistentAudioPlayerProvider({
 
               <button
                 type="button"
-                onClick={close}
-                className="absolute right-5 bottom-4 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-white shadow-sm hover:bg-white/10"
+                onClick={handleClose}
+                className="absolute right-3 top-9 z-20 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-white shadow-sm hover:bg-white/10 lg:right-5 lg:bottom-4 lg:top-auto lg:h-9 lg:w-9"
                 aria-label="Close audio player"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
 
-              <div className="relative mx-auto h-full max-w-[1420px] pr-14">
-                <Link href={currentTrack.href || '#'} className="absolute bottom-2 left-0 flex max-w-[420px] items-center gap-3">
-                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm bg-white">
+              <div className="relative mx-auto h-full max-w-[1420px] px-3 pr-14 lg:px-0 lg:pr-14">
+                <Link href={currentTrack.href || '#'} className="absolute left-3 right-14 top-10 flex min-w-0 items-center gap-2 lg:bottom-2 lg:left-0 lg:right-auto lg:top-auto lg:max-w-[420px] lg:gap-3">
+                  <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-sm bg-white lg:h-12 lg:w-12">
                     {currentTrack.image ? (
                       <Image
                         src={currentTrack.image}
@@ -399,54 +403,46 @@ export function PersistentAudioPlayerProvider({
                       </span>
                     )}
                   </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-bold leading-5 text-white/70">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[11px] font-bold leading-4 text-white/70 lg:text-sm lg:leading-5">
                       {currentTrack.author || 'Audiobook'}
                     </span>
-                    <span className="block truncate text-base font-extrabold leading-5 text-white">
+                    <span className="block truncate text-sm font-extrabold leading-5 text-white lg:text-base">
                       {currentTrack.title}
                     </span>
                   </span>
                 </Link>
 
-                <div className="absolute bottom-2 left-1/2 flex w-[760px] -translate-x-1/2 flex-col items-center justify-center gap-1">
-                  <div className="flex w-full items-center justify-center gap-10">
+                <div className="absolute bottom-3 left-3 right-14 flex flex-col items-center justify-center gap-1 lg:bottom-2 lg:left-1/2 lg:right-auto lg:w-[760px] lg:-translate-x-1/2">
+                  <div className="flex w-full items-center justify-center gap-4 lg:gap-10">
                     <button
                       type="button"
                       onClick={() => skip(-10)}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-[11px] font-bold text-white shadow-sm hover:bg-white/10"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-[10px] font-bold text-white shadow-sm hover:bg-white/10 lg:h-9 lg:w-9 lg:text-[11px]"
                       aria-label="Back 10 seconds"
                     >
                       10
                     </button>
                     <button
                       type="button"
-                      onClick={() => skip(-15)}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-[11px] font-bold text-white shadow-sm hover:bg-white/10"
-                      aria-label="Back 15 seconds"
-                    >
-                      15
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => (isPlaying ? pause() : void playTrack(currentTrack))}
-                      className="flex h-12 w-12 items-center justify-center rounded-full bg-[#73eef4] text-[#122431] shadow-lg shadow-black/25 hover:bg-[#9af6f9]"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#73eef4] text-[#122431] shadow-lg shadow-black/25 hover:bg-[#9af6f9] lg:h-12 lg:w-12"
                       aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
                     >
                       {isPlaying ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="ml-0.5 h-6 w-6" />}
                     </button>
                     <button
                       type="button"
-                      onClick={() => skip(60)}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-[11px] font-bold text-white shadow-sm hover:bg-white/10"
-                      aria-label="Forward 60 seconds"
+                      onClick={() => skip(10)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/90 bg-transparent text-[10px] font-bold text-white shadow-sm hover:bg-white/10 lg:h-9 lg:w-9 lg:text-[11px]"
+                      aria-label="Forward 10 seconds"
                     >
-                      60
+                      10
                     </button>
-                    <SpeakerWaveIcon className="h-8 w-8 text-white drop-shadow" />
+                    <SpeakerWaveIcon className="h-6 w-6 text-white drop-shadow lg:h-8 lg:w-8" />
                   </div>
-                  <div className="flex w-full items-center gap-5">
-                    <span className="w-12 text-right text-[13px] font-bold text-white">{formatTime(displayCurrentTime)}</span>
+                  <div className="flex w-full items-center gap-2 lg:gap-5">
+                    <span className="w-10 text-right text-[11px] font-bold text-white lg:w-12 lg:text-[13px]">{formatTime(displayCurrentTime)}</span>
                     <button
                       type="button"
                       onClick={handleProgressClick}
@@ -460,7 +456,7 @@ export function PersistentAudioPlayerProvider({
                         />
                       </span>
                     </button>
-                    <span className="w-12 text-[13px] font-bold text-white">{formatTime(displayDuration)}</span>
+                    <span className="w-10 text-[11px] font-bold text-white lg:w-12 lg:text-[13px]">{formatTime(displayDuration)}</span>
                   </div>
                 </div>
               </div>
