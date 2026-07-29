@@ -817,6 +817,10 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   };
 
   const handleWordClick = (wordIndex: number) => {
+    if (typeof window !== 'undefined') {
+      window.speechSynthesis.cancel();
+    }
+
     const audio = audioRef.current;
     if (audio && audio.src) {
       const timedWord = useTranscriptWordTimings ? transcriptWords[wordIndex] : null;
@@ -837,7 +841,6 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
       }
       return;
     }
-    fallbackToSpeechSynthesis(wordIndex);
   };
 
   const handleRating = async (stars: number) => {
