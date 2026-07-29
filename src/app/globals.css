@@ -513,3 +513,17 @@
 .top-24 {
   top: 1rem;
 }
+
+.audio-player-title-marquee {
+  animation: audio-player-title-marquee 12s linear infinite;
+}
+
+@keyframes audio-player-title-marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}

@@ -387,7 +387,7 @@ export function PersistentAudioPlayerProvider({
               </button>
 
               <div className="relative mx-auto h-full max-w-[1420px] px-3 pr-14 lg:px-0 lg:pr-14">
-                <Link href={currentTrack.href || '#'} className="absolute left-3 right-14 top-10 flex min-w-0 items-center gap-2 lg:bottom-2 lg:left-0 lg:right-auto lg:top-auto lg:max-w-[420px] lg:gap-3">
+                <Link href={currentTrack.href || '#'} className="absolute left-3 right-14 top-10 flex min-w-0 items-center gap-2 lg:bottom-2 lg:left-0 lg:right-auto lg:top-auto lg:max-w-[360px] lg:gap-3">
                   <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-sm bg-white lg:h-12 lg:w-12">
                     {currentTrack.image ? (
                       <Image
@@ -404,11 +404,14 @@ export function PersistentAudioPlayerProvider({
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[11px] font-bold leading-4 text-white/70 lg:text-sm lg:leading-5">
+                    <span className="block truncate text-[11px] font-bold leading-4 text-white/70 lg:hidden">
                       {currentTrack.author || 'Audiobook'}
                     </span>
-                    <span className="block truncate text-sm font-extrabold leading-5 text-white lg:text-base">
-                      {currentTrack.title}
+                    <span className="block overflow-hidden whitespace-nowrap text-sm font-extrabold leading-5 text-white lg:text-base">
+                      <span className="audio-player-title-marquee inline-flex min-w-max gap-8">
+                        <span>{currentTrack.title}</span>
+                        <span aria-hidden="true">{currentTrack.title}</span>
+                      </span>
                     </span>
                   </span>
                 </Link>
