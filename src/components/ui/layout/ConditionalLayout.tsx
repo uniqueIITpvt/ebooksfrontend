@@ -9,7 +9,7 @@ const Navbar = dynamic(() => import('./Navbar'), {
 
 const Footer = dynamic(() => import('./Footer'));
 
-const AutomaticChatEmbed = dynamic(() => import('../primitives/AutomaticChatEmbed'), {
+const TawkWidget = dynamic(() => import('../primitives/TawkWidget'), {
   ssr: false,
 });
 
@@ -46,7 +46,7 @@ export default function ConditionalLayout({
       <Navbar siteLogo={siteLogo} />
       <main className="pt-20">{children}</main>
       <Footer siteLogo={siteLogo} />
-      <AutomaticChatEmbed />
+      <TawkWidget />
     </>
   );
 }

@@ -23,6 +23,7 @@ import { booksApi, type Book } from '@/services/api/booksApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { generateBookSlug } from '@/utils/slugify';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 interface BookDetailClientProps {
   book: Book;
@@ -50,6 +51,59 @@ export default function BookDetailClient({
       currency: 'INR',
       minimumFractionDigits: 2,
     }).format(value);
+
+  const currentBookId = String(currentBook.id || (currentBook as any)._id || '');
+  const currentBookSlug = currentBook.slug || generateBookSlug(currentBook.title || '');
+  const currentBookDetailPath = `/books/${currentBookSlug}`;
+  const currentBookReadPath = `${currentBookDetailPath}/read`;
+  const hasUniquePlusAccess = hasActiveSubscription(user);
+
+  const normalizeBookReference = (entry: any) => {
+    if (!entry) return [];
+    if (typeof entry === 'string' || typeof entry === 'number') return [{ id: String(entry) }];
+
+    return [
+      entry,
+      entry.bookId,
+      entry.book,
+      entry.item,
+      entry.product,
+    ].filter(Boolean);
+  };
+
+  const matchesCurrentBook = (entry: any) =>
+    normalizeBookReference(entry).some((bookRef) => {
+      const refId = String(bookRef?._id || bookRef?.id || bookRef?.bookId || '');
+      const refSlug = bookRef?.slug || (bookRef?.title ? generateBookSlug(bookRef.title) : '');
+
+      return (
+        (currentBookId && refId === currentBookId) ||
+        (currentBookSlug && refSlug === currentBookSlug)
+      );
+    });
+
+  const purchasedCollections = [
+    (user as any)?.purchasedBooks,
+    (user as any)?.ownedBooks,
+    (user as any)?.libraryBooks,
+    (user as any)?.myLibrary,
+    (user as any)?.library,
+    (user as any)?.purchases,
+  ];
+
+  const hasKeepForeverAccess = purchasedCollections.some(
+    (collection) => Array.isArray(collection) && collection.some(matchesCurrentBook),
+  );
+
+  const getCheckoutPath = () => {
+    const params = new URLSearchParams({
+      id: String(currentBook.id || (currentBook as any)._id || currentBook.slug || ''),
+      qty: '1',
+      format: 'E-book',
+    });
+
+    return `/checkout?${params.toString()}`;
+  };
 
   useEffect(() => {
     const currentBookId = String(currentBook.id || (currentBook as any)._id || '');
@@ -88,22 +142,33 @@ export default function BookDetailClient({
   };
 
   const handleBuyNow = () => {
-    const params = new URLSearchParams({
-      id: String(currentBook.id || (currentBook as any)._id || currentBook.slug || ''),
-      qty: '1',
-      format: 'E-book',
-    });
-
-    router.push(`/checkout?${params.toString()}`);
-  };
-
-  const handleSubscribeClick = () => {
     if (!user) {
-      openAuthModal('signin', '/subscription');
+      openAuthModal('signin', getCheckoutPath());
       return;
     }
 
-    router.push('/subscription');
+    if (hasKeepForeverAccess) {
+      router.push(currentBookReadPath);
+      return;
+    }
+
+    router.push(getCheckoutPath());
+  };
+
+  const handleSubscribeClick = () => {
+    const subscriptionPath = `/subscription?returnTo=${encodeURIComponent(currentBookDetailPath)}`;
+
+    if (!user) {
+      openAuthModal('signin', subscriptionPath);
+      return;
+    }
+
+    if (hasUniquePlusAccess) {
+      router.push(currentBookReadPath);
+      return;
+    }
+
+    router.push(subscriptionPath);
   };
 
   const handleRatingClick = async (newRating: number) => {
@@ -303,6 +368,8 @@ export default function BookDetailClient({
               price={currentBook.price}
               onStartUniquePlus={handleSubscribeClick}
               onKeepForever={handleBuyNow}
+              uniquePlusButtonLabel={hasUniquePlusAccess ? 'Read with Unique Plus' : 'Start Unique Plus'}
+              keepForeverButtonLabel={hasKeepForeverAccess ? 'Read Now' : undefined}
             />
 
           </div>
