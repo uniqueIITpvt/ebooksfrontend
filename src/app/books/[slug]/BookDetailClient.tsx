@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,12 +7,10 @@ import Image from 'next/image';
 import {
   ArrowLeftIcon,
   StarIcon,
-  ClockIcon,
   BookOpenIcon,
   SpeakerWaveIcon,
   ShareIcon,
   HeartIcon,
-  ShoppingCartIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
 import {
@@ -20,11 +18,11 @@ import {
   HeartIcon as SolidHeartIcon,
 } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCart } from '@/contexts/CartContext';
 import { authApi } from '@/services/api/authApi';
 import { booksApi, type Book } from '@/services/api/booksApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { generateBookSlug } from '@/utils/slugify';
+import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
 
 interface BookDetailClientProps {
   book: Book;
@@ -37,17 +35,11 @@ export default function BookDetailClient({
 }: BookDetailClientProps) {
   const router = useRouter();
   const { user, refreshUser, openAuthModal } = useAuth();
-  const { addToCart, isInCart } = useCart();
-  const selectedFormat: string = 'E-book';
   const [isFavorited, setIsFavorited] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const quantity = 1;
   const [currentBook, setCurrentBook] = useState(book);
   const [userRating, setUserRating] = useState<number>(0);
-  const [cartFeedback, setCartFeedback] = useState<'added' | null>(null);
-  const [claiming, setClaiming] = useState(false);
   const [savingFavorite, setSavingFavorite] = useState(false);
-  const [currentPrice, setCurrentPrice] = useState<string>('');
 
   const parseCurrency = (value?: string | number | null) =>
     Number.parseFloat(String(value || '0').replace(/[^0-9.]/g, '')) || 0;
@@ -79,39 +71,6 @@ export default function BookDetailClient({
     setIsFavorited(Boolean(saved));
   }, [currentBook, user]);
 
-  useEffect(() => {
-    // Update price when format or quantity changes
-    const updatePrice = () => {
-      const basePrice = parseCurrency(currentBook.price);
-      let formatPrice = basePrice;
-      
-      // If API provides format-specific pricing, use it
-      if (currentBook.formatPrices && currentBook.formatPrices[selectedFormat]) {
-        formatPrice = parseCurrency(currentBook.formatPrices[selectedFormat]);
-      } else {
-        // Fallback to hardcoded format-specific pricing
-        switch (selectedFormat) {
-          case 'Hardcover':
-            formatPrice = basePrice * 1.5; // 50% more expensive
-            break;
-          case 'Paperback':
-            formatPrice = basePrice * 1.0; // Base price
-            break;
-          case 'E-book':
-            formatPrice = basePrice * 0.7; // 30% cheaper
-            break;
-          default:
-            formatPrice = basePrice;
-        }
-      }
-      
-      const finalPrice = formatPrice * quantity;
-      setCurrentPrice(formatCurrency(finalPrice));
-    };
-    
-    updatePrice();
-  }, [selectedFormat, quantity, currentBook]);
-
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -128,67 +87,14 @@ export default function BookDetailClient({
     alert('Link copied to clipboard!');
   };
 
-  const handleAddToCart = () => {
-    const price = parseFloat((currentPrice || calculateTotalPrice()).replace(/[^0-9.]/g, '')) / quantity;
-    const originalPrice = currentBook.originalPrice
-      ? parseFloat(String(currentBook.originalPrice).replace(/[^0-9.]/g, ''))
-      : undefined;
-
-    addToCart({
-      id: currentBook.id || (currentBook as any)._id,
-      title: currentBook.title,
-      author: currentBook.author || 'UniqueIIT Research Center',
-      price,
-      originalPrice,
-      image: currentBook.image || '',
-      slug: currentBook.slug || currentBook.id,
-      category: currentBook.category || '',
-      format: selectedFormat,
-      language: currentBook.language,
-    }, quantity);
-
-    setCartFeedback('added');
-    setTimeout(() => setCartFeedback(null), 3000);
-  };
-
   const handleBuyNow = () => {
     const params = new URLSearchParams({
-      id: currentBook.id || (currentBook as any)._id,
-      qty: String(quantity),
+      id: String(currentBook.id || (currentBook as any)._id || currentBook.slug || ''),
+      qty: '1',
+      format: 'E-book',
     });
 
-    if (selectedFormat) {
-      params.set('format', selectedFormat);
-    }
-
     router.push(`/checkout?${params.toString()}`);
-  };
-
-  const isFreeBook =
-    currentBook.componentType === 'free-summaries' ||
-    currentBook.accessLevel === 'free' ||
-    parseCurrency(currentBook.price) <= 0;
-
-  const handlePrimaryAccess = async () => {
-    if (!isFreeBook) {
-      handleBuyNow();
-      return;
-    }
-
-    if (!user) {
-      openAuthModal('signin', window.location.pathname);
-      return;
-    }
-
-    setClaiming(true);
-    try {
-      const response = await booksApi.claim(currentBook.slug || currentBook.id);
-      router.push(response.data?.redirectTarget || `/books/${currentBook.slug || currentBook.id}/read`);
-    } catch (error: any) {
-      alert(error?.message || 'Unable to claim this book');
-    } finally {
-      setClaiming(false);
-    }
   };
 
   const handleSubscribeClick = () => {
@@ -245,67 +151,6 @@ export default function BookDetailClient({
     }
   };
 
-  const calculateTotalPrice = () => {
-    const parsedBasePrice = parseCurrency(currentBook.price);
-    const parsedFormatPrice =
-      currentBook.formatPrices && currentBook.formatPrices[selectedFormat]
-        ? parseCurrency(currentBook.formatPrices[selectedFormat])
-        : parsedBasePrice;
-
-    return formatCurrency(parsedFormatPrice * quantity);
-
-  };
-
-  const freeActionButtons = (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        onClick={handlePrimaryAccess}
-        disabled={claiming}
-        className="min-w-[150px] px-4 py-2.5 bg-green-600 text-white rounded-xl font-bold text-[13px] hover:bg-green-700 transition-all font-syne flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-      >
-        <BookOpenIcon className="w-5 h-5" />
-        {claiming ? 'Claiming...' : 'Read Free'}
-      </button>
-    </div>
-  );
-
-  const currentBookCartId = currentBook.id || (currentBook as any)._id;
-  const isCurrentBookInCart =
-    isInCart(currentBookCartId, selectedFormat) || isInCart(currentBookCartId);
-
-  const actionButtons = isFreeBook ? freeActionButtons : (
-    <div className="flex items-center justify-end gap-2">
-      {isCurrentBookInCart ? (
-        <Link
-          href="/cart"
-          className="min-w-[130px] px-4 py-2.5 border-2 border-green-600 bg-green-600 text-white rounded-xl font-bold text-[13px] hover:bg-green-700 transition-all font-syne flex items-center justify-center gap-2"
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          In Cart
-        </Link>
-      ) : (
-        <button
-          onClick={handleAddToCart}
-          className="min-w-[130px] px-4 py-2.5 border-2 border-slate-900 text-slate-900 rounded-xl font-bold text-[13px] hover:bg-slate-50 transition-all font-syne flex items-center justify-center gap-2"
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          Add to Cart
-        </button>
-      )}
-      <button
-        onClick={handleBuyNow}
-        className="min-w-[120px] px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-[13px] hover:bg-blue-700 transition-all font-syne flex items-center justify-center gap-2"
-      >
-        Buy Now
-      </button>
-      <button
-        onClick={handleSubscribeClick}
-        className="min-w-[120px] px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-[13px] hover:bg-indigo-700 transition-all font-syne flex items-center justify-center gap-2"
-      >
-        Subscribe
-      </button>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 mt-[2px]">
@@ -378,11 +223,10 @@ export default function BookDetailClient({
           </div>
 
           <div className="flex-1 min-w-0 space-y-4">
-            <div className="flex flex-row flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-row flex-wrap items-center gap-2">
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                 {currentBook.category}
               </span>
-              {actionButtons}
             </div>
 
             <div>
@@ -397,18 +241,19 @@ export default function BookDetailClient({
               <span className="font-semibold text-gray-900">{currentBook.author}</span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-5 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-sm">
               <div className="flex items-center gap-1 group">
                 {[...Array(5)].map((_, index) => (
                   <button
                     key={index}
                     onClick={() => handleRatingClick(index + 1)}
                     className="transition-transform active:scale-90"
+                    aria-label={`Rate ${index + 1} star`}
                   >
                     {index < (userRating || Math.floor(currentBook.rating)) ? (
-                      <SolidStarIcon className="w-6 h-6 text-yellow-500" />
+                      <SolidStarIcon className="w-6 h-6 text-blue-600" />
                     ) : (
-                      <StarIcon className="w-6 h-6 text-gray-300 hover:text-yellow-200 transition-colors" />
+                      <StarIcon className="w-6 h-6 text-blue-100 hover:text-blue-300 transition-colors" />
                     )}
                   </button>
                 ))}
@@ -417,65 +262,6 @@ export default function BookDetailClient({
               <span className="text-gray-400 font-medium font-dm-sans">
                 ({currentBook.reviews + (userRating ? 1 : 0)} reviews)
               </span>
-            </div>
-
-            <div className="flex items-baseline gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-              {isFreeBook ? (
-                <>
-                  <span className="text-3xl font-bold text-gray-400 line-through font-syne">
-                    {currentPrice || calculateTotalPrice()}
-                  </span>
-                  <span className="text-3xl font-extrabold text-green-600 font-syne">
-                    Free
-                  </span>
-                </>
-              ) : (
-                <span className="text-4xl font-bold text-slate-900 font-syne">{currentPrice || calculateTotalPrice()}</span>
-              )}
-              {!isFreeBook && currentBook.originalPrice && (
-                <span className="text-xl text-gray-400 line-through">
-                  {(() => {
-                    // Check if API provides format-specific original pricing
-                    if (currentBook.formatOriginalPrices && currentBook.formatOriginalPrices[selectedFormat]) {
-                      const formatOriginalPrice = parseFloat(currentBook.formatOriginalPrices[selectedFormat].replace(/^[₹$]/, ''));
-                      return `₹${formatOriginalPrice.toFixed(2)}`;
-                    } else {
-                      // Fallback to hardcoded format-specific original pricing
-                      const baseOriginalPrice = parseFloat(currentBook.originalPrice.replace(/^[₹$]/, ''));
-                      let formatOriginalPrice = baseOriginalPrice;
-                      switch (selectedFormat) {
-                        case 'Hardcover':
-                          formatOriginalPrice = baseOriginalPrice * 1.5;
-                          break;
-                        case 'Paperback':
-                          formatOriginalPrice = baseOriginalPrice * 1.0;
-                          break;
-                        case 'E-book':
-                          formatOriginalPrice = baseOriginalPrice * 0.7;
-                          break;
-                        default:
-                          formatOriginalPrice = baseOriginalPrice;
-                      }
-                      return `₹${formatOriginalPrice.toFixed(2)}`;
-                    }
-                  })()}
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {actionButtons}
-              {cartFeedback === 'added' && (
-                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
-                  <span className="text-emerald-700 font-semibold text-sm">✓ Added to cart!</span>
-                  <Link href="/cart" className="text-sm font-bold text-blue-600 hover:underline">
-                    View Cart →
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-6 pt-6 border-t">
               {currentBook.pages && (
                 <div className="flex items-center gap-3">
                   <BookOpenIcon className="w-5 h-5 text-gray-400" />
@@ -485,41 +271,40 @@ export default function BookDetailClient({
                   </div>
                 </div>
               )}
-              {currentBook.duration && (
-                <div className="flex items-center gap-3">
-                  <ClockIcon className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <div className="text-sm text-gray-500">Duration</div>
-                    <div className="font-semibold">{currentBook.duration}</div>
-                  </div>
+              <div className="flex items-center gap-3">
+                {currentBook.type === 'Audiobook' ? (
+                  <SpeakerWaveIcon className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <BookOpenIcon className="w-5 h-5 text-gray-400" />
+                )}
+                <div>
+                  <div className="text-sm text-gray-500">Type</div>
+                  <div className="font-semibold">{currentBook.type || 'Books'}</div>
                 </div>
-              )}
-              {currentBook.type && (
-                <div className="flex items-center gap-3">
-                  {currentBook.type === 'Audiobook' ? (
-                    <SpeakerWaveIcon className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <BookOpenIcon className="w-5 h-5 text-gray-400" />
-                  )}
-                  <div>
-                    <div className="text-sm text-gray-500">Type</div>
-                    <div className="font-semibold">{currentBook.type}</div>
-                  </div>
-                </div>
-              )}
+              </div>
               <div className="flex items-center gap-3">
                 <CheckIcon className="w-5 h-5 text-gray-400" />
                 <div>
                   <div className="text-sm text-gray-500">Published</div>
                   <div className="font-semibold">
-                    {new Date(currentBook.publishDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                    })}
+                    {currentBook.publishDate
+                      ? new Date(currentBook.publishDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                        })
+                      : 'N/A'}
                   </div>
                 </div>
               </div>
             </div>
+
+            <AccessChoicePanel
+              itemLabel="book"
+              price={currentBook.price}
+              onStartUniquePlus={handleSubscribeClick}
+              onKeepForever={handleBuyNow}
+            />
+
           </div>
         </div>
 
