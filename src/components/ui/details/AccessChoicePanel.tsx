@@ -60,16 +60,16 @@ export function AccessChoicePanel({
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <article className="rounded-2xl border border-blue-200 bg-blue-50/40 p-5 shadow-sm">
-          <div className="mb-5 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
-              <BookOpenIcon className="h-7 w-7" />
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+        <article className="flex h-full flex-col rounded-2xl border border-blue-200 bg-blue-50/40 p-4 shadow-sm">
+          <div className="mb-2.5 flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+              <BookOpenIcon className="h-6 w-6" />
             </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-extrabold text-slate-950">Read with Unique Plus</h2>
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold text-slate-950">Read with Unique Plus</h2>
+                <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
                   Best Value
                 </span>
               </div>
@@ -77,67 +77,71 @@ export function AccessChoicePanel({
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {uniquePlusBenefits.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 text-sm font-semibold text-slate-800">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
-                  <Icon className="h-5 w-5" />
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
+                  <Icon className="h-4 w-4" />
                 </span>
                 <span>{text}</span>
               </div>
             ))}
           </div>
 
-          <div className="my-5 h-px bg-blue-100" />
+          <div className="mt-auto pt-3">
+            <div className="mb-3 h-px bg-blue-100" />
 
-          <div className="mb-4">
-            <div className="flex items-end gap-1">
-              <span className="text-3xl font-extrabold text-slate-950">{formatRupees(subscriptionPrice)}</span>
-              <span className="pb-1 text-sm font-medium text-slate-500">/month</span>
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <div className="flex items-end gap-1">
+                <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(subscriptionPrice)}</span>
+                <span className="text-sm font-medium text-slate-500">/month</span>
+              </div>
+              <p className="pb-0.5 text-xs font-medium text-slate-500">Cancel anytime</p>
             </div>
-            <p className="mt-1 text-xs font-medium text-slate-500">Cancel anytime</p>
-          </div>
 
-          <button
-            type="button"
-            onClick={onStartUniquePlus}
-            className="h-12 w-full rounded-xl bg-blue-600 text-base font-extrabold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
-          >
-            Start Unique Plus
-          </button>
+            <button
+              type="button"
+              onClick={onStartUniquePlus}
+              className="h-11 w-full rounded-xl bg-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
+            >
+              Start Unique Plus
+            </button>
+          </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="mb-5 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
-              <ShoppingBagIcon className="h-7 w-7" />
+        <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-2.5 flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
+              <ShoppingBagIcon className="h-6 w-6" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-xl font-extrabold text-slate-950">Keep this book forever</h2>
+              <h2 className="text-xl font-semibold text-slate-950">Keep this book forever</h2>
               <p className="mt-1 text-sm font-medium text-slate-500">One-time purchase with lifetime access</p>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {foreverBenefits.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 text-sm font-semibold text-slate-800">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-                  <Icon className="h-5 w-5" />
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                  <Icon className="h-4 w-4" />
                 </span>
                 <span>{text}</span>
               </div>
             ))}
           </div>
 
-          <div className="my-5 h-px bg-slate-200" />
+          <div className="mt-auto pt-3">
+            <div className="mb-3 h-px bg-slate-200" />
 
-          <button
-            type="button"
-            onClick={onKeepForever}
-            className="h-14 w-full rounded-xl bg-black text-lg font-extrabold text-white shadow-lg shadow-black/20 transition-colors hover:bg-slate-900"
-          >
-            {formatRupees(price)} Keep Forever
-          </button>
+            <button
+              type="button"
+              onClick={onKeepForever}
+              className="h-11 w-full rounded-xl bg-black text-base font-semibold text-white shadow-lg shadow-black/20 transition-colors hover:bg-slate-900"
+            >
+              {formatRupees(price)} Keep Forever
+            </button>
+          </div>
         </article>
       </div>
     </section>
