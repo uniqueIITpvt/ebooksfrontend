@@ -16,6 +16,8 @@ interface AccessChoicePanelProps {
   subscriptionPrice?: string | number;
   onStartUniquePlus: () => void;
   onKeepForever: () => void;
+  uniquePlusButtonLabel?: string;
+  keepForeverButtonLabel?: string;
 }
 
 const formatRupees = (value?: string | number | null) => {
@@ -37,6 +39,8 @@ export function AccessChoicePanel({
   subscriptionPrice = 199,
   onStartUniquePlus,
   onKeepForever,
+  uniquePlusButtonLabel = 'Start Unique Plus',
+  keepForeverButtonLabel,
 }: AccessChoicePanelProps) {
   const label = itemLabel === 'audiobook' ? 'audiobook' : 'book';
 
@@ -104,7 +108,7 @@ export function AccessChoicePanel({
               onClick={onStartUniquePlus}
               className="h-11 w-full rounded-xl bg-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
             >
-              Start Unique Plus
+              {uniquePlusButtonLabel}
             </button>
           </div>
         </article>
@@ -139,7 +143,7 @@ export function AccessChoicePanel({
               onClick={onKeepForever}
               className="h-11 w-full rounded-xl bg-black text-base font-semibold text-white shadow-lg shadow-black/20 transition-colors hover:bg-slate-900"
             >
-              {formatRupees(price)} Keep Forever
+              {keepForeverButtonLabel ?? `${formatRupees(price)} Keep Forever`}
             </button>
           </div>
         </article>
