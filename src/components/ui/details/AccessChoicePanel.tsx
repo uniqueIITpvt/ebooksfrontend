@@ -4,7 +4,7 @@ import {
   BookOpenIcon,
   CloudArrowDownIcon,
   DevicePhoneMobileIcon,
-  MegaphoneIcon,
+  MusicalNoteIcon,
   LockClosedIcon,
   ShoppingBagIcon,
   UserCircleIcon,
@@ -42,7 +42,7 @@ export function AccessChoicePanel({
 
   const uniquePlusBenefits = [
     { icon: BookOpenIcon, text: 'Access to all premium eBooks' },
-    { icon: MegaphoneIcon, text: 'Access to all premium audiobooks' },
+    { icon: MusicalNoteIcon, text: 'Access to all premium audiobooks' },
     { icon: DevicePhoneMobileIcon, text: 'Read & listen anywhere' },
   ];
 
