@@ -3,8 +3,8 @@ import Navbar from '@/components/ui/layout/Navbar';
 import Footer from '@/components/ui/layout/Footer';
 import { getPublicShellData } from '@/lib/server/public-data';
 
-const AutomaticChatEmbed = dynamic(
-  () => import('@/components/ui/primitives/AutomaticChatEmbed'),
+const TawkWidget = dynamic(
+  () => import('@/components/ui/primitives/TawkWidget'),
   {
     ssr: false,
   }
@@ -22,7 +22,7 @@ export default async function PublicLayout({
       <Navbar siteLogo={siteLogo} />
       <main>{children}</main>
       <Footer siteLogo={siteLogo} />
-      <AutomaticChatEmbed />
+      <TawkWidget />
     </>
   );
 }
