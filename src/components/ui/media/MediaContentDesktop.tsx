@@ -252,121 +252,6 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       loading={index < 3 ? 'eager' : 'lazy'}
     />
   );
-  return (
-    <div className='group flex h-auto w-[210px] flex-col overflow-visible rounded-lg bg-transparent transition-all duration-[250ms] ease-out hover:-translate-y-1.5'>
-      {/* Cover image */}
-      <div className='relative h-[285px] w-[190px] overflow-hidden rounded-lg bg-transparent shadow-[0_12px_30px_rgba(0,0,0,0.10)] transition-shadow duration-[250ms] ease-out group-hover:shadow-[0_18px_36px_rgba(0,0,0,0.14)]'>
-        <CoverImageFrame
-          src={getOptimizedImageUrl(book.image, 640)}
-          alt={book.title}
-          sizes='190px'
-          priority={index < 3}
-          loading={index < 3 ? 'eager' : 'lazy'}
-          quality={85}
-          className='h-[285px] w-[190px] rounded-lg border-0 bg-transparent shadow-none'
-          imageClassName='transition-transform duration-[250ms] ease-out'
-          fit='cover'
-          showBackdrop={false}
-          fixedAspectRatio={2 / 3}
-          variant={book.type === 'Audiobook' ? 'audiobook' : 'book'}
-        >
-          {/* subLabel ribbon */}
-          {subLabel && (
-            <div className='absolute bottom-2 left-2 z-10 flex items-center gap-1'>
-              <div className='h-px w-3 bg-indigo-400' />
-              <span className='text-[8px] font-bold uppercase tracking-widest text-indigo-300 drop-shadow font-dm-sans'>{subLabel}</span>
-            </div>
-          )}
-        </CoverImageFrame>
-      </div>
-
-      {/* Details panel — always visible */}
-      <div className='flex flex-col pt-3 font-dm-sans'>
-        <div className='hidden'>
-          <span className='min-w-0 truncate bg-white text-slate-800 px-2 py-0.5 rounded-full text-[8px] font-bold tracking-widest uppercase border border-slate-200 shadow-sm font-dm-sans'>
-            {book.category}
-          </span>
-          {book.language && (
-            <span className='shrink-0 bg-indigo-600 text-white px-2 py-0.5 rounded-full text-[8px] font-bold tracking-widest uppercase border border-indigo-500 shadow-sm font-dm-sans'>
-              {book.language}
-            </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <h3 className='truncate text-[16px] font-semibold leading-tight text-[#1E1B4B] font-dm-sans'>{book.title}</h3>
-
-        {/* Author */}
-        <p className='mt-1.5 truncate text-[13px] font-normal text-[#757575] font-dm-sans'>{book.author}</p>
-
-        {/* Star rating */}
-        {(book.rating ?? 0) > 0 && (
-          <div className='mt-2 flex items-center gap-2'>
-            <StarIconSolid className='h-5 w-5 text-[#5146F7]' />
-            <span className='text-[26px] font-bold leading-none text-[#1E1B4B] font-dm-sans'>{(book.rating || 0).toFixed(1)}</span>
-            <span className='text-[14px] font-medium text-[#666666] font-dm-sans'>({book.reviews || 0})</span>
-          </div>
-        )}
-
-        {/* Price */}
-        {false && book.price && (
-          <div className='flex items-center gap-1.5'>
-            {isFreeItem ? (
-              <>
-                <span className='text-sm font-bold text-slate-400 line-through font-dm-sans'>{formatPrice(book.price)}</span>
-                <span className='text-[11px] font-extrabold text-green-600 uppercase tracking-wide font-dm-sans'>Free</span>
-              </>
-            ) : (
-              <span className='text-sm font-bold text-slate-900 font-dm-sans'>{formatPrice(book.price)}</span>
-            )}
-            {!isFreeItem && book.originalPrice && (
-              <span className='text-[11px] text-slate-400 line-through font-dm-sans'>{formatPrice(book.originalPrice)}</span>
-            )}
-          </div>
-        )}
-
-        {/* Pages / type tag */}
-        {!isFreeItem && <p className='mt-2 truncate text-[13px] font-semibold text-[#1E1B4B] font-dm-sans'>
-          {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
-          <span className='font-semibold text-[#16A34A]'>Free</span>
-          {hasUniquePlus ? ' with Unique Plus or' : ' with Unique Plus'}
-          {false && book.duration ? ` · ${book.duration}` : ''}
-        </p>}
-
-        {/* Action button */}
-        <div className='mt-3 grid grid-cols-[158px_42px] gap-2.5'>
-          <button
-            onClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
-            className={`flex h-10 w-[158px] items-center justify-center whitespace-nowrap rounded-[10px] text-[12px] font-semibold leading-none transition-all duration-[250ms] ease-out active:scale-95 font-dm-sans ${
-              isFreeItem
-                ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
-                : hasUniquePlus
-                ? 'bg-slate-950 text-white hover:bg-slate-800'
-                : 'bg-gradient-to-r from-[#5146F7] to-[#7356FF] text-white shadow-[0_10px_25px_rgba(83,70,247,0.35)] hover:brightness-110'
-            }`}
-          >
-            {isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-          </button>
-          <button
-            type='button'
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void handleSaveBook();
-            }}
-            disabled={saving}
-            className={`flex h-10 w-[42px] items-center justify-center rounded-[10px] border shadow-sm transition-all duration-[250ms] ease-out active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 font-dm-sans ${isSaved
-                ? 'border-yellow-400 bg-yellow-400 text-white hover:bg-yellow-500'
-                : 'border-[#E5E7EB] bg-white text-[#5146F7] hover:border-[#6D5CF6] hover:bg-violet-50'
-              }`}
-            aria-label={`Save ${book.title}`}
-          >
-            {isSaved ? <BookmarkIconSolid className='h-5 w-5' /> : <BookmarkIconOutline className='h-5 w-5' />}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 interface SectionCarouselProps {
@@ -404,7 +289,7 @@ function SectionCarousel({
   const isFreeSection = subLabel?.toLowerCase() === 'free';
   const hasUniquePlus = hasActiveSubscription(user);
   const gridClassName = isFreeSection
-    ? 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-8'
+    ? 'grid w-full grid-cols-7 items-start gap-x-4 gap-y-8'
     : 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10 overflow-hidden';
 
   return (
@@ -699,7 +584,7 @@ export default function MediaContentDesktop({
                 items={filteredFreeSummaries}
                 emptyMsg='No free summaries'
                 sectionKey='free'
-                itemLimit={6}
+                itemLimit={7}
                 cartFormat={selectedCartFormat}
                 cardHref={(b) => {
                   const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;

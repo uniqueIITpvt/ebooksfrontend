@@ -17,6 +17,7 @@ declare global {
     Tawk_API?: {
       maximize?: () => void;
       showWidget?: () => void;
+      hideWidget?: () => void;
       onLoad?: () => void;
       onChatMaximized?: () => void;
       onChatMinimized?: () => void;
@@ -119,6 +120,7 @@ export default function TawkWidget() {
     window.addEventListener('openChatbot', openTawk);
     return () => {
       isMounted = false;
+      window.Tawk_API?.hideWidget?.();
       window.removeEventListener('openChatbot', openTawk);
     };
   }, []);
