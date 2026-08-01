@@ -10,12 +10,11 @@ import { generateBookSlug } from '@/utils/slugify';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop, LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
 import { hasActiveSubscription } from '@/lib/subscription';
+import BooksSidebar from '@/components/ui/books/BooksSidebar';
 import {
   ArrowLeftIcon,
   BookmarkIcon as BookmarkIconOutline,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -66,6 +65,9 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   const [searchTerm, setSearchTerm] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
+  const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
 
   const categories = useMemo(() => {
     return [...new Set(items.map((item) => item.category))];
@@ -80,18 +82,33 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     [items]
   );
 
+  const languages = useMemo(() => {
+    return [...new Set(items.map((item) => item.language).filter(Boolean))] as string[];
+  }, [items]);
+
+  const languageCounts = useMemo(
+    () =>
+      items.reduce<Record<string, number>>((accumulator, item) => {
+        if (item.language) {
+          accumulator[item.language] = (accumulator[item.language] ?? 0) + 1;
+        }
+        return accumulator;
+      }, {}),
+    [items]
+  );
+
   const filteredItems = items.filter((item) => {
     const matchesCategory =
       selectedCategories.length === 0 || selectedCategories.includes(item.category);
+    const matchesLanguage =
+      selectedLanguages.length === 0 || selectedLanguages.includes(item.language || '');
     const matchesSearch =
       !searchTerm ||
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.author.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesLanguage && matchesSearch;
   });
-
-  const hasActiveFilters = searchTerm !== '' || selectedCategories.length > 0;
 
   const getItemId = (item: T) => item._id || item.id || item.slug || item.title;
   const getHref = (item: T) => `${detailBasePath}/${item.slug || item._id || item.id}`;
@@ -369,9 +386,9 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 pt-10'>
-      <div className="max-w-[1600px] mx-auto">
-        <div className="px-4 sm:px-6 lg:px-8 py-6">
+    <div className='min-h-screen bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60'>
+      <div className="mx-auto max-w-[1300px]">
+        <div className="px-4 py-6 sm:px-6 lg:px-8">
           <button
             onClick={() => router.push('/')}
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
@@ -382,88 +399,48 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
           <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
         </div>
 
-        <div className="lg:flex lg:gap-6 xl:gap-8 px-4 sm:px-6 lg:px-8 pb-12">
-          <div className="lg:w-64 xl:w-72 lg:flex-shrink-0">
-            <div className="h-full lg:h-auto bg-white border-r lg:border border-gray-200 lg:rounded-xl lg:shadow-sm flex flex-col">
-              <div className="p-4 lg:p-6 border-b border-gray-200 bg-white lg:bg-gray-50 lg:rounded-t-xl sticky top-0 z-10">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <FunnelIcon className="w-5 h-5 mr-2 text-gray-600" />
-                    Filters
-                  </h2>
-                </div>
-              </div>
-
-              <div className="flex-1 p-4 lg:p-6 space-y-6 overflow-y-auto">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder={searchPlaceholder}
-                      value={searchTerm}
-                      onChange={(event) => setSearchTerm(event.target.value)}
-                      className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Category</label>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <label key={category} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          value={category}
-                          checked={selectedCategories.includes(category)}
-                          onChange={(event) => {
-                            if (event.target.checked) {
-                              setSelectedCategories([...selectedCategories, category]);
-                            } else {
-                              setSelectedCategories(selectedCategories.filter((value) => value !== category));
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{category}</span>
-                        <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                          {categoryCounts[category] ?? 0}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 lg:p-6 border-t border-gray-200 bg-white lg:bg-gray-50 lg:rounded-b-xl sticky bottom-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">
-                    {filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}
-                  </span>
-                  {hasActiveFilters && (
-                    <button
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSelectedCategories([]);
-                      }}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Clear all
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+        <div className="px-4 pb-12 sm:px-6 lg:flex lg:gap-6 lg:px-8 xl:gap-8">
+          <div
+            className={`lg:flex-shrink-0 transition-all duration-300 ${
+              isFilterSidebarCollapsed ? 'lg:w-12 xl:w-12' : 'lg:w-64 xl:w-62'
+            }`}
+          >
+            {isFilterSidebarCollapsed && (
+              <button
+                onClick={() => setIsFilterSidebarCollapsed(false)}
+                className='hidden h-10 w-10 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-100 hover:text-blue-700 lg:inline-flex'
+                type='button'
+                aria-label='Show filters'
+                title='Show filters'
+              >
+                <ChevronRightIcon className='h-5 w-5' />
+              </button>
+            )}
+            <BooksSidebar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              selectedFormats={[]}
+              setSelectedFormats={() => {}}
+              selectedTypes={[]}
+              setSelectedTypes={() => {}}
+              selectedLanguages={selectedLanguages}
+              setSelectedLanguages={setSelectedLanguages}
+              categories={categories}
+              languages={languages}
+              formats={[]}
+              categoryCounts={categoryCounts}
+              formatCounts={{}}
+              languageCounts={languageCounts}
+              typeCounts={{}}
+              resultsCount={filteredItems.length}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+              onDesktopCollapse={() => setIsFilterSidebarCollapsed(true)}
+              searchPlaceholder={searchPlaceholder}
+              className={isFilterSidebarCollapsed ? 'lg:hidden' : ''}
+            />
           </div>
 
           <div className="flex-1 min-w-0 lg:pt-6">
