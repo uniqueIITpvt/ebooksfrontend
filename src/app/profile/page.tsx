@@ -20,7 +20,7 @@ import { BookmarkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
-import { authApi, type SavedBook } from '@/services/api/authApi';
+import { authApi, type SavedBook, type UserSubscription } from '@/services/api/authApi';
 import { generateBookSlug } from '@/utils/slugify';
 import { formatSubscriptionPlanLabel, hasActiveSubscription } from '@/lib/subscription';
 
@@ -36,6 +36,10 @@ export default function UserProfilePage() {
   const [removingSavedBookId, setRemovingSavedBookId] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
+  const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false);
+  const [subscriptionMessage, setSubscriptionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
@@ -88,10 +92,9 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('tab') === 'library') {
-      setActiveTab('library');
-    } else if (params.get('tab') === 'saved') {
-      setActiveTab('saved');
+    const requestedTab = params.get('tab');
+    if (requestedTab === 'subscription' || requestedTab === 'orders' || requestedTab === 'saved' || requestedTab === 'library') {
+      setActiveTab(requestedTab);
     }
   }, []);
 
@@ -212,6 +215,48 @@ export default function UserProfilePage() {
   }, [activeTab, isAuthenticated]);
 
   useEffect(() => {
+    if (activeTab !== 'subscription' || !isAuthenticated || !hasUserActiveSubscription) {
+      setCurrentSubscription(null);
+      return;
+    }
+
+    let ignore = false;
+    setSubscriptionLoading(true);
+    setSubscriptionMessage(null);
+
+    authApi
+      .getMySubscription()
+      .then((response) => {
+        if (ignore) return;
+
+        if (response.success) {
+          setCurrentSubscription(response.data ?? null);
+          return;
+        }
+
+        setSubscriptionMessage({
+          type: 'error',
+          text: response.message || 'Unable to load subscription details',
+        });
+      })
+      .catch(() => {
+        if (!ignore) {
+          setSubscriptionMessage({
+            type: 'error',
+            text: 'Unable to load subscription details',
+          });
+        }
+      })
+      .finally(() => {
+        if (!ignore) setSubscriptionLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, isAuthenticated, hasUserActiveSubscription]);
+
+  useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/');
     }
@@ -248,6 +293,38 @@ export default function UserProfilePage() {
       alert('Unable to remove saved book');
     } finally {
       setRemovingSavedBookId(null);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!currentSubscription?._id || subscriptionActionLoading) return;
+
+    const shouldCancel = window.confirm('Cancel your current subscription plan?');
+    if (!shouldCancel) return;
+
+    setSubscriptionActionLoading(true);
+    setSubscriptionMessage(null);
+
+    try {
+      const response = await authApi.cancelSubscription(currentSubscription._id);
+
+      if (!response.success) {
+        throw new Error(response.message || 'Unable to cancel subscription');
+      }
+
+      setCurrentSubscription(null);
+      setSubscriptionMessage({
+        type: 'success',
+        text: 'Subscription cancelled successfully',
+      });
+      await refreshUser();
+    } catch (error) {
+      setSubscriptionMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Unable to cancel subscription',
+      });
+    } finally {
+      setSubscriptionActionLoading(false);
     }
   };
 
@@ -477,6 +554,17 @@ export default function UserProfilePage() {
             {activeTab === 'subscription' && (
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Current Subscription</h3>
+                {subscriptionMessage && (
+                  <p
+                    className={`mb-4 rounded-lg px-4 py-3 text-sm font-medium ${
+                      subscriptionMessage.type === 'success'
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-red-50 text-red-700'
+                    }`}
+                  >
+                    {subscriptionMessage.text}
+                  </p>
+                )}
                 {hasUserActiveSubscription ? (
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
                     <div className="flex items-center justify-between">
@@ -499,13 +587,26 @@ export default function UserProfilePage() {
                             })}
                           </p>
                         )}
+                        {subscriptionLoading && (
+                          <p className="text-gray-500 mt-1">Loading plan details...</p>
+                        )}
                       </div>
-                      <Link
-                        href="/subscription"
-                        className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-                      >
-                        Upgrade/Manage
-                      </Link>
+                      <div className="flex flex-wrap justify-end gap-3">
+                        <Link
+                          href="/subscription"
+                          className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                        >
+                          Upgrade/Manage
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={handleCancelSubscription}
+                          disabled={!currentSubscription?._id || subscriptionLoading || subscriptionActionLoading}
+                          className="px-6 py-2.5 border border-red-300 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-colors disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-transparent"
+                        >
+                          {subscriptionActionLoading ? 'Cancelling...' : 'Cancel Plan'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (

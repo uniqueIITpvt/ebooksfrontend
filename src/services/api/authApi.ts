@@ -57,6 +57,17 @@ export interface SavedBook {
   savedAt: string;
 }
 
+export interface UserSubscription {
+  _id: string;
+  plan: 'basic' | 'premium' | 'pro';
+  status: 'active' | 'cancelled' | 'expired' | 'pending' | 'upgraded';
+  price: number;
+  durationMonths: number;
+  startDate: string;
+  endDate: string;
+  autoRenew?: boolean;
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -540,6 +551,41 @@ class AuthApiService {
       return {
         success: false,
         message: 'Failed to update subscription',
+      };
+    }
+  }
+
+  async getMySubscription(): Promise<{ success: boolean; data?: UserSubscription | null; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/subscriptions/me`, {
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error('Get subscription error:', error);
+      return {
+        success: false,
+        message: 'Failed to load subscription',
+      };
+    }
+  }
+
+  async cancelSubscription(subscriptionId: string): Promise<{ success: boolean; data?: UserSubscription; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/subscriptions/${subscriptionId}/cancel`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      return await response.json();
+    } catch (error) {
+      console.error('Cancel subscription error:', error);
+      return {
+        success: false,
+        message: 'Failed to cancel subscription',
       };
     }
   }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import {
   BookOpenIcon,
   CloudArrowDownIcon,
@@ -44,6 +45,7 @@ export function AccessChoicePanel({
   keepForeverButtonLabel,
   activePlan = null,
 }: AccessChoicePanelProps) {
+  const router = useRouter();
   const label = itemLabel === 'audiobook' ? 'audiobook' : 'book';
   const activePlanDetails = activePlan
     ? {
@@ -125,7 +127,17 @@ export function AccessChoicePanel({
                 <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(displaySubscriptionPrice)}</span>
                 <span className="text-sm font-medium text-slate-500">{displaySubscriptionPeriod}</span>
               </div>
-              <p className="pb-0.5 text-xs font-medium text-slate-500">Cancel anytime</p>
+              {activePlanDetails ? (
+                <button
+                  type="button"
+                  onClick={() => router.push('/profile?tab=subscription')}
+                  className="pb-0.5 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-800 hover:underline"
+                >
+                  Cancel anytime
+                </button>
+              ) : (
+                <p className="pb-0.5 text-xs font-medium text-slate-500">Cancel anytime</p>
+              )}
             </div>
 
             <button
