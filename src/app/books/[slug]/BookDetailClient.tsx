@@ -58,7 +58,8 @@ export default function BookDetailClient({
   const currentBookReadPath = `${currentBookDetailPath}/read`;
   const hasUniquePlusAccess = hasActiveSubscription(user);
   const activeSubscriptionPlan = getActiveSubscriptionPlan(user);
-  const isFreeSummary = currentBook.componentType === 'free-summaries';
+  const isReadFreeSummary =
+    currentBook.componentType === 'free-summaries' && parseCurrency(currentBook.price) <= 0;
 
   const normalizeBookReference = (entry: any) => {
     if (!entry) return [];
@@ -365,7 +366,7 @@ export default function BookDetailClient({
               </div>
             </div>
 
-            {!isFreeSummary && (
+            {!isReadFreeSummary && (
               <AccessChoicePanel
                 itemLabel="book"
                 price={currentBook.price}
