@@ -139,6 +139,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
         {items.map((item) => {
           const audioUrl = item.files?.audiobook?.url;
           const isCurrentItem = currentTrack?.id === `audiobook-preview-${item.id}`;
+          const itemHref = getAudiobookHref(item);
           const free = isFreeItem(item);
           const priceLine = free ? null : (
             <>
@@ -149,49 +150,54 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
           );
 
           return (
-            <LibraryCardDesktop
+            <div
               key={item.id}
-              image={item.image}
-              title={item.title}
-              author={item.author}
-              rating={item.rating}
-              reviews={item.reviews}
-              priceLine={priceLine}
-              primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${cleanDisplayPrice(item) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-              primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-              onPrimaryClick={() => handleUniquePlusAction(item)}
-              isSaved={isItemSaved(item)}
-              onSaveClick={() => void handleSaveBook(item)}
-              saveDisabled={savingId === getItemId(item)}
-              saveLabel={`Save ${item.title}`}
-              coverVariant='audiobook'
-              coverOverlay={(
-                <button
-                  type='button'
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleTogglePreview(item);
-                  }}
-                  disabled={!audioUrl}
-                  aria-label={
-                    audioUrl
-                      ? `${isCurrentItem && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`
-                      : `Audio preview unavailable for ${item.title}`
-                  }
-                  className={`absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full border backdrop-blur transition ${
-                    audioUrl
-                      ? 'border-blue-200 bg-blue-600 text-white shadow-[0_10px_30px_rgba(37,99,235,0.28)] hover:scale-105 hover:bg-blue-700'
-                      : 'cursor-not-allowed border-white/40 bg-white/50 text-slate-400'
-                  }`}
-                >
-                  {isCurrentItem && isPlaying ? (
-                    <PauseIcon className='h-6 w-6' />
-                  ) : (
-                    <PlayIcon className='ml-0.5 h-6 w-6' />
-                  )}
-                </button>
-              )}
-            />
+              role='button'
+              tabIndex={0}
+              onClick={() => router.push(itemHref)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  router.push(itemHref);
+                }
+              }}
+              className='cursor-pointer'
+            >
+              <LibraryCardDesktop
+                image={item.image}
+                title={item.title}
+                author={item.author}
+                rating={item.rating}
+                reviews={item.reviews}
+                priceLine={priceLine}
+                primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${cleanDisplayPrice(item) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+                onPrimaryClick={() => handleUniquePlusAction(item)}
+                onCoverClick={() => router.push(itemHref)}
+                isSaved={isItemSaved(item)}
+                onSaveClick={() => void handleSaveBook(item)}
+                saveDisabled={savingId === getItemId(item)}
+                saveLabel={`Save ${item.title}`}
+                coverVariant='audiobook'
+                coverOverlay={(
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      router.push(itemHref);
+                    }}
+                    aria-label={`Open details for ${item.title}`}
+                    className='absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full border border-blue-200 bg-blue-600 text-white shadow-[0_10px_30px_rgba(37,99,235,0.28)] backdrop-blur transition hover:scale-105 hover:bg-blue-700'
+                  >
+                    {isCurrentItem && isPlaying ? (
+                      <PauseIcon className='h-6 w-6' />
+                    ) : (
+                      <PlayIcon className='ml-0.5 h-6 w-6' />
+                    )}
+                  </button>
+                )}
+              />
+            </div>
           );
         })}
       </div>
