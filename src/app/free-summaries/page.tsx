@@ -10,7 +10,7 @@ export default async function FreeSummariesPage() {
       items={freeSummaries}
       searchPlaceholder='Search free summaries...'
       emptyMessage='No free summaries found.'
-      detailBasePath='/books'
+      detailBasePath='/free-summaries'
       defaultMetaLabel='Free Summary'
       variant='landing'
     />

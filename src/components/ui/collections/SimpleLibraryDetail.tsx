@@ -18,7 +18,9 @@ interface SimpleLibraryDetailProps {
   featured?: boolean;
   badge?: string;
   actionLabel: string;
+  actionHref?: string;
   detailRows?: DetailRow[];
+  compactMedia?: boolean;
 }
 
 export default function SimpleLibraryDetail({
@@ -32,7 +34,9 @@ export default function SimpleLibraryDetail({
   featured,
   badge,
   actionLabel,
+  actionHref,
   detailRows = [],
+  compactMedia = false,
 }: SimpleLibraryDetailProps) {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,15 +55,15 @@ export default function SimpleLibraryDetail({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className={`grid grid-cols-1 gap-8 lg:gap-12 ${compactMedia ? 'lg:grid-cols-[360px_minmax(0,1fr)]' : 'lg:grid-cols-2'}`}>
           <div className="space-y-6">
-            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-white shadow-xl">
+            <div className={`relative aspect-[2/3] overflow-hidden rounded-2xl bg-white shadow-xl ${compactMedia ? 'mx-auto w-full max-w-[360px]' : 'aspect-[3/4]'}`}>
               {image ? (
                 <Image
                   src={image}
                   alt={title}
                   fill
-                  className="object-cover object-center"
+                  className={compactMedia ? 'object-contain object-center' : 'object-cover object-center'}
                   priority
                 />
               ) : (
@@ -118,10 +122,18 @@ export default function SimpleLibraryDetail({
               </div>
             )}
 
-            <div className="flex gap-3 pt-6">
-              <Button variant="primary" fullWidth>
-                {actionLabel}
-              </Button>
+            <div className="flex gap-3 pt-4">
+              {actionHref ? (
+                <Link href={actionHref} className="w-full">
+                  <Button variant="primary" fullWidth>
+                    {actionLabel}
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="primary" fullWidth>
+                  {actionLabel}
+                </Button>
+              )}
             </div>
           </div>
         </div>

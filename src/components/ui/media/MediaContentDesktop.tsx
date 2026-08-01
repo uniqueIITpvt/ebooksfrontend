@@ -570,11 +570,7 @@ export default function MediaContentDesktop({
                 itemLimit={7}
                 cartFormat={selectedCartFormat}
                 cardHref={(b) => {
-                  const baseUrl = `/books/${b.slug || generateBookSlug(b.title)}`;
-                  if (selectedFormats.length === 1) {
-                    return `${baseUrl}?format=${encodeURIComponent(selectedFormats[0])}`;
-                  }
-                  return baseUrl;
+                  return `/free-summaries/${b.slug || generateBookSlug(b.title)}`;
                 }}
                 subLabel='Free'
               />

@@ -21,6 +21,8 @@ export default async function FreeSummaryDetailPage({ params }: { params: Promis
       image={summary.image}
       featured={summary.featured}
       actionLabel='Read Free Summary'
+      actionHref={`/free-summaries/${slug}/read`}
+      compactMedia
       detailRows={[
         ...(summary.pages ? [{ label: 'Pages', value: String(summary.pages) }] : []),
         ...(summary.readingTime ? [{ label: 'Reading Time', value: summary.readingTime }] : []),

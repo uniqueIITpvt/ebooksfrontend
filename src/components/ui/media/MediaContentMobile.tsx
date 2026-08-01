@@ -754,7 +754,7 @@ export default function MediaContentMobile({
                 item={summary}
                 index={index}
                 meta={summary.pages ? `${summary.pages} pages` : 'Free Summary'}
-                href={`/books/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
+                href={`/free-summaries/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
               />
             ))}
           </div>
