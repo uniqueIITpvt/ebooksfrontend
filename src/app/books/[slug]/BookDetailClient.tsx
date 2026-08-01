@@ -57,6 +57,7 @@ export default function BookDetailClient({
   const currentBookDetailPath = `/books/${currentBookSlug}`;
   const currentBookReadPath = `${currentBookDetailPath}/read`;
   const hasUniquePlusAccess = hasActiveSubscription(user);
+  const isFreeSummary = currentBook.componentType === 'free-summaries';
 
   const normalizeBookReference = (entry: any) => {
     if (!entry) return [];
@@ -363,14 +364,16 @@ export default function BookDetailClient({
               </div>
             </div>
 
-            <AccessChoicePanel
-              itemLabel="book"
-              price={currentBook.price}
-              onStartUniquePlus={handleSubscribeClick}
-              onKeepForever={handleBuyNow}
-              uniquePlusButtonLabel={hasUniquePlusAccess ? 'Read with Unique Plus' : 'Start Unique Plus'}
-              keepForeverButtonLabel={hasKeepForeverAccess ? 'Read Now' : undefined}
-            />
+            {!isFreeSummary && (
+              <AccessChoicePanel
+                itemLabel="book"
+                price={currentBook.price}
+                onStartUniquePlus={handleSubscribeClick}
+                onKeepForever={handleBuyNow}
+                uniquePlusButtonLabel={hasUniquePlusAccess ? 'Read with Unique Plus' : 'Start Unique Plus'}
+                keepForeverButtonLabel={hasKeepForeverAccess ? 'Read Now' : undefined}
+              />
+            )}
 
           </div>
         </div>

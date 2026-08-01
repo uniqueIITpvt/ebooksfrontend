@@ -8,6 +8,8 @@ import { audiobooksApi } from '@/services/api/audiobooksApi';
 import { tokenStore } from '@/services/api/tokenStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
+import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
+import { hasActiveSubscription } from '@/lib/subscription';
 
 interface Audiobook {
   id: string;
@@ -191,7 +193,7 @@ function normalizeTimedWords<T extends { startTime: number; endTime: number }>(
 
 export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClientProps) {
   const router = useRouter();
-  const { openAuthModal } = useAuth();
+  const { openAuthModal, user } = useAuth();
   const persistentAudio = usePersistentAudioPlayer();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -293,6 +295,9 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
 
   const isFreeAudiobook =
     audiobook.accessLevel === 'free' || getNumericPrice(audiobook.price) <= 0;
+  const audiobookId = audiobook.slug || audiobook.id || (audiobook as any)._id;
+  const audiobookDetailPath = `/audiobooks/${audiobookId}`;
+  const hasUniquePlusAccess = hasActiveSubscription(user);
 
   const getGeneratedAudioUrl = () => {
     const generatedAudio: any = audiobook.generatedAudio;
@@ -321,7 +326,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   const isPersistentTrack = persistentAudio.currentTrack?.id === persistentTrackId;
 
   const handleAccessClick = async () => {
-    const id = audiobook.slug || audiobook.id || (audiobook as any)._id;
+    const id = audiobookId;
 
     if (!id) return;
 
@@ -843,6 +848,22 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
     }
   };
 
+  const handleSubscribeClick = () => {
+    const subscriptionPath = `/subscription?returnTo=${encodeURIComponent(audiobookDetailPath)}`;
+
+    if (!user) {
+      openAuthModal('signin', subscriptionPath);
+      return;
+    }
+
+    if (hasUniquePlusAccess) {
+      router.push(`${audiobookDetailPath}/listen`);
+      return;
+    }
+
+    router.push(subscriptionPath);
+  };
+
   const handleRating = async (stars: number) => {
     const abId = String((audiobook as any)._id || audiobook.id || '');
     if (!abId) return;
@@ -1062,28 +1083,6 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
 
               <div className="action-buttons" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
-                  onClick={handleAccessClick}
-                  disabled={claimingAccess}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    padding: '10px 22px',
-                    borderRadius: '6px',
-                    fontFamily: 'inherit',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: claimingAccess ? 'not-allowed' : 'pointer',
-                    border: 'none',
-                    background: '#16a34a',
-                    color: '#ffffff',
-                    boxShadow: '0 4px 18px rgba(22, 163, 74, .16)',
-                    opacity: claimingAccess ? 0.7 : 1,
-                  }}
-                >
-                  {claimingAccess ? 'Claiming...' : isFreeAudiobook ? 'Claim / Enroll' : 'Buy Now'}
-                </button>
-                <button
                   onClick={handleTogglePlay}
                   style={{
                     display: 'flex',
@@ -1131,6 +1130,17 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
                 >
                   📖 Read Book
                 </button>
+              </div>
+
+              <div style={{ marginTop: '22px' }}>
+                <AccessChoicePanel
+                  itemLabel="book"
+                  price={audiobook.price}
+                  onStartUniquePlus={handleSubscribeClick}
+                  onKeepForever={handleAccessClick}
+                  uniquePlusButtonLabel={hasUniquePlusAccess ? 'Listen with Unique Plus' : 'Start Unique Plus'}
+                  keepForeverButtonLabel={isFreeAudiobook ? 'Claim / Enroll' : undefined}
+                />
               </div>
             </div>
           </div>
