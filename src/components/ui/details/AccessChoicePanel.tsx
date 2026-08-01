@@ -18,6 +18,7 @@ interface AccessChoicePanelProps {
   onKeepForever: () => void;
   uniquePlusButtonLabel?: string;
   keepForeverButtonLabel?: string;
+  activePlan?: 'basic' | 'premium' | 'pro' | null;
 }
 
 const formatRupees = (value?: string | number | null) => {
@@ -41,8 +42,32 @@ export function AccessChoicePanel({
   onKeepForever,
   uniquePlusButtonLabel = 'Start Unique Plus',
   keepForeverButtonLabel,
+  activePlan = null,
 }: AccessChoicePanelProps) {
   const label = itemLabel === 'audiobook' ? 'audiobook' : 'book';
+  const activePlanDetails = activePlan
+    ? {
+        basic: { name: 'Basic', price: 99, period: '/month' },
+        premium: { name: 'Premium', price: 249, period: '/3 months' },
+        pro: { name: 'Pro', price: 499, period: '/year' },
+      }[activePlan]
+    : null;
+  const planName = activePlanDetails?.name || 'Unique Plus';
+  const displaySubscriptionPrice = activePlanDetails?.price ?? subscriptionPrice;
+  const displaySubscriptionPeriod = activePlanDetails?.period || '/month';
+  const subscriptionTitle =
+    itemLabel === 'audiobook'
+      ? activePlanDetails
+        ? `Listen with ${planName}`
+        : 'Listen with Unique Plus'
+      : activePlanDetails
+        ? `Read with ${planName}`
+        : 'Read with Unique Plus';
+  const subscriptionDescription = activePlanDetails
+    ? `${planName} plan active${activePlan === 'premium' ? ' for 3 months' : ''}`
+    : 'Unlock the full premium library';
+  const subscriptionBadge = activePlanDetails ? 'Active Plan' : 'Best Value';
+  const subscriptionButtonLabel = activePlanDetails ? planName : uniquePlusButtonLabel;
 
   const uniquePlusBenefits = [
     { icon: BookOpenIcon, text: 'Access to all premium eBooks' },
@@ -72,12 +97,12 @@ export function AccessChoicePanel({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-semibold text-slate-950">Read with Unique Plus</h2>
+                <h2 className="text-xl font-semibold text-slate-950">{subscriptionTitle}</h2>
                 <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                  Best Value
+                  {subscriptionBadge}
                 </span>
               </div>
-              <p className="mt-1 text-sm font-medium text-slate-500">Unlock the full premium library</p>
+              <p className="mt-1 text-sm font-medium text-slate-500">{subscriptionDescription}</p>
             </div>
           </div>
 
@@ -97,8 +122,8 @@ export function AccessChoicePanel({
 
             <div className="mb-3 flex items-end justify-between gap-3">
               <div className="flex items-end gap-1">
-                <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(subscriptionPrice)}</span>
-                <span className="text-sm font-medium text-slate-500">/month</span>
+                <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(displaySubscriptionPrice)}</span>
+                <span className="text-sm font-medium text-slate-500">{displaySubscriptionPeriod}</span>
               </div>
               <p className="pb-0.5 text-xs font-medium text-slate-500">Cancel anytime</p>
             </div>
@@ -108,7 +133,7 @@ export function AccessChoicePanel({
               onClick={onStartUniquePlus}
               className="h-11 w-full rounded-xl bg-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
             >
-              {uniquePlusButtonLabel}
+              {subscriptionButtonLabel}
             </button>
           </div>
         </article>

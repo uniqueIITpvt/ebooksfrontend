@@ -9,7 +9,7 @@ import { tokenStore } from '@/services/api/tokenStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
-import { hasActiveSubscription } from '@/lib/subscription';
+import { getActiveSubscriptionPlan, hasActiveSubscription } from '@/lib/subscription';
 
 interface Audiobook {
   id: string;
@@ -298,6 +298,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   const audiobookId = audiobook.slug || audiobook.id || (audiobook as any)._id;
   const audiobookDetailPath = `/audiobooks/${audiobookId}`;
   const hasUniquePlusAccess = hasActiveSubscription(user);
+  const activeSubscriptionPlan = getActiveSubscriptionPlan(user);
 
   const getGeneratedAudioUrl = () => {
     const generatedAudio: any = audiobook.generatedAudio;
@@ -1140,6 +1141,7 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
                   onKeepForever={handleAccessClick}
                   uniquePlusButtonLabel={hasUniquePlusAccess ? 'Listen with Unique Plus' : 'Start Unique Plus'}
                   keepForeverButtonLabel={isFreeAudiobook ? 'Claim / Enroll' : undefined}
+                  activePlan={activeSubscriptionPlan}
                 />
               </div>
             </div>

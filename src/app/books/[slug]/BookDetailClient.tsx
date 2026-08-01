@@ -23,7 +23,7 @@ import { booksApi, type Book } from '@/services/api/booksApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { generateBookSlug } from '@/utils/slugify';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
-import { hasActiveSubscription } from '@/lib/subscription';
+import { getActiveSubscriptionPlan, hasActiveSubscription } from '@/lib/subscription';
 
 interface BookDetailClientProps {
   book: Book;
@@ -57,6 +57,7 @@ export default function BookDetailClient({
   const currentBookDetailPath = `/books/${currentBookSlug}`;
   const currentBookReadPath = `${currentBookDetailPath}/read`;
   const hasUniquePlusAccess = hasActiveSubscription(user);
+  const activeSubscriptionPlan = getActiveSubscriptionPlan(user);
   const isFreeSummary = currentBook.componentType === 'free-summaries';
 
   const normalizeBookReference = (entry: any) => {
@@ -372,6 +373,7 @@ export default function BookDetailClient({
                 onKeepForever={handleBuyNow}
                 uniquePlusButtonLabel={hasUniquePlusAccess ? 'Read with Unique Plus' : 'Start Unique Plus'}
                 keepForeverButtonLabel={hasKeepForeverAccess ? 'Read Now' : undefined}
+                activePlan={activeSubscriptionPlan}
               />
             )}
 
