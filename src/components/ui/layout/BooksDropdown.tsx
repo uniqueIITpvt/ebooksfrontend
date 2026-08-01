@@ -20,7 +20,7 @@ export default function BooksDropdown({
   onClose,
 }: BooksDropdownProps) {
   return (
-    <div className='fixed top-20 left-1/2 -translate-x-1/2 w-[680px] max-w-[calc(100vw-32px)] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border-2 border-blue-200/60 hover:border-blue-300/80 py-5 z-50 animate-in slide-in-from-top-2 duration-300 transition-all'>
+    <div className='absolute left-0 top-full mt-2 w-[680px] max-w-[calc(100vw-32px)] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border-2 border-blue-200/60 hover:border-blue-300/80 py-5 z-50 animate-in slide-in-from-top-2 duration-300 transition-all'>
       <div className='px-6 mb-4'>
         <div className='flex items-center space-x-3 mb-2'>
           <div className='p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl text-white'>
