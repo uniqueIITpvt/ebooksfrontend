@@ -1,6 +1,10 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/primitives/Button';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DetailRow {
   label: string;
@@ -19,6 +23,7 @@ interface SimpleLibraryDetailProps {
   badge?: string;
   actionLabel: string;
   actionHref?: string;
+  actionRequiresAuth?: boolean;
   detailRows?: DetailRow[];
   compactMedia?: boolean;
 }
@@ -35,9 +40,24 @@ export default function SimpleLibraryDetail({
   badge,
   actionLabel,
   actionHref,
+  actionRequiresAuth = false,
   detailRows = [],
   compactMedia = false,
 }: SimpleLibraryDetailProps) {
+  const router = useRouter();
+  const { openAuthModal, user } = useAuth();
+
+  const handleActionClick = () => {
+    if (!actionHref) return;
+
+    if (actionRequiresAuth && !user) {
+      openAuthModal('signin', actionHref);
+      return;
+    }
+
+    router.push(actionHref);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b sticky top-0 z-10">
@@ -55,9 +75,9 @@ export default function SimpleLibraryDetail({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className={`grid grid-cols-1 gap-8 lg:gap-12 ${compactMedia ? 'lg:grid-cols-[360px_minmax(0,1fr)]' : 'lg:grid-cols-2'}`}>
+        <div className={`grid grid-cols-1 gap-8 ${compactMedia ? 'lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10' : 'lg:grid-cols-2 lg:gap-12'}`}>
           <div className="space-y-6">
-            <div className={`relative aspect-[2/3] overflow-hidden rounded-2xl bg-white shadow-xl ${compactMedia ? 'mx-auto w-full max-w-[360px]' : 'aspect-[3/4]'}`}>
+            <div className={`relative aspect-[2/3] overflow-hidden rounded-2xl bg-white shadow-xl ${compactMedia ? 'mx-auto w-full max-w-[260px]' : 'aspect-[3/4]'}`}>
               {image ? (
                 <Image
                   src={image}
@@ -84,7 +104,7 @@ export default function SimpleLibraryDetail({
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className={compactMedia ? 'space-y-5' : 'space-y-6'}>
             <div>
               <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                 {category}
@@ -97,9 +117,21 @@ export default function SimpleLibraryDetail({
               </h1>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">by</span>
-              <span className="font-semibold text-gray-900">{author}</span>
+            <div className={compactMedia ? 'flex flex-wrap items-center gap-x-8 gap-y-3' : 'flex items-center gap-2'}>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">by</span>
+                <span className="font-semibold text-gray-900">{author}</span>
+              </div>
+              {compactMedia && detailRows.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                  {detailRows.map((row) => (
+                    <div key={row.label}>
+                      <div className="text-sm text-gray-500">{row.label}</div>
+                      <div className="font-semibold text-gray-900">{row.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -109,7 +141,7 @@ export default function SimpleLibraryDetail({
               </p>
             </div>
 
-            {detailRows.length > 0 && (
+            {!compactMedia && detailRows.length > 0 && (
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">
                 {detailRows.map((row) => (
                   <div key={row.label} className="flex items-center gap-3">
@@ -124,11 +156,15 @@ export default function SimpleLibraryDetail({
 
             <div className="flex gap-3 pt-4">
               {actionHref ? (
-                <Link href={actionHref} className="w-full">
-                  <Button variant="primary" fullWidth>
-                    {actionLabel}
-                  </Button>
-                </Link>
+                <button
+                  type="button"
+                  onClick={handleActionClick}
+                  className={`inline-flex h-10 items-center justify-center rounded-[10px] bg-gradient-to-r from-blue-500 to-indigo-600 px-6 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl ${
+                    compactMedia ? 'w-auto min-w-[180px]' : 'w-full'
+                  }`}
+                >
+                  {actionLabel}
+                </button>
               ) : (
                 <Button variant="primary" fullWidth>
                   {actionLabel}

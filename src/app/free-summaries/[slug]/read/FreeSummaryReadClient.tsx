@@ -22,7 +22,7 @@ export default function FreeSummaryReadClient({ slug }: { slug: string }) {
 
         const message = String(error?.message || '');
         if (message.includes('401') || message.toLowerCase().includes('login')) {
-          router.replace(`/user/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+          router.replace(`/free-summaries/${slug}`);
           return;
         }
 
