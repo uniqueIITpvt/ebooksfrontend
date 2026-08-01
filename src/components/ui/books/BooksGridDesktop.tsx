@@ -127,17 +127,8 @@ export default function BooksGridDesktop({
       return itemKeys.some((key) => savedKeys.includes(key));
     });
   };
-  const handleUniquePlusAction = (item: PublicBookListItem, href: string) => {
-    if (isFreeItem(item) || hasUniquePlus) {
-      router.push(href);
-      return;
-    }
-
-    const returnTo =
-      typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}`
-        : '/';
-    openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
+  const handleUniquePlusAction = (href: string) => {
+    router.push(href);
   };
   const handleSaveBook = async (item: PublicBookListItem, href: string) => {
     const identifier = item.slug || item.id || item._id;
@@ -199,7 +190,7 @@ export default function BooksGridDesktop({
               priceLine={priceLine}
               primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
               primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-              onPrimaryClick={() => handleUniquePlusAction(item, href)}
+              onPrimaryClick={() => handleUniquePlusAction(href)}
               isSaved={isItemSaved(item)}
               onSaveClick={() => void handleSaveBook(item, href)}
               saveDisabled={savingId === getItemId(item)}

@@ -311,7 +311,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const isSaving = savingId === itemId;
     const isSaved = isItemSaved(item);
     const hasUniquePlus = hasActiveSubscription(user);
-    const keepForeverTarget = getHref(item);
     const displayPrice = formatDisplayPrice(item.price);
     const priceLine = isFreeItem ? null : (
       <>
@@ -322,21 +321,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     );
 
     const handlePrimaryClick = () => {
-      if (isFreeItem) {
-        router.push(getHref(item));
-        return;
-      }
-
-      if (!user) {
-        const returnTo =
-          typeof window !== 'undefined'
-            ? `${window.location.pathname}${window.location.search}`
-            : '/';
-        openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
-        return;
-      }
-
-      router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
+      router.push(getHref(item));
     };
     const handleCoverClick = () => router.push(getHref(item));
     const handleSaveClick = () => void handleSaveBook(item);

@@ -89,16 +89,7 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
     });
   };
   const handleUniquePlusAction = (item: PublicBookListItem) => {
-    if (isFreeItem(item) || hasUniquePlus) {
-      router.push(getAudiobookHref(item));
-      return;
-    }
-
-    const returnTo =
-      typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}`
-        : '/';
-    openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
+    router.push(getAudiobookHref(item));
   };
   const handleSaveBook = async (item: PublicBookListItem) => {
     const identifier = item.slug || item.id || item._id;

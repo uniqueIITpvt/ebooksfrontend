@@ -68,18 +68,6 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
   };
   const displayPrice = formatPrice(item.price);
   const hasUniquePlus = hasActiveSubscription(user);
-  const handleUniquePlusAction = () => {
-    if (!user) {
-      const returnTo =
-        typeof window !== 'undefined'
-          ? `${window.location.pathname}${window.location.search}`
-          : '/';
-      openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
-      return;
-    }
-
-    router.push(hasUniquePlus ? href : '/subscription');
-  };
   const handleFreeSummaryClaim = async (navigateAfterClaim: boolean) => {
     const identifier = item.slug || item.id || item._id;
     if (!identifier) return;
@@ -124,7 +112,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
       }
       primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
       primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+      onPrimaryClick={() => router.push(href)}
       onCoverClick={() => router.push(href)}
       isSaved={false}
       onSaveClick={() => {
@@ -274,7 +262,7 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
         <div className='mt-2 flex flex-col gap-1.5'>
           <button
             type='button'
-            onClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+            onClick={() => router.push(href)}
             className={`flex h-9 w-full items-center justify-center rounded-[10px] text-[10px] font-semibold leading-none text-white transition-all active:scale-95 font-dm-sans ${
               isFreeItem
                 ? 'bg-blue-600'

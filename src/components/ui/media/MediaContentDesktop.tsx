@@ -96,26 +96,9 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   });
   const claimedReadTarget = serverLibraryItem?.redirectTarget || null;
   const hasUniquePlus = hasActiveSubscription(user);
-  const checkoutId = book.id || book._id || itemKey;
-  const checkoutSlug = book.slug || itemKey;
-  const keepForeverTarget = isAudiobook
-    ? `/audiobooks/${checkoutSlug}`
-    : `/books/${checkoutSlug}${cartFormat ? `?format=${encodeURIComponent(cartFormat)}` : ''}`;
   const displayPrice = book.price
     ? `${'\u20B9'}${book.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
     : null;
-  const handleUniquePlusAction = useCallback(() => {
-    if (!user) {
-      const returnTo =
-        typeof window !== 'undefined'
-          ? `${window.location.pathname}${window.location.search}`
-          : '/';
-      openAuthModal('signin', `/subscription?returnTo=${encodeURIComponent(returnTo)}`);
-      return;
-    }
-
-    router.push(hasUniquePlus ? keepForeverTarget : '/subscription');
-  }, [hasUniquePlus, keepForeverTarget, router, user]);
   const isSavedByUser = useMemo(() => {
     const bookKeys = [book.slug, book.id, book._id, book.title, generateBookSlug(book.title)]
       .filter(Boolean)
@@ -241,7 +224,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       }
       primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
       primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={isFreeItem ? () => router.push(href) : handleUniquePlusAction}
+      onPrimaryClick={() => router.push(href)}
       onCoverClick={() => router.push(href)}
       isSaved={isSaved}
       onSaveClick={() => void handleSaveBook()}
