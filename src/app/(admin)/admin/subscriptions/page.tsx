@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { API_CONFIG } from '@/config/api';
 import { tokenStore } from '@/services/api/tokenStore';
-import { Crown, RefreshCw, CheckCircle, XCircle, Clock, Search, Calendar } from 'lucide-react';
+import { subscriptionPlansApi } from '@/services/api/subscriptionPlansApi';
+import { fallbackSubscriptionPlans, type SubscriptionPlan } from '@/lib/subscriptionPlans';
+import { Crown, RefreshCw, Search, Calendar, Pencil, Trash2 } from 'lucide-react';
 
 interface Subscription {
   _id: string;
@@ -26,12 +28,29 @@ interface Subscription {
 
 export default function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(fallbackSubscriptionPlans);
   const [loading, setLoading] = useState(true);
+  const [plansLoading, setPlansLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [planForm, setPlanForm] = useState<SubscriptionPlan>({
+    planKey: 'basic',
+    name: '',
+    price: 0,
+    duration: '',
+    period: '',
+    durationMonths: 1,
+    features: [],
+    color: 'blue',
+    recommended: false,
+    isActive: true,
+    sortOrder: 0,
+  });
 
   useEffect(() => {
     fetchSubscriptions();
+    fetchPlans();
   }, []);
 
   const fetchSubscriptions = async () => {
@@ -48,6 +67,83 @@ export default function SubscriptionsPage() {
       console.error('Error fetching subscriptions:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPlans = async () => {
+    try {
+      const data = await subscriptionPlansApi.getAdminPlans();
+      if (data.length) {
+        setPlans(data);
+      }
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+    } finally {
+      setPlansLoading(false);
+    }
+  };
+
+  const resetPlanForm = () => {
+    setEditingPlanId(null);
+    setPlanForm({
+      planKey: 'basic',
+      name: '',
+      price: 0,
+      duration: '',
+      period: '',
+      durationMonths: 1,
+      features: [],
+      color: 'blue',
+      recommended: false,
+      isActive: true,
+      sortOrder: plans.length + 1,
+    });
+  };
+
+  const editPlan = (plan: SubscriptionPlan) => {
+    setEditingPlanId(plan._id || null);
+    setPlanForm({
+      ...plan,
+      features: plan.features || [],
+      isActive: plan.isActive !== false,
+    });
+  };
+
+  const savePlan = async () => {
+    try {
+      const payload = {
+        ...planForm,
+        price: Number(planForm.price),
+        durationMonths: Number(planForm.durationMonths),
+        sortOrder: Number(planForm.sortOrder || 0),
+        features: planForm.features.filter(Boolean),
+      };
+
+      if (editingPlanId) {
+        await subscriptionPlansApi.updatePlan(editingPlanId, payload);
+      } else {
+        await subscriptionPlansApi.createPlan(payload);
+      }
+
+      resetPlanForm();
+      await fetchPlans();
+    } catch (error) {
+      console.error('Error saving subscription plan:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save subscription plan');
+    }
+  };
+
+  const deletePlan = async (plan: SubscriptionPlan) => {
+    if (!plan._id || !window.confirm(`Delete ${plan.name} plan?`)) {
+      return;
+    }
+
+    try {
+      await subscriptionPlansApi.deletePlan(plan._id);
+      await fetchPlans();
+    } catch (error) {
+      console.error('Error deleting subscription plan:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete subscription plan');
     }
   };
 
@@ -102,6 +198,169 @@ export default function SubscriptionsPage() {
           <Crown className="w-6 h-6" />
           Subscriptions
         </h1>
+      </div>
+
+      <div className="mb-6 rounded-lg bg-white p-5 shadow dark:bg-gray-800">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Subscription Plan CRUD</h2>
+          {plansLoading && <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />}
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Plan Key</span>
+            <select
+              value={planForm.planKey}
+              onChange={(e) => setPlanForm({ ...planForm, planKey: e.target.value as SubscriptionPlan['planKey'] })}
+              disabled={!!editingPlanId}
+              className="w-full rounded-lg border px-3 py-2"
+            >
+              <option value="basic">basic</option>
+              <option value="premium">premium</option>
+              <option value="pro">pro</option>
+            </select>
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Plan Name</span>
+            <input
+              value={planForm.name}
+              onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+              placeholder="Plan name"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Price</span>
+            <input
+              type="number"
+              value={planForm.price}
+              onChange={(e) => setPlanForm({ ...planForm, price: Number(e.target.value) })}
+              placeholder="Price"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Duration Months</span>
+            <input
+              type="number"
+              value={planForm.durationMonths}
+              onChange={(e) => setPlanForm({ ...planForm, durationMonths: Number(e.target.value) })}
+              placeholder="Duration months"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Duration Label</span>
+            <input
+              value={planForm.duration}
+              onChange={(e) => setPlanForm({ ...planForm, duration: e.target.value })}
+              placeholder="e.g. per 3 months"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Card Period</span>
+            <input
+              value={planForm.period}
+              onChange={(e) => setPlanForm({ ...planForm, period: e.target.value })}
+              placeholder="e.g. /3 months"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Sort Order</span>
+            <input
+              type="number"
+              value={planForm.sortOrder || 0}
+              onChange={(e) => setPlanForm({ ...planForm, sortOrder: Number(e.target.value) })}
+              placeholder="Sort order"
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700 md:col-span-2">
+            <span>Features</span>
+            <textarea
+              value={planForm.features.join('\n')}
+              onChange={(e) => setPlanForm({ ...planForm, features: e.target.value.split('\n') })}
+              placeholder="One feature per line"
+              className="w-full rounded-lg border px-3 py-2"
+              rows={3}
+            />
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Recommended Badge</span>
+            <div className="flex h-[42px] items-center gap-2 rounded-lg border px-3">
+              <input
+                type="checkbox"
+                checked={!!planForm.recommended}
+                onChange={(e) => setPlanForm({ ...planForm, recommended: e.target.checked })}
+              />
+              Recommended
+            </div>
+          </label>
+          <label className="space-y-1 text-sm font-medium text-gray-700">
+            <span>Plan Status</span>
+            <div className="flex h-[42px] items-center gap-2 rounded-lg border px-3">
+              <input
+                type="checkbox"
+                checked={planForm.isActive !== false}
+                onChange={(e) => setPlanForm({ ...planForm, isActive: e.target.checked })}
+              />
+              Active
+            </div>
+          </label>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button onClick={savePlan} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">
+            {editingPlanId ? 'Update Plan' : 'Add Plan'}
+          </button>
+          <button onClick={resetPlanForm} className="rounded-lg border px-4 py-2 font-semibold">
+            Cancel
+          </button>
+        </div>
+
+        <div className="mt-5 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 py-2 text-left">Plan</th>
+                <th className="px-3 py-2 text-left">Price</th>
+                <th className="px-3 py-2 text-left">Duration</th>
+                <th className="px-3 py-2 text-left">Status</th>
+                <th className="px-3 py-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {plans.map((plan) => (
+                <tr key={plan._id || plan.planKey}>
+                  <td className="px-3 py-2">
+                    <div className="font-semibold">{plan.name}</div>
+                    <div className="text-xs text-gray-500">{plan.planKey}</div>
+                  </td>
+                  <td className="px-3 py-2">₹{plan.price}</td>
+                  <td className="px-3 py-2">{plan.duration}</td>
+                  <td className="px-3 py-2">
+                    <span className={`rounded-full px-2 py-1 text-xs ${plan.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                      {plan.isActive !== false ? 'Active' : 'Inactive'}
+                    </span>
+                    {plan.recommended && <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">Recommended</span>}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex gap-2">
+                      <button onClick={() => editPlan(plan)} className="rounded border p-2 text-blue-600">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => deletePlan(plan)} className="rounded border p-2 text-red-600">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Filters */}

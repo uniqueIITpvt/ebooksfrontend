@@ -20,6 +20,8 @@ import { API_CONFIG } from '@/config/api';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { tokenStore } from '@/services/api/tokenStore';
+import { subscriptionPlansApi } from '@/services/api/subscriptionPlansApi';
+import { fallbackSubscriptionPlans, type SubscriptionPlan } from '@/lib/subscriptionPlans';
 
 const API_BASE_URL = API_CONFIG.API_BASE_URL;
 
@@ -135,6 +137,7 @@ function CheckoutContent() {
   const [isFetchingZip, setIsFetchingZip] = useState(false);
   const [quantity] = useState(initialQty);
   const [subscriptionUpgradeCredit, setSubscriptionUpgradeCredit] = useState(0);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>(fallbackSubscriptionPlans);
   
   const [addressData, setAddressData] = useState<AddressData>({
     fullName: '',
@@ -158,11 +161,23 @@ function CheckoutContent() {
       : false;
 
   // Plan data for subscription checkout
-  const planData = planKey ? {
-    basic: { name: 'Basic Plan', price: '₹99', duration: 'per month', features: ['Access to all standard books', 'Read on any device', 'Standard support', 'No ads'] },
-    premium: { name: 'Premium Plan', price: '₹249', duration: 'per 3 months', features: ['All Basic features', 'Access to Premium summaries', 'Download for offline reading', 'Priority support'] },
-    pro: { name: 'Pro Plan', price: '₹499', duration: 'per year', features: ['All Premium features', 'Exclusive community access', 'Early access to new releases', 'Personalized reading plans'] },
-  }[planKey] : null;
+  const legacyPlanData = planKey
+    ? fallbackSubscriptionPlans.find((plan) => plan.planKey === planKey)
+    : null;
+
+  const planData = planKey
+    ? subscriptionPlans.find((plan) => plan.planKey === planKey) || legacyPlanData
+    : null;
+
+  useEffect(() => {
+    if (!planKey) return;
+
+    subscriptionPlansApi.getPublicPlans().then((data) => {
+      if (data.length) {
+        setSubscriptionPlans(data);
+      }
+    });
+  }, [planKey]);
 
   useEffect(() => {
     if (fromCart) {
@@ -744,7 +759,7 @@ function CheckoutContent() {
     totalAmount = subtotal + gstAmount;
     displayPrice = `₹${priceVal.toFixed(2)}`;
   } else if (planData) {
-    priceVal = parseFloat(planData.price.replace(/[^0-9.]/g, ''));
+    priceVal = parseCurrency(planData.price);
     subtotal = priceVal;
     gstPercentage = 0;
     gstAmount = 0;
@@ -1169,7 +1184,7 @@ function CheckoutContent() {
                           Subscription Plan
                         </div>
                       </div>
-                      <div className="text-indigo-600 font-bold">{planData.price} <span className="text-sm text-gray-500">{planData.duration}</span></div>
+                      <div className="text-indigo-600 font-bold">{displayPrice} <span className="text-sm text-gray-500">{planData.duration}</span></div>
                     </div>
                   </div>
                 ) : null}
@@ -1187,7 +1202,7 @@ function CheckoutContent() {
                             ? '₹0.00'
                             : displayPrice
                           : planData
-                            ? planData.price
+                            ? displayPrice
                             : '-'}
                     </span>
                   </div>

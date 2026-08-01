@@ -7,62 +7,30 @@ import { useRouter } from "next/navigation";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/primitives/Button";
 import { getActiveSubscriptionPlan, hasActiveSubscription } from "@/lib/subscription";
-
-const plans = [
-  {
-    name: "Basic",
-    price: 99,
-    duration: "per month",
-    features: [
-      "Access to all standard books",
-      "Read on any device",
-      "Standard support",
-      "No ads",
-    ],
-    planKey: "basic",
-    color: "blue",
-  },
-  {
-    name: "Premium",
-    price: 249,
-    duration: "per 3 months",
-    features: [
-      "All Basic features",
-      "Access to Premium summaries",
-      "Download for offline reading",
-      "Priority support",
-    ],
-    planKey: "premium",
-    color: "indigo",
-    recommended: true,
-  },
-  {
-    name: "Pro",
-    price: 499,
-    duration: "year",
-    features: [
-      "All Premium features",
-      "Exclusive community access",
-      "Early access to new releases",
-      "Personalized reading plans",
-    ],
-    planKey: "pro",
-    color: "purple",
-  },
-];
-
-const PLAN_RANK: Record<string, number> = { basic: 1, premium: 2, pro: 3 };
+import {
+  fallbackSubscriptionPlans,
+  subscriptionPlanRank,
+  type SubscriptionPlan,
+  type SubscriptionPlanKey,
+} from "@/lib/subscriptionPlans";
+import { subscriptionPlansApi } from "@/services/api/subscriptionPlansApi";
 
 export default function SubscriptionPage() {
   const { user, isAuthenticated, refreshUser, openAuthModal } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [returnTo, setReturnTo] = useState('');
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(fallbackSubscriptionPlans);
   const hasUniquePlus = hasActiveSubscription(user);
   const activePlan = getActiveSubscriptionPlan(user);
 
   useEffect(() => {
     setReturnTo(new URLSearchParams(window.location.search).get('returnTo') || '');
+    subscriptionPlansApi.getPublicPlans().then((data) => {
+      if (data.length) {
+        setPlans(data);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -76,10 +44,10 @@ export default function SubscriptionPage() {
     router.replace(returnTo);
   }, [hasUniquePlus, isAuthenticated, returnTo, router]);
 
-  const handleSubscribe = async (planKey: string) => {
+  const handleSubscribe = async (planKey: SubscriptionPlanKey) => {
     if (
       activePlan &&
-      PLAN_RANK[planKey] < PLAN_RANK[activePlan]
+      subscriptionPlanRank[planKey] < subscriptionPlanRank[activePlan]
     ) {
       return;
     }
@@ -114,7 +82,7 @@ export default function SubscriptionPage() {
           {plans.map((plan) => {
             const isCurrentPlan = activePlan === plan.planKey;
             const hasHigherActivePlan =
-              !!activePlan && PLAN_RANK[plan.planKey] < PLAN_RANK[activePlan];
+              !!activePlan && subscriptionPlanRank[plan.planKey] < subscriptionPlanRank[activePlan];
 
             return (
             <div

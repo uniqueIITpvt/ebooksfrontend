@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpenIcon,
@@ -10,6 +11,14 @@ import {
   ShoppingBagIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
+import {
+  fallbackSubscriptionPlans,
+  getRecommendedSubscriptionPlan,
+  getSubscriptionPlan,
+  type SubscriptionPlan,
+  type SubscriptionPlanKey,
+} from '@/lib/subscriptionPlans';
+import { subscriptionPlansApi } from '@/services/api/subscriptionPlansApi';
 
 interface AccessChoicePanelProps {
   itemLabel?: 'book' | 'audiobook';
@@ -19,7 +28,7 @@ interface AccessChoicePanelProps {
   onKeepForever: () => void;
   uniquePlusButtonLabel?: string;
   keepForeverButtonLabel?: string;
-  activePlan?: 'basic' | 'premium' | 'pro' | null;
+  activePlan?: SubscriptionPlanKey | null;
 }
 
 const formatRupees = (value?: string | number | null) => {
@@ -38,7 +47,7 @@ const formatRupees = (value?: string | number | null) => {
 export function AccessChoicePanel({
   itemLabel = 'book',
   price,
-  subscriptionPrice = 199,
+  subscriptionPrice,
   onStartUniquePlus,
   onKeepForever,
   uniquePlusButtonLabel = 'Start Unique Plus',
@@ -46,17 +55,24 @@ export function AccessChoicePanel({
   activePlan = null,
 }: AccessChoicePanelProps) {
   const router = useRouter();
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(fallbackSubscriptionPlans);
   const label = itemLabel === 'audiobook' ? 'audiobook' : 'book';
-  const activePlanDetails = activePlan
-    ? {
-        basic: { name: 'Basic', price: 99, period: '/month' },
-        premium: { name: 'Premium', price: 249, period: '/3 months' },
-        pro: { name: 'Pro', price: 499, period: '/year' },
-      }[activePlan]
-    : null;
+
+  useEffect(() => {
+    subscriptionPlansApi.getPublicPlans().then((data) => {
+      if (data.length) {
+        setPlans(data);
+      }
+    });
+  }, []);
+
+  const activePlanDetails = getSubscriptionPlan(activePlan, plans);
+  const defaultPlanDetails = getRecommendedSubscriptionPlan(plans);
   const planName = activePlanDetails?.name || 'Unique Plus';
-  const displaySubscriptionPrice = activePlanDetails?.price ?? subscriptionPrice;
-  const displaySubscriptionPeriod = activePlanDetails?.period || '/month';
+  const displaySubscriptionPrice =
+    activePlanDetails?.price ?? subscriptionPrice ?? defaultPlanDetails.price;
+  const displaySubscriptionPeriod =
+    activePlanDetails?.period || defaultPlanDetails.period;
   const subscriptionTitle =
     itemLabel === 'audiobook'
       ? activePlanDetails
