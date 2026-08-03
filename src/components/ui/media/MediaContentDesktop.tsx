@@ -847,7 +847,7 @@ export default function MediaContentDesktop({
               </div>{/* end flex-1 main content */}
             </div>{/* end flex gap-6 */}
 
-            <div ref={bookOfDayRef} className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[40px] overflow-hidden border border-blue-100 shadow-xl shadow-blue-100/50'>
+            <div ref={bookOfDayRef} className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[40px] overflow-hidden border border-blue-100'>
               <div className='absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),transparent_35%),radial-gradient(circle_at_75%_30%,rgba(99,102,241,0.13),transparent_32%)] pointer-events-none' />
 
               <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10'>
@@ -890,7 +890,7 @@ export default function MediaContentDesktop({
                           const colors = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#6366F1', '#EC4899', '#F97316', '#84CC16', '#3B82F6', '#A855F7', '#F43F5E', '#14B8A6'];
                           return (
                             <div key={category._id || category.id} className='col-span-1 group'>
-                              <button onClick={() => router.push(`/books?category=${category.name}`)} className='w-full min-h-[60px] h-full relative flex items-center gap-3 p-2.5 rounded-[18px] bg-white/75 border border-blue-100 shadow-sm transition-all hover:bg-white hover:border-blue-200 hover:scale-[1.01] hover:shadow-md overflow-hidden'>
+                              <button onClick={() => router.push(`/books?category=${category.name}`)} className='w-full min-h-[60px] h-full relative flex items-center gap-3 p-2.5 rounded-[18px] bg-white/75 border border-blue-100 transition-all hover:bg-white hover:border-blue-200 hover:scale-[1.01] overflow-hidden'>
                                 <div className='w-8 h-8 shrink-0 rounded-[10px] flex items-center justify-center text-base transition-transform group-hover:scale-110' style={{ backgroundColor: `${colors[idx % colors.length]}15`, color: colors[idx % colors.length] }}>
                                   {icons[idx % icons.length]}
                                 </div>
@@ -899,7 +899,7 @@ export default function MediaContentDesktop({
                                     <span className='font-syne font-bold text-[14px] text-slate-900 truncate'>{category.name}</span>
                                     {idx === 0 && <span className='px-1.5 py-0.5 rounded-full bg-[#FF4E74]/20 text-[#FF4E74] text-[6.5px] font-black uppercase tracking-widest'>HOT</span>}
                                   </div>
-                                  <div className='font-dm-sans text-slate-500 text-[10px]'>{Math.floor(Math.random() * 400 + 50)}+ summaries</div>
+                                  <div className='font-dm-sans text-slate-500 text-[10px]'>{categoryCounts[category.name] ?? category.bookCount ?? 0} summaries</div>
                                 </div>
                                 <div className='shrink-0 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 bg-blue-50 p-1 rounded-full'>
                                   <ChevronRightIcon className='w-2.5 h-2.5 text-blue-500' />

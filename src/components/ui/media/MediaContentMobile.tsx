@@ -1042,7 +1042,7 @@ export default function MediaContentMobile({
         </div>
 
         {/* Categories Section - Mobile */}
-        <div className='relative mt-10 mb-8 p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[32px] overflow-hidden border border-blue-100 shadow-xl shadow-blue-100/50'>
+        <div className='relative mt-10 mb-8 p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[32px] overflow-hidden border border-blue-100'>
           {/* Background Glows */}
           <div className='absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),transparent_35%),radial-gradient(circle_at_75%_30%,rgba(99,102,241,0.13),transparent_32%)] pointer-events-none' />
           
@@ -1085,7 +1085,7 @@ export default function MediaContentMobile({
                   <button
                     key={category._id || category.id}
                     onClick={() => router.push(`/books?category=${category.name}`)}
-                    className='relative flex items-center gap-2.5 p-2.5 rounded-[16px] bg-white/75 border border-blue-100 shadow-sm transition-all active:scale-[0.98] overflow-hidden'
+                    className='relative flex items-center gap-2.5 p-2.5 rounded-[16px] bg-white/75 border border-blue-100 transition-all active:scale-[0.98] overflow-hidden'
                   >
                     <div 
                       className='w-7 h-7 shrink-0 rounded-[8px] flex items-center justify-center text-sm' 
@@ -1095,7 +1095,7 @@ export default function MediaContentMobile({
                     </div>
                     <div className='flex-1 flex flex-col justify-center text-left min-w-0'>
                       <span className='font-syne font-bold text-[11px] text-slate-900 truncate leading-tight'>{category.name}</span>
-                      <div className='font-dm-sans text-slate-500 text-[8px]'>{Math.floor(Math.random() * 400 + 50)}+</div>
+                      <div className='font-dm-sans text-slate-500 text-[8px]'>{categoryCounts[category.name] ?? category.bookCount ?? 0}</div>
                     </div>
                     <div className='absolute inset-0 opacity-0 active:opacity-[0.05] transition-opacity pointer-events-none' style={{ background: `radial-gradient(circle at center, ${colors[idx % colors.length]}, transparent 70%)` }} />
                   </button>
