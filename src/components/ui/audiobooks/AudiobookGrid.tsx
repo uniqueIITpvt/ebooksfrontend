@@ -184,9 +184,9 @@ export default function AudiobookGrid({ items }: AudiobookGridProps) {
                     type='button'
                     onClick={(event) => {
                       event.stopPropagation();
-                      router.push(itemHref);
+                      void handleTogglePreview(item);
                     }}
-                    aria-label={`Open details for ${item.title}`}
+                    aria-label={`${isCurrentItem && isPlaying ? 'Pause' : 'Play'} preview for ${item.title}`}
                     className='absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full border border-blue-200 bg-blue-600 text-white shadow-[0_10px_30px_rgba(37,99,235,0.28)] backdrop-blur transition hover:scale-105 hover:bg-blue-700'
                   >
                     {isCurrentItem && isPlaying ? (
