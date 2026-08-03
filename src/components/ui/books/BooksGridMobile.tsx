@@ -175,43 +175,57 @@ export default function BooksGridMobile({ items, className = '', onAudiobookSele
           );
 
           return (
-            <LibraryCardMobile
+            <div
               key={item.id}
-              image={item.image}
-              title={item.title}
-              author={item.author}
-              rating={item.rating}
-              reviews={item.reviews}
-              priceLine={priceLine}
-              primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-              primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-              onPrimaryClick={() => handleUniquePlusAction(href)}
-              isSaved={isItemSaved(item)}
-              onSaveClick={() => void handleSaveBook(item, href)}
-              saveDisabled={savingId === getItemId(item)}
-              saveLabel={`Save ${item.title}`}
-              coverVariant={isAudiobook ? 'audiobook' : 'book'}
-              coverOverlay={isAudiobook ? (
-                <div className='absolute left-1/2 top-1/2 z-[4] -translate-x-1/2 -translate-y-1/2'>
-                  <button
-                    type='button'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlay(item);
-                    }}
-                    disabled={!item.files?.audiobook?.url}
-                    className='flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white disabled:cursor-not-allowed disabled:bg-white/60 disabled:hover:scale-100'
-                    aria-label={`${currentTrack?.id === `audiobook-${item.id}` && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
-                  >
-                    {currentTrack?.id === `audiobook-${item.id}` && isPlaying ? (
-                      <PauseIcon className='h-4 w-4 text-indigo-600' />
-                    ) : (
-                      <PlayIcon className='ml-0.5 h-4 w-4 text-indigo-600' />
-                    )}
-                  </button>
-                </div>
-              ) : null}
-            />
+              role='button'
+              tabIndex={0}
+              onClick={() => router.push(href)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  router.push(href);
+                }
+              }}
+              className='cursor-pointer'
+            >
+              <LibraryCardMobile
+                image={item.image}
+                title={item.title}
+                author={item.author}
+                rating={item.rating}
+                reviews={item.reviews}
+                priceLine={priceLine}
+                primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+                onPrimaryClick={() => handleUniquePlusAction(href)}
+                onCoverClick={() => router.push(href)}
+                isSaved={isItemSaved(item)}
+                onSaveClick={() => void handleSaveBook(item, href)}
+                saveDisabled={savingId === getItemId(item)}
+                saveLabel={`Save ${item.title}`}
+                coverVariant={isAudiobook ? 'audiobook' : 'book'}
+                coverOverlay={isAudiobook ? (
+                  <div className='absolute left-1/2 top-1/2 z-[4] -translate-x-1/2 -translate-y-1/2'>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlay(item);
+                      }}
+                      disabled={!item.files?.audiobook?.url}
+                      className='flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white disabled:cursor-not-allowed disabled:bg-white/60 disabled:hover:scale-100'
+                      aria-label={`${currentTrack?.id === `audiobook-${item.id}` && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
+                    >
+                      {currentTrack?.id === `audiobook-${item.id}` && isPlaying ? (
+                        <PauseIcon className='h-4 w-4 text-indigo-600' />
+                      ) : (
+                        <PlayIcon className='ml-0.5 h-4 w-4 text-indigo-600' />
+                      )}
+                    </button>
+                  </div>
+                ) : null}
+              />
+            </div>
           );
         })}
       </div>

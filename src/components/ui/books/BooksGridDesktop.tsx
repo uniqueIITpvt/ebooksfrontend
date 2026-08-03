@@ -180,44 +180,58 @@ export default function BooksGridDesktop({
           );
 
           return (
-            <LibraryCardDesktop
+            <div
               key={item.id}
-              image={item.image}
-              title={item.title}
-              author={item.author}
-              rating={item.rating}
-              reviews={item.reviews}
-              priceLine={priceLine}
-              primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-              primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-              onPrimaryClick={() => handleUniquePlusAction(href)}
-              isSaved={isItemSaved(item)}
-              onSaveClick={() => void handleSaveBook(item, href)}
-              saveDisabled={savingId === getItemId(item)}
-              saveLabel={`Save ${item.title}`}
-              coverVariant={isAudiobook ? 'audiobook' : 'book'}
-              coverOverlay={isAudiobook ? (
-                <div className='absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2'>
-                  <button
-                    type='button'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlay(item);
-                    }}
-                    disabled={!item.files?.audiobook?.url}
-                    className='flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white disabled:cursor-not-allowed disabled:bg-white/60 disabled:hover:scale-100'
-                    aria-label={`${currentTrack?.id === `audiobook-${item.id}` && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
-                  >
-                    {currentTrack?.id === `audiobook-${item.id}` && isPlaying ? (
-                      <PauseIcon className='h-6 w-6 text-indigo-600' />
-                    ) : (
-                      <PlayIcon className='ml-0.5 h-6 w-6 text-indigo-600' />
-                    )}
-                  </button>
-                </div>
-              ) : null}
-              className='[animation-fill-mode:both]'
-            />
+              role='button'
+              tabIndex={0}
+              onClick={() => router.push(href)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  router.push(href);
+                }
+              }}
+              className='cursor-pointer'
+            >
+              <LibraryCardDesktop
+                image={item.image}
+                title={item.title}
+                author={item.author}
+                rating={item.rating}
+                reviews={item.reviews}
+                priceLine={priceLine}
+                primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+                onPrimaryClick={() => handleUniquePlusAction(href)}
+                onCoverClick={() => router.push(href)}
+                isSaved={isItemSaved(item)}
+                onSaveClick={() => void handleSaveBook(item, href)}
+                saveDisabled={savingId === getItemId(item)}
+                saveLabel={`Save ${item.title}`}
+                coverVariant={isAudiobook ? 'audiobook' : 'book'}
+                coverOverlay={isAudiobook ? (
+                  <div className='absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2'>
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlay(item);
+                      }}
+                      disabled={!item.files?.audiobook?.url}
+                      className='flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white disabled:cursor-not-allowed disabled:bg-white/60 disabled:hover:scale-100'
+                      aria-label={`${currentTrack?.id === `audiobook-${item.id}` && isPlaying ? 'Pause' : 'Play'} audio preview for ${item.title}`}
+                    >
+                      {currentTrack?.id === `audiobook-${item.id}` && isPlaying ? (
+                        <PauseIcon className='h-6 w-6 text-indigo-600' />
+                      ) : (
+                        <PlayIcon className='ml-0.5 h-6 w-6 text-indigo-600' />
+                      )}
+                    </button>
+                  </div>
+                ) : null}
+                className='[animation-fill-mode:both]'
+              />
+            </div>
           );
         })}
       </div>
