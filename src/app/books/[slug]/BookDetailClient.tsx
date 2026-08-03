@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowLeftIcon,
@@ -24,6 +23,7 @@ import type { PublicBookListItem } from '@/types/publicBook';
 import { generateBookSlug } from '@/utils/slugify';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
 import { getActiveSubscriptionPlan, hasActiveSubscription } from '@/lib/subscription';
+import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 
 interface BookDetailClientProps {
   book: Book;
@@ -41,16 +41,11 @@ export default function BookDetailClient({
   const [currentBook, setCurrentBook] = useState(book);
   const [userRating, setUserRating] = useState<number>(0);
   const [savingFavorite, setSavingFavorite] = useState(false);
+  const [savingRelatedId, setSavingRelatedId] = useState<string | null>(null);
+  const [relatedSavedOverrides, setRelatedSavedOverrides] = useState<Record<string, boolean>>({});
 
   const parseCurrency = (value?: string | number | null) =>
     Number.parseFloat(String(value || '0').replace(/[^0-9.]/g, '')) || 0;
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 2,
-    }).format(value);
 
   const currentBookId = String(currentBook.id || (currentBook as any)._id || '');
   const currentBookSlug = currentBook.slug || generateBookSlug(currentBook.title || '');
@@ -187,9 +182,74 @@ export default function BookDetailClient({
     }
   };
 
-  const formatPrice = (price?: string | null) => {
-    if (!price) return '';
-    return formatCurrency(parseCurrency(price));
+  const formatCardPrice = (price?: string | null) => {
+    if (!price) return null;
+    return `₹${price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`;
+  };
+
+  const getRelatedHref = (relatedBook: PublicBookListItem) =>
+    `/books/${relatedBook.slug || generateBookSlug(relatedBook.title)}`;
+
+  const getRelatedId = (relatedBook: PublicBookListItem) =>
+    relatedBook._id || relatedBook.id || relatedBook.slug || relatedBook.title;
+
+  const isRelatedSaved = (relatedBook: PublicBookListItem) => {
+    const relatedId = getRelatedId(relatedBook);
+    const override = relatedSavedOverrides[relatedId];
+    if (override !== undefined) return override;
+
+    const relatedKeys = [
+      relatedBook.slug,
+      relatedBook.id,
+      relatedBook._id,
+      relatedBook.title,
+      generateBookSlug(relatedBook.title),
+    ].filter(Boolean).map(String);
+
+    return (user?.savedBooks || []).some((savedBook) => {
+      const rawBook = typeof savedBook.bookId === 'object' ? savedBook.bookId : null;
+      const savedKeys = [
+        savedBook.slug,
+        savedBook.id,
+        savedBook._id,
+        savedBook.title,
+        typeof savedBook.bookId === 'string' ? savedBook.bookId : undefined,
+        rawBook?.slug,
+        rawBook?.id,
+        rawBook?._id,
+        rawBook?.title,
+      ].filter(Boolean).map(String);
+
+      return relatedKeys.some((key) => savedKeys.includes(key));
+    });
+  };
+
+  const handleSaveRelatedBook = async (relatedBook: PublicBookListItem) => {
+    const identifier = relatedBook.slug || relatedBook.id || relatedBook._id;
+    if (!identifier) return;
+
+    const href = getRelatedHref(relatedBook);
+    if (!user) {
+      openAuthModal('signin', href);
+      return;
+    }
+
+    const relatedId = getRelatedId(relatedBook);
+    setSavingRelatedId(relatedId);
+    try {
+      const response = await authApi.toggleSavedBook(identifier);
+      if (response.success) {
+        setRelatedSavedOverrides((current) => ({
+          ...current,
+          [relatedId]: response.data?.saved ?? !isRelatedSaved(relatedBook),
+        }));
+      }
+      await refreshUser();
+    } catch (error: any) {
+      alert(error?.message || 'Unable to save this item');
+    } finally {
+      setSavingRelatedId(null);
+    }
   };
 
   const handleToggleFavorite = async () => {
@@ -432,51 +492,56 @@ export default function BookDetailClient({
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
               You May Also Like
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedBooks.map((relatedBook) => (
-                <Link
-                  key={relatedBook.id}
-                  href={`/books/${relatedBook.slug || generateBookSlug(relatedBook.title)}`}
-                  className="group"
-                >
-                  <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                    <div className="relative aspect-[4/5] bg-gray-50">
-                      {relatedBook.image ? (
-                        <Image
-                          src={relatedBook.image}
-                          alt={relatedBook.title}
-                          fill
-                          className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <span className="text-gray-400 text-sm">No Image</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2">
-                        {relatedBook.title}
-                      </h3>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1">
-                          <SolidStarIcon className="w-4 h-4 text-yellow-400" />
-                          <span className="text-sm font-medium">{relatedBook.rating}</span>
-                        </div>
-                        <span className="text-sm text-gray-500">({relatedBook.reviews})</span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-bold text-gray-900">{formatPrice(relatedBook.price)}</span>
-                        {relatedBook.originalPrice && (
-                          <span className="text-sm text-gray-400 line-through">
-                            {formatPrice(relatedBook.originalPrice)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+            <div className="grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10">
+              {relatedBooks.slice(0, 5).map((relatedBook, index) => {
+                const href = getRelatedHref(relatedBook);
+                const isFreeItem = parseCurrency(relatedBook.price) <= 0;
+                const displayPrice = formatCardPrice(relatedBook.price);
+
+                return (
+                  <div
+                    key={relatedBook.id || relatedBook.slug || relatedBook.title}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => router.push(href)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        router.push(href);
+                      }
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <LibraryCardDesktop
+                      image={relatedBook.image}
+                      title={relatedBook.title}
+                      author={relatedBook.author}
+                      rating={relatedBook.rating}
+                      reviews={relatedBook.reviews}
+                      priceLine={
+                        isFreeItem ? null : (
+                          <>
+                            {hasUniquePlusAccess ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
+                            <span className="font-semibold text-[#16A34A]">Free</span>
+                            {hasUniquePlusAccess ? ' with Unique Plus or' : ' with Unique Plus'}
+                          </>
+                        )
+                      }
+                      primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlusAccess ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                      primaryVariant={isFreeItem ? 'free' : hasUniquePlusAccess ? 'keep-forever' : 'unique-plus'}
+                      onPrimaryClick={() => router.push(href)}
+                      onCoverClick={() => router.push(href)}
+                      isSaved={isRelatedSaved(relatedBook)}
+                      onSaveClick={() => void handleSaveRelatedBook(relatedBook)}
+                      saveDisabled={savingRelatedId === getRelatedId(relatedBook)}
+                      saveLabel={`Save ${relatedBook.title}`}
+                      coverVariant={relatedBook.type === 'Audiobook' ? 'audiobook' : 'book'}
+                      priority={index < 3}
+                      loading={index < 3 ? 'eager' : 'lazy'}
+                    />
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

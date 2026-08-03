@@ -1,3 +1,5 @@
+import type { SubscriptionPlanKey } from './subscriptionPlans';
+
 type SubscriptionUser = {
   subscriptionStatus?: 'none' | 'active' | 'inactive' | 'expired' | string;
   subscriptionPlan?: 'none' | 'basic' | 'premium' | 'pro';
@@ -20,8 +22,11 @@ export const hasActiveSubscription = (user: SubscriptionUser) => {
   return Number.isNaN(endTime) ? false : endTime > Date.now();
 };
 
-export const getActiveSubscriptionPlan = (user: SubscriptionUser) =>
-  hasActiveSubscription(user) ? user?.subscriptionPlan ?? null : null;
+export const getActiveSubscriptionPlan = (user: SubscriptionUser): SubscriptionPlanKey | null => {
+  if (!hasActiveSubscription(user)) return null;
+  const plan = user?.subscriptionPlan;
+  return plan === 'basic' || plan === 'premium' || plan === 'pro' ? plan : null;
+};
 
 export const formatSubscriptionPlanLabel = (
   plan: NonNullable<SubscriptionUser>['subscriptionPlan'] | null | undefined
