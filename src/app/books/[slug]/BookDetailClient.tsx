@@ -492,7 +492,7 @@ export default function BookDetailClient({
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
               You May Also Like
             </h2>
-            <div className="grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10">
+            <div className="grid w-full grid-cols-[repeat(5,150px)] items-start gap-x-8 gap-y-10">
               {relatedBooks.slice(0, 5).map((relatedBook, index) => {
                 const href = getRelatedHref(relatedBook);
                 const isFreeItem = parseCurrency(relatedBook.price) <= 0;
