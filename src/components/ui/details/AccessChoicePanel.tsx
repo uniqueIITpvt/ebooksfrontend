@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   BookOpenIcon,
   CloudArrowDownIcon,
@@ -54,7 +53,6 @@ export function AccessChoicePanel({
   keepForeverButtonLabel,
   activePlan = null,
 }: AccessChoicePanelProps) {
-  const router = useRouter();
   const [plans, setPlans] = useState<SubscriptionPlan[]>(fallbackSubscriptionPlans);
   const label = itemLabel === 'audiobook' ? 'audiobook' : 'book';
 
@@ -107,66 +105,58 @@ export function AccessChoicePanel({
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
-        <article className="flex h-full flex-col rounded-2xl border border-blue-200 bg-blue-50/40 p-4 shadow-sm">
-          <div className="mb-2.5 flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
-              <BookOpenIcon className="h-6 w-6" />
+      <div className={activePlanDetails ? 'flex justify-center' : 'grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2'}>
+        {!activePlanDetails && (
+          <article className="flex h-full flex-col rounded-2xl border border-blue-200 bg-blue-50/40 p-4 shadow-sm">
+            <div className="mb-2.5 flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+                <BookOpenIcon className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-semibold text-slate-950">{subscriptionTitle}</h2>
+                  <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
+                    {subscriptionBadge}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm font-medium text-slate-500">{subscriptionDescription}</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-semibold text-slate-950">{subscriptionTitle}</h2>
-                <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                  {subscriptionBadge}
-                </span>
-              </div>
-              <p className="mt-1 text-sm font-medium text-slate-500">{subscriptionDescription}</p>
+
+            <div className="space-y-2">
+              {uniquePlusBenefits.map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-3 text-sm font-semibold text-slate-800">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span>{text}</span>
+                </div>
+              ))}
             </div>
-          </div>
 
-          <div className="space-y-2">
-            {uniquePlusBenefits.map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-3 text-sm font-semibold text-slate-800">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>{text}</span>
-              </div>
-            ))}
-          </div>
+            <div className="mt-auto pt-3">
+              <div className="mb-3 h-px bg-blue-100" />
 
-          <div className="mt-auto pt-3">
-            <div className="mb-3 h-px bg-blue-100" />
-
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <div className="flex items-end gap-1">
-                <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(displaySubscriptionPrice)}</span>
-                <span className="text-sm font-medium text-slate-500">{displaySubscriptionPeriod}</span>
-              </div>
-              {activePlanDetails ? (
-                <button
-                  type="button"
-                  onClick={() => router.push('/profile?tab=subscription')}
-                  className="pb-0.5 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-800 hover:underline"
-                >
-                  Cancel anytime
-                </button>
-              ) : (
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-bold leading-none text-slate-950">{formatRupees(displaySubscriptionPrice)}</span>
+                  <span className="text-sm font-medium text-slate-500">{displaySubscriptionPeriod}</span>
+                </div>
                 <p className="pb-0.5 text-xs font-medium text-slate-500">Cancel anytime</p>
-              )}
+              </div>
+
+              <button
+                type="button"
+                onClick={onStartUniquePlus}
+                className="h-11 w-full rounded-xl bg-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
+              >
+                {subscriptionButtonLabel}
+              </button>
             </div>
+          </article>
+        )}
 
-            <button
-              type="button"
-              onClick={onStartUniquePlus}
-              className="h-11 w-full rounded-xl bg-blue-600 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-colors hover:bg-blue-700"
-            >
-              {subscriptionButtonLabel}
-            </button>
-          </div>
-        </article>
-
-        <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <article className={`flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm ${activePlanDetails ? 'w-full max-w-xl' : ''}`}>
           <div className="mb-2.5 flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-900">
               <ShoppingBagIcon className="h-6 w-6" />
