@@ -847,27 +847,26 @@ export default function MediaContentDesktop({
               </div>{/* end flex-1 main content */}
             </div>{/* end flex gap-6 */}
 
-            <div ref={bookOfDayRef} className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-[#0B0F1A] rounded-[40px] overflow-hidden border border-white/5'>
-              <div className='absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none' />
-              <div className='absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/10 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none' />
+            <div ref={bookOfDayRef} className='relative mx-auto mt-8 mb-4 max-w-[1300px] p-8 lg:p-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[40px] overflow-hidden border border-blue-100 shadow-xl shadow-blue-100/50'>
+              <div className='absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),transparent_35%),radial-gradient(circle_at_75%_30%,rgba(99,102,241,0.13),transparent_32%)] pointer-events-none' />
 
               <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10'>
                 <div className='lg:col-span-2 lg:sticky lg:top-24'>
                   <div className='flex flex-col items-center pt-4'>
-                    <div className='bg-gradient-to-r from-[#FF8C7E] to-[#FF4E74] text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-6 shadow-lg shadow-pink-500/20'>
+                    <div className='bg-gradient-to-r from-orange-500 to-orange-400 text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-6 shadow-lg shadow-orange-500/20'>
                       ✦ book of the day
                     </div>
                     <div className='font-syne text-center mb-6'>
-                      <div className='text-[70px] font-extrabold text-white leading-[0.8] mb-1 tracking-tighter'>21</div>
-                      <div className='text-[24px] font-bold text-[#00E5BC] tracking-[0.2em] leading-none mb-1'>DAYS</div>
-                      <div className='text-[10px] font-medium text-white/30 tracking-[0.4em] uppercase'>Challenge</div>
+                      <div className='text-[70px] font-extrabold text-[#172554] leading-[0.8] mb-1 tracking-tighter'>21</div>
+                      <div className='text-[24px] font-bold text-blue-600 tracking-[0.2em] leading-none mb-1'>DAYS</div>
+                      <div className='text-[10px] font-medium text-slate-500 tracking-[0.4em] uppercase'>Challenge</div>
                     </div>
                     <button
                       onClick={() => {
                         const element = document.getElementById('free-summaries-section');
                         element?.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className='group relative flex items-center gap-2 px-7 py-3 bg-white text-black text-[12px] font-bold rounded-full transition-all hover:scale-105 hover:shadow-xl font-dm-sans'
+                      className='group relative flex items-center gap-2 px-7 py-3 bg-orange-500 text-white text-[12px] font-bold rounded-full transition-all hover:scale-105 hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/25 font-dm-sans'
                     >
                       <span>Start Now</span>
                       <ChevronRightIcon className='w-3.5 h-3.5 transition-transform group-hover:translate-x-1' />
@@ -877,13 +876,13 @@ export default function MediaContentDesktop({
 
                 <div className='lg:col-span-10'>
                   <div className='flex items-center gap-4 mb-7'>
-                    <span className='text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-syne'>Browse Categories</span>
-                    <div className='h-px flex-1 bg-white/5'></div>
+                    <span className='text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] font-syne'>Browse Categories</span>
+                    <div className='h-px flex-1 bg-blue-200/70'></div>
                   </div>
 
                   <div className='grid grid-cols-2 lg:grid-cols-4 gap-3.5'>
                     {isLoadingCategories ? (
-                      Array.from({ length: 15 }, (_, i) => <div key={i} className='h-[75px] bg-white/5 animate-pulse rounded-2xl border border-white/5' />)
+                      Array.from({ length: 15 }, (_, i) => <div key={i} className='h-[75px] bg-white/70 animate-pulse rounded-2xl border border-blue-100' />)
                     ) : (
                       <>
                         {categories.map((category, idx) => {
@@ -891,19 +890,19 @@ export default function MediaContentDesktop({
                           const colors = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#6366F1', '#EC4899', '#F97316', '#84CC16', '#3B82F6', '#A855F7', '#F43F5E', '#14B8A6'];
                           return (
                             <div key={category._id || category.id} className='col-span-1 group'>
-                              <button onClick={() => router.push(`/books?category=${category.name}`)} className='w-full min-h-[60px] h-full relative flex items-center gap-3 p-2.5 rounded-[18px] bg-[#1A1F2E] border border-white/5 transition-all hover:bg-[#23293D] hover:border-white/15 hover:scale-[1.01] overflow-hidden'>
+                              <button onClick={() => router.push(`/books?category=${category.name}`)} className='w-full min-h-[60px] h-full relative flex items-center gap-3 p-2.5 rounded-[18px] bg-white/75 border border-blue-100 shadow-sm transition-all hover:bg-white hover:border-blue-200 hover:scale-[1.01] hover:shadow-md overflow-hidden'>
                                 <div className='w-8 h-8 shrink-0 rounded-[10px] flex items-center justify-center text-base transition-transform group-hover:scale-110' style={{ backgroundColor: `${colors[idx % colors.length]}15`, color: colors[idx % colors.length] }}>
                                   {icons[idx % icons.length]}
                                 </div>
                                 <div className='flex-1 flex flex-col justify-center text-left min-w-0'>
                                   <div className='flex items-center flex-wrap gap-1.5 mb-0.5'>
-                                    <span className='font-syne font-bold text-[14px] text-white truncate'>{category.name}</span>
+                                    <span className='font-syne font-bold text-[14px] text-slate-900 truncate'>{category.name}</span>
                                     {idx === 0 && <span className='px-1.5 py-0.5 rounded-full bg-[#FF4E74]/20 text-[#FF4E74] text-[6.5px] font-black uppercase tracking-widest'>HOT</span>}
                                   </div>
-                                  <div className='font-dm-sans text-white/20 text-[10px]'>{Math.floor(Math.random() * 400 + 50)}+ summaries</div>
+                                  <div className='font-dm-sans text-slate-500 text-[10px]'>{Math.floor(Math.random() * 400 + 50)}+ summaries</div>
                                 </div>
-                                <div className='shrink-0 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 bg-white/5 p-1 rounded-full'>
-                                  <ChevronRightIcon className='w-2.5 h-2.5 text-white/50' />
+                                <div className='shrink-0 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 bg-blue-50 p-1 rounded-full'>
+                                  <ChevronRightIcon className='w-2.5 h-2.5 text-blue-500' />
                                 </div>
                                 <div className='absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity pointer-events-none' style={{ background: `radial-gradient(circle at center, ${colors[idx % colors.length]}, transparent 70%)` }} />
                               </button>

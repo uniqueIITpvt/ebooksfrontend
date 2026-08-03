@@ -99,7 +99,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
   ];
 
   return (
-    <footer className='bg-gradient-to-br from-slate-900 to-slate-800 text-white'>
+    <footer className='bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-slate-900 border-t border-blue-100'>
       <div className='mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8'>
         {/* Main Content */}
         <div className='pt-8 pb-4 sm:pt-12 sm:pb-5 lg:pt-16 lg:pb-6'>
@@ -107,7 +107,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
             {/* Brand Section */}
             <div className='md:col-span-1'>
               <div className='flex flex-col items-start gap-2'>
-                <div className='w-20 h-20 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden relative flex-shrink-0'>
+                <div className='w-20 h-20 rounded-xl bg-white/80 border border-blue-100 overflow-hidden relative flex-shrink-0 shadow-sm'>
                   <Image
                     src={siteLogo || '/file.svg'}
                     alt='TechUniqueIIT Research Center'
@@ -121,7 +121,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                     <span className='text-[#2f8fd3]'>TechUnique</span>
                     <span className='text-[#f59a32]'>IIT</span>
                   </div>
-                  <div className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-200'>
+                  <div className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>
                     Research Center
                   </div>
                 </div>
@@ -130,17 +130,17 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
 
             {/* About Us */}
             <div>
-              <h4 className='text-sm font-bold text-white uppercase tracking-wider mb-4'>
+              <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 About Us
               </h4>
-              <p className='text-slate-300 text-sm leading-relaxed max-w-xs'>
+              <p className='text-slate-600 text-sm leading-relaxed max-w-xs'>
                 TechUniqueIIT Research Center provides books, audiobooks, and research-driven content to support continuous learning.
               </p>
             </div>
 
             {/* Get Know To Us */}
             <div>
-              <h4 className='text-sm font-bold text-white uppercase tracking-wider mb-4'>
+              <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 Get Know To Us
               </h4>
               <ul className='space-y-2'>
@@ -148,7 +148,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className='text-slate-300 hover:text-white transition-colors text-sm'
+                      className='text-slate-600 hover:text-blue-600 transition-colors text-sm'
                     >
                       {link.name}
                     </Link>
@@ -159,14 +159,14 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
 
             {/* Contact Us */}
             <div>
-              <h4 className='text-sm font-bold text-white uppercase tracking-wider mb-4'>
+              <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 Contact Us
               </h4>
-              <div className='text-sm text-slate-300'>
-                <div className='font-semibold text-white/90 mb-1'>Drop email at:</div>
+              <div className='text-sm text-slate-600'>
+                <div className='font-semibold text-slate-800 mb-1'>Drop email at:</div>
                 <a
                   href='mailto:unquebookpublishinghouse@gmail.com'
-                  className='text-slate-300 hover:text-white transition-colors'
+                  className='text-slate-600 hover:text-blue-600 transition-colors'
                 >
                   {/* unquebookpublishinghouse@gmail.com */}
                 </a>
@@ -194,8 +194,8 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
           </div>
 
           {/* Bottom Bar */}
-          <div className='border-t border-slate-700 mt-10 pt-5'>
-            <p className='text-slate-400 text-xs sm:text-sm text-center'>
+          <div className='border-t border-blue-100 mt-10 pt-5'>
+            <p className='text-slate-500 text-xs sm:text-sm text-center'>
               Copyright © 2026 uniqueIIT Research Center. All Rights Reserved.
             </p>
           </div>

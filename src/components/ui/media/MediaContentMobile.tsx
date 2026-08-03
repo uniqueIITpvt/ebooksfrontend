@@ -1042,25 +1042,25 @@ export default function MediaContentMobile({
         </div>
 
         {/* Categories Section - Mobile */}
-        <div className='relative mt-10 mb-8 p-6 bg-[#0B0F1A] rounded-[32px] overflow-hidden border border-white/5'>
+        <div className='relative mt-10 mb-8 p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-[32px] overflow-hidden border border-blue-100 shadow-xl shadow-blue-100/50'>
           {/* Background Glows */}
-          <div className='absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-600/10 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/2 pointer-events-none' />
+          <div className='absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.9),transparent_35%),radial-gradient(circle_at_75%_30%,rgba(99,102,241,0.13),transparent_32%)] pointer-events-none' />
           
           <div className='flex flex-col items-center mb-10'>
-            <div className='bg-gradient-to-r from-[#FF8C7E] to-[#FF4E74] text-white text-[8px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-4 shadow-lg shadow-pink-500/20'>
+            <div className='bg-gradient-to-r from-orange-500 to-orange-400 text-white text-[8px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-4 shadow-lg shadow-orange-500/20'>
               âœ¦ book of the day
             </div>
             <div className='font-syne text-center mb-5'>
-              <div className='text-[56px] font-extrabold text-white leading-[0.8] mb-1 tracking-tighter'>21</div>
-              <div className='text-[20px] font-bold text-[#00E5BC] tracking-[0.2em] leading-none mb-1 uppercase'>Days</div>
-              <div className='text-[8px] font-medium text-white/30 tracking-[0.4em] uppercase'>Challenge</div>
+              <div className='text-[56px] font-extrabold text-[#172554] leading-[0.8] mb-1 tracking-tighter'>21</div>
+              <div className='text-[20px] font-bold text-blue-600 tracking-[0.2em] leading-none mb-1 uppercase'>Days</div>
+              <div className='text-[8px] font-medium text-slate-500 tracking-[0.4em] uppercase'>Challenge</div>
             </div>
             <button
               onClick={() => {
                 const element = document.getElementById('free-summaries-section-mobile');
                 element?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className='group relative flex items-center gap-2 px-6 py-2.5 bg-white text-black text-[11px] font-bold rounded-full transition-all active:scale-95 font-dm-sans shadow-lg'
+              className='group relative flex items-center gap-2 px-6 py-2.5 bg-orange-500 text-white text-[11px] font-bold rounded-full transition-all active:scale-95 font-dm-sans shadow-lg shadow-orange-500/25'
             >
               <span>Start Now</span>
               <ChevronRightIcon className='w-3 h-3' />
@@ -1068,14 +1068,14 @@ export default function MediaContentMobile({
           </div>
 
           <div className='flex items-center gap-3 mb-6'>
-            <span className='text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] font-syne shrink-0'>Browse Categories</span>
-            <div className='h-px flex-1 bg-white/5'></div>
+            <span className='text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] font-syne shrink-0'>Browse Categories</span>
+            <div className='h-px flex-1 bg-blue-200/70'></div>
           </div>
 
           <div className='grid grid-cols-2 gap-3'>
             {isLoadingCategories ? (
               Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className='h-[60px] bg-white/5 animate-pulse rounded-2xl border border-white/5' />
+                <div key={i} className='h-[60px] bg-white/70 animate-pulse rounded-2xl border border-blue-100' />
               ))
             ) : (
               categories.map((category, idx) => {
@@ -1085,7 +1085,7 @@ export default function MediaContentMobile({
                   <button
                     key={category._id || category.id}
                     onClick={() => router.push(`/books?category=${category.name}`)}
-                    className='relative flex items-center gap-2.5 p-2.5 rounded-[16px] bg-[#1A1F2E] border border-white/5 transition-all active:scale-[0.98] overflow-hidden'
+                    className='relative flex items-center gap-2.5 p-2.5 rounded-[16px] bg-white/75 border border-blue-100 shadow-sm transition-all active:scale-[0.98] overflow-hidden'
                   >
                     <div 
                       className='w-7 h-7 shrink-0 rounded-[8px] flex items-center justify-center text-sm' 
@@ -1094,8 +1094,8 @@ export default function MediaContentMobile({
                       {icons[idx % icons.length]}
                     </div>
                     <div className='flex-1 flex flex-col justify-center text-left min-w-0'>
-                      <span className='font-syne font-bold text-[11px] text-white truncate leading-tight'>{category.name}</span>
-                      <div className='font-dm-sans text-white/20 text-[8px]'>{Math.floor(Math.random() * 400 + 50)}+</div>
+                      <span className='font-syne font-bold text-[11px] text-slate-900 truncate leading-tight'>{category.name}</span>
+                      <div className='font-dm-sans text-slate-500 text-[8px]'>{Math.floor(Math.random() * 400 + 50)}+</div>
                     </div>
                     <div className='absolute inset-0 opacity-0 active:opacity-[0.05] transition-opacity pointer-events-none' style={{ background: `radial-gradient(circle at center, ${colors[idx % colors.length]}, transparent 70%)` }} />
                   </button>
