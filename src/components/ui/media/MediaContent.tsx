@@ -6,6 +6,7 @@ import type { Category } from '@/services/api/categoriesApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { bookFormatsApi } from '@/services/api/bookFormatsApi';
 import { categoriesApi } from '@/services/api/categoriesApi';
+import { API_CONFIG } from '@/config/api';
 
 const MediaContentMobile = dynamic(() => import('./MediaContentMobile'));
 const MediaContentDesktop = dynamic(() => import('./MediaContentDesktop'));
@@ -24,6 +25,7 @@ export default function MediaContent(props: MediaContentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [availableFormats, setAvailableFormats] = useState<string[]>([]);
   const [allCategoryNames, setAllCategoryNames] = useState<string[]>([]);
+  const [categoryContentCounts, setCategoryContentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const checkMobile = () => {
@@ -56,6 +58,28 @@ export default function MediaContent(props: MediaContentProps) {
       })
       .catch(() => {});
 
+    const countByCategory = (items: PublicBookListItem[]) =>
+      items.reduce<Record<string, number>>((counts, item) => {
+        if (!item.category) return counts;
+        counts[item.category] = (counts[item.category] ?? 0) + 1;
+        return counts;
+      }, {});
+
+    const fetchListingItems = async (path: string) => {
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}${path}`);
+      const data = await response.json();
+      return Array.isArray(data?.data) ? data.data : [];
+    };
+
+    Promise.all([
+      fetchListingItems('/books?view=listing&type=Books&excludeComponentType=free-summaries'),
+      fetchListingItems('/audiobooks?view=listing'),
+    ])
+      .then(([books, audiobooks]) => {
+        setCategoryContentCounts(countByCategory([...books, ...audiobooks]));
+      })
+      .catch(() => {});
+
     return () => {
       window.removeEventListener('resize', checkMobile);
       clearTimeout(timer);
@@ -80,6 +104,6 @@ export default function MediaContent(props: MediaContentProps) {
   }
 
   // Render mobile or desktop component based on screen size
-  const enrichedProps = { ...props, availableFormats, allCategoryNames };
+  const enrichedProps = { ...props, availableFormats, allCategoryNames, categoryContentCounts };
   return isMobile ? <MediaContentMobile {...enrichedProps} /> : <MediaContentDesktop {...enrichedProps} />;
 }

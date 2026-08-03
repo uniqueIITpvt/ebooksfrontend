@@ -207,35 +207,8 @@ export default function BooksPageClient({
     setSelectedFormats(formatParam ? [formatParam] : []);
     setSortBy(isAudiobookSortOption(sortParam) ? sortParam : DEFAULT_SORT);
 
-    if (categoryParam && !languageParam && !typeParam && !formatParam && allBooks.length > 0) {
-      const categoryBooks = allBooks.filter((book) => book.category === categoryParam);
-      const availableLanguages = Array.from(
-        new Set(categoryBooks.map((book) => book.language).filter(Boolean))
-      ) as string[];
-      const availableTypes = Array.from(
-        new Set(categoryBooks.map((book) => book.type).filter(Boolean))
-      ) as ('Books' | 'Audiobook')[];
-      const availableFormats = new Set<string>();
-
-      categoryBooks.forEach((book) => {
-        book.format?.forEach((format) => availableFormats.add(format));
-      });
-
-      if (availableLanguages.length > 0) {
-        setSelectedLanguages(availableLanguages);
-      }
-
-      if (availableTypes.length > 0) {
-        setSelectedTypes(availableTypes);
-      }
-
-      if (availableFormats.size > 0) {
-        setSelectedFormats(Array.from(availableFormats));
-      }
-    }
-
     hasHydratedFiltersFromUrl.current = true;
-  }, [allBooks, currentNormalizedQuery, currentSearchParamsString]);
+  }, [currentNormalizedQuery, currentSearchParamsString]);
 
   useEffect(() => {
     if (!hasHydratedFiltersFromUrl.current) {

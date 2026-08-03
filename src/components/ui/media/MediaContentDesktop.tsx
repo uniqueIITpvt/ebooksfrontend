@@ -339,6 +339,7 @@ interface MediaContentDesktopProps {
   categories: Category[];
   availableFormats?: string[];
   allCategoryNames?: string[];
+  categoryContentCounts?: Record<string, number>;
 }
 
 export default function MediaContentDesktop({
@@ -350,6 +351,7 @@ export default function MediaContentDesktop({
   categories,
   availableFormats = [],
   allCategoryNames = [],
+  categoryContentCounts = {},
 }: MediaContentDesktopProps) {
   const router = useRouter();
   const isLoadingCategories = false;
@@ -899,7 +901,7 @@ export default function MediaContentDesktop({
                                     <span className='font-syne font-bold text-[14px] text-slate-900 truncate'>{category.name}</span>
                                     {idx === 0 && <span className='px-1.5 py-0.5 rounded-full bg-[#FF4E74]/20 text-[#FF4E74] text-[6.5px] font-black uppercase tracking-widest'>HOT</span>}
                                   </div>
-                                  <div className='font-dm-sans text-slate-500 text-[10px]'>{categoryCounts[category.name] ?? category.bookCount ?? 0} summaries</div>
+                                  <div className='font-dm-sans text-slate-500 text-[10px]'>{categoryContentCounts[category.name] ?? categoryCounts[category.name] ?? category.bookCount ?? 0} summaries</div>
                                 </div>
                                 <div className='shrink-0 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 bg-blue-50 p-1 rounded-full'>
                                   <ChevronRightIcon className='w-2.5 h-2.5 text-blue-500' />

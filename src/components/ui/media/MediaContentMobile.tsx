@@ -288,6 +288,7 @@ interface MediaContentMobileProps {
   categories: Category[];
   availableFormats?: string[];
   allCategoryNames?: string[];
+  categoryContentCounts?: Record<string, number>;
 }
 
 const LANDING_ITEM_LIMIT = 3;
@@ -301,6 +302,7 @@ export default function MediaContentMobile({
   categories,
   availableFormats = [],
   allCategoryNames = [],
+  categoryContentCounts = {},
 }: MediaContentMobileProps) {
   const router = useRouter();
   const [currentBookPage, setCurrentBookPage] = useState(0);
@@ -1095,7 +1097,7 @@ export default function MediaContentMobile({
                     </div>
                     <div className='flex-1 flex flex-col justify-center text-left min-w-0'>
                       <span className='font-syne font-bold text-[11px] text-slate-900 truncate leading-tight'>{category.name}</span>
-                      <div className='font-dm-sans text-slate-500 text-[8px]'>{categoryCounts[category.name] ?? category.bookCount ?? 0}</div>
+                      <div className='font-dm-sans text-slate-500 text-[8px]'>{categoryContentCounts[category.name] ?? categoryCounts[category.name] ?? category.bookCount ?? 0}</div>
                     </div>
                     <div className='absolute inset-0 opacity-0 active:opacity-[0.05] transition-opacity pointer-events-none' style={{ background: `radial-gradient(circle at center, ${colors[idx % colors.length]}, transparent 70%)` }} />
                   </button>
