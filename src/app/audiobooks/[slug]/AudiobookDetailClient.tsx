@@ -10,6 +10,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePersistentAudioPlayer } from '@/contexts/PersistentAudioPlayerContext';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
 import { getActiveSubscriptionPlan, hasActiveSubscription } from '@/lib/subscription';
+import {
+  CheckIcon,
+  ClockIcon,
+  SpeakerWaveIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline';
+import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 
 interface Audiobook {
   id: string;
@@ -227,6 +234,12 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
   };
 
   const scriptWords = useMemo(() => splitScriptWords(getScriptText()), [audiobook]);
+  const publishDateLabel = audiobook.publishDate
+    ? new Date(audiobook.publishDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+      })
+    : 'N/A';
 
   const rawTranscriptWords = useMemo<TimedTranscriptWord[]>(() => {
     const languages = Array.isArray(audiobook.transcript?.languages)
@@ -1002,7 +1015,12 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
                 {audiobook.title}
               </h1>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap', fontSize: '13px', color: THEME.textSoft }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', fontSize: '15px', color: THEME.textSoft }}>
+                <span>by</span>
+                <span style={{ fontWeight: 700, color: THEME.text }}>{audiobook.author}</span>
+              </div>
+
+              <div style={{ display: 'none' }}>
                 <span>👤 {audiobook.author}</span>
                 <span>⏱ {audiobook.duration || 'N/A'}</span>
                 {/* Interactive star rating */}
@@ -1131,6 +1149,63 @@ export default function AudiobookDetailClient({ audiobook }: AudiobookDetailClie
                 >
                   📖 Read Book
                 </button>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', border: `1px solid ${THEME.border}`, background: 'rgba(255,255,255,.75)', borderRadius: '16px', padding: '16px', marginTop: '22px', boxShadow: '0 1px 2px rgba(15,23,42,.04)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const filled = star <= (hoverRating || userRating || Math.round(avgRating));
+                    return (
+                      <button
+                        key={star}
+                        onClick={() => handleRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                        aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+                      >
+                        {filled ? (
+                          <SolidStarIcon style={{ width: '24px', height: '24px', color: THEME.accent }} />
+                        ) : (
+                          <StarIcon style={{ width: '24px', height: '24px', color: '#dbeafe' }} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <span style={{ fontFamily: 'var(--font-syne, inherit)', fontWeight: 700, color: THEME.text, fontSize: '18px' }}>
+                  {avgRating > 0 ? avgRating.toFixed(1) : 0}
+                </span>
+                <span style={{ color: '#9ca3af', fontWeight: 600 }}>
+                  ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                </span>
+                {ratingSubmitted && (
+                  <span style={{ color: '#16a34a', fontSize: '13px', fontWeight: 700 }}>
+                    {userRating} star rated
+                  </span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <ClockIcon style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                  <div>
+                    <div style={{ color: THEME.textSoft, fontSize: '14px' }}>Duration</div>
+                    <div style={{ fontWeight: 700, color: THEME.text }}>{audiobook.duration || 'N/A'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <SpeakerWaveIcon style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                  <div>
+                    <div style={{ color: THEME.textSoft, fontSize: '14px' }}>Type</div>
+                    <div style={{ fontWeight: 700, color: THEME.text }}>Audiobook</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <CheckIcon style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                  <div>
+                    <div style={{ color: THEME.textSoft, fontSize: '14px' }}>Published</div>
+                    <div style={{ fontWeight: 700, color: THEME.text }}>{publishDateLabel}</div>
+                  </div>
+                </div>
               </div>
 
               <div style={{ marginTop: '22px' }}>
