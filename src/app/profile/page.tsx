@@ -794,7 +794,19 @@ export default function UserProfilePage() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {libraryItems.map((item) => (
-                      <div key={item.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                      <div
+                        key={item.id}
+                        role="link"
+                        tabIndex={0}
+                        onClick={() => router.push(item.redirectTarget)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            router.push(item.redirectTarget);
+                          }
+                        }}
+                        className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+                      >
                         <div className="relative h-44 bg-gray-100">
                           {item.image ? (
                             <Image
@@ -818,12 +830,16 @@ export default function UserProfilePage() {
                           </div>
                           <h4 className="font-bold text-gray-900 line-clamp-2">{item.title}</h4>
                           <p className="text-sm text-gray-500 mt-1 line-clamp-1">{item.author}</p>
-                          <Link
-                            href={item.redirectTarget}
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              router.push(item.redirectTarget);
+                            }}
                             className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                           >
                             {item.itemType === 'audiobook' ? 'Listen' : 'Read'}
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     ))}

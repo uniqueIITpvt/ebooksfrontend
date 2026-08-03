@@ -855,7 +855,7 @@ export default function MediaContentDesktop({
               <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10'>
                 <div className='lg:col-span-2 lg:sticky lg:top-24'>
                   <div className='flex flex-col items-center pt-4'>
-                    <div className='bg-gradient-to-r from-orange-500 to-orange-400 text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-6 shadow-lg shadow-orange-500/20'>
+                    <div className='bg-gradient-to-r from-blue-700 to-blue-400 text-white text-[9px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-6 shadow-lg shadow-blue-500/20'>
                       ✦ book of the day
                     </div>
                     <div className='font-syne text-center mb-6'>
@@ -868,7 +868,7 @@ export default function MediaContentDesktop({
                         const element = document.getElementById('free-summaries-section');
                         element?.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className='group relative flex items-center gap-2 px-7 py-3 bg-orange-500 text-white text-[12px] font-bold rounded-full transition-all hover:scale-105 hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/25 font-dm-sans'
+                      className='group relative flex items-center gap-2 px-7 py-3 bg-blue-500 text-white text-[12px] font-bold rounded-full transition-all hover:scale-105 hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-500/25 font-dm-sans'
                     >
                       <span>Start Now</span>
                       <ChevronRightIcon className='w-3.5 h-3.5 transition-transform group-hover:translate-x-1' />

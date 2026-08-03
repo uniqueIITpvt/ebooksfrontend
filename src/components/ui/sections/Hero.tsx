@@ -368,7 +368,7 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
           <button
             type='button'
             onClick={handleStartFreeLearning}
-            className='mt-4 inline-flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-600 md:px-7 md:py-3 md:text-base'
+            className='mt-4 inline-flex items-center justify-center rounded-lg bg-blue-500 px-5 py-2 text-sm font-bold text-white shadow-lg transition-all hover:bg-blue-600 md:px-7 md:py-2 md:text-base'
           >
             Start With Free learning
           </button>
