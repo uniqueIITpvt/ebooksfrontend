@@ -10,6 +10,11 @@ export default async function FreeSummaryDetailPage({ params }: { params: Promis
     notFound();
   }
 
+  const summaryMeta = summary as typeof summary & {
+    rating?: number;
+    reviews?: number;
+  };
+
   return (
     <SimpleLibraryDetail
       backHref='/free-summaries'
@@ -24,6 +29,15 @@ export default async function FreeSummaryDetailPage({ params }: { params: Promis
       actionHref={`/free-summaries/${slug}/read`}
       actionRequiresAuth
       compactMedia
+      ratingId={summary.slug || summary._id || slug}
+      meta={{
+        rating: summaryMeta.rating ?? 0,
+        reviews: summaryMeta.reviews ?? 0,
+        pages: summary.pages,
+        readingTime: summary.readingTime,
+        type: 'Free Summary',
+        publishDate: summary.publishDate,
+      }}
       detailRows={[
         ...(summary.pages ? [{ label: 'Pages', value: String(summary.pages) }] : []),
         ...(summary.readingTime ? [{ label: 'Reading Time', value: summary.readingTime }] : []),

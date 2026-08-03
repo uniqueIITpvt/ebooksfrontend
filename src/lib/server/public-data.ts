@@ -416,6 +416,8 @@ export const getFreeSummaryBySlug = cache(async (slug: string): Promise<FreeSumm
     isActive: true,
     views: 0,
     downloads: 0,
+    rating: book.rating,
+    reviews: book.reviews,
     tags: book.tags || [],
     createdAt: book.createdAt || book.publishDate || '',
     updatedAt: book.updatedAt || book.publishDate || '',

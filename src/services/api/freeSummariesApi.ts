@@ -20,6 +20,8 @@ export interface FreeSummary {
   isActive: boolean;
   views: number;
   downloads: number;
+  rating?: number;
+  reviews?: number;
   tags: string[];
   createdAt: string;
   updatedAt: string;
@@ -147,6 +149,24 @@ class FreeSummariesApiService {
     }
 
     return data.data;
+  }
+
+  async rate(id: string, rating: number): Promise<{ rating: number; reviews: number }> {
+    const response = await fetch(`${API_BASE_URL}/free-summaries/${id}/rate`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ rating }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return {
+      rating: data.rating ?? data.data?.rating ?? 0,
+      reviews: data.reviews ?? data.data?.reviews ?? 0,
+    };
   }
 
   /**

@@ -1,14 +1,32 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/primitives/Button';
 import { useAuth } from '@/contexts/AuthContext';
+import { freeSummariesApi } from '@/services/api/freeSummariesApi';
+import {
+  BookOpenIcon,
+  CheckIcon,
+  ClockIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline';
+import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 
 interface DetailRow {
   label: string;
   value: string;
+}
+
+interface DetailMeta {
+  rating?: number;
+  reviews?: number;
+  pages?: number | string;
+  readingTime?: string;
+  type?: string;
+  publishDate?: string;
 }
 
 interface SimpleLibraryDetailProps {
@@ -25,6 +43,8 @@ interface SimpleLibraryDetailProps {
   actionHref?: string;
   actionRequiresAuth?: boolean;
   detailRows?: DetailRow[];
+  meta?: DetailMeta;
+  ratingId?: string;
   compactMedia?: boolean;
 }
 
@@ -42,10 +62,16 @@ export default function SimpleLibraryDetail({
   actionHref,
   actionRequiresAuth = false,
   detailRows = [],
+  meta,
+  ratingId,
   compactMedia = false,
 }: SimpleLibraryDetailProps) {
   const router = useRouter();
   const { openAuthModal, user } = useAuth();
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [displayRating, setDisplayRating] = useState(meta?.rating ?? 0);
+  const [displayReviews, setDisplayReviews] = useState(meta?.reviews ?? 0);
 
   const handleActionClick = () => {
     if (!actionHref) return;
@@ -56,6 +82,33 @@ export default function SimpleLibraryDetail({
     }
 
     router.push(actionHref);
+  };
+
+  const publishDateLabel = meta?.publishDate
+    ? new Date(meta.publishDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+      })
+    : 'N/A';
+  const handleRatingClick = async (stars: number) => {
+    if (!ratingId) return;
+
+    const nextReviews = userRating ? displayReviews : displayReviews + 1;
+    const nextRating = userRating
+      ? stars
+      : Math.round(((displayRating * displayReviews) + stars) / nextReviews * 10) / 10;
+
+    setUserRating(stars);
+    setDisplayRating(nextRating);
+    setDisplayReviews(nextReviews);
+
+    try {
+      const result = await freeSummariesApi.rate(ratingId, stars);
+      setDisplayRating(result.rating);
+      setDisplayReviews(result.reviews);
+    } catch {
+      // Keep optimistic rating visible if the request fails.
+    }
   };
 
   return (
@@ -133,6 +186,67 @@ export default function SimpleLibraryDetail({
                 </div>
               )}
             </div>
+
+            {meta && (
+              <div className="flex flex-wrap items-center gap-5 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-sm">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => void handleRatingClick(index + 1)}
+                      onMouseEnter={() => setHoverRating(index + 1)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      disabled={!ratingId}
+                      aria-label={`Rate ${index + 1} star${index === 0 ? '' : 's'}`}
+                      className="transition-transform active:scale-90 disabled:cursor-default"
+                    >
+                      {index < (hoverRating || userRating || Math.floor(displayRating)) ? (
+                        <SolidStarIcon className="w-6 h-6 text-blue-600" />
+                      ) : (
+                        <StarIcon className="w-6 h-6 text-blue-100 hover:text-blue-300 transition-colors" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <span className="font-syne font-bold text-gray-900 text-lg">{displayRating}</span>
+                <span className="text-gray-400 font-medium font-dm-sans">
+                  ({displayReviews} reviews)
+                </span>
+                {meta.pages && (
+                  <div className="flex items-center gap-3">
+                    <BookOpenIcon className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <div className="text-sm text-gray-500">Pages</div>
+                      <div className="font-semibold">{meta.pages}</div>
+                    </div>
+                  </div>
+                )}
+                {meta.readingTime && (
+                  <div className="flex items-center gap-3">
+                    <ClockIcon className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <div className="text-sm text-gray-500">Reading Time</div>
+                      <div className="font-semibold">{meta.readingTime}</div>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <BookOpenIcon className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <div className="text-sm text-gray-500">Type</div>
+                    <div className="font-semibold">{meta.type || 'Free Summary'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckIcon className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <div className="text-sm text-gray-500">Published</div>
+                    <div className="font-semibold">{publishDateLabel}</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-4">About This Item</h2>
