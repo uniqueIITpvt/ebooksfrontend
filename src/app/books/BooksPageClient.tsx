@@ -495,7 +495,7 @@ export default function BooksPageClient({
     <div className='min-h-screen bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60'>
       <TopTrendingStrip
         title='Top 10 Trending eBook in India'
-        subtitle='Check out the most popular and trending ebooks right now.'
+        subtitle="Discover India's most popular and trending eBooks, handpicked for you."
         items={allBooks.filter((book) => book.type === 'Books')}
         viewAllHref='/books'
       />
