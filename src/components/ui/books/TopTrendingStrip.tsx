@@ -102,7 +102,7 @@ export default function TopTrendingStrip({
             </>
           )}
 
-          <div className='grid grid-cols-5 gap-5'>
+          <div className='flex justify-center gap-6'>
             {visibleItems.map((item, index) => {
               const slug = item.slug || generateBookSlug(item.title);
               const rank = activeIndex + index + 1;
@@ -111,7 +111,7 @@ export default function TopTrendingStrip({
                 <Link
                   key={item.id || item._id || slug}
                   href={`${itemHrefPrefix}/${slug}`}
-                  className='group block min-w-0'
+                  className='group block w-[132px] shrink-0'
                   title={item.title}
                 >
                   <div className='relative mx-auto w-full max-w-[132px] rounded-[12px] bg-white/80 p-2 shadow-sm transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl'>
