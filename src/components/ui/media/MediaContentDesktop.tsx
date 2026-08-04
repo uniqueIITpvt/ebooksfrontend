@@ -806,11 +806,11 @@ export default function MediaContentDesktop({
                 )}
                 {filteredTrendingBooks.length > 0 && (
                   <SectionCarousel
-                    title='Trending Books'
+                    title='Trending E-Books'
                     seeMoreHref='/trending-books'
                     isLoading={false}
                     items={filteredTrendingBooks}
-                    emptyMsg='No trending books'
+                    emptyMsg='No trending e-books available'
                     sectionKey='trending'
                     itemLimit={landingItemLimit}
                     cartFormat={selectedCartFormat}
@@ -829,11 +829,11 @@ export default function MediaContentDesktop({
                 {filteredPremiumSummaries.length > 0 && (
                   <div ref={premiumContentRef}>
                     <SectionCarousel
-                      title='Premium Content'
+                      title='Premium E-Books'
                       seeMoreHref='/premium-summaries'
                       isLoading={false}
                       items={filteredPremiumSummaries}
-                      emptyMsg='No premium content'
+                      emptyMsg='No premium e-books available'
                       sectionKey='premium'
                       itemLimit={landingItemLimit}
                       cartFormat={selectedCartFormat}

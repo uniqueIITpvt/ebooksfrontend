@@ -79,7 +79,7 @@ export default function TopTrendingStrip({
         </div>
 
         <div className='relative mt-5 px-8'>
-          {topItems.length > 5 && (
+          {topItems.length > 0 && (
             <>
               <button
                 type='button'

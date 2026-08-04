@@ -930,7 +930,7 @@ export default function MediaContentMobile({
             <div className='flex-1'>
               <h3 className='text-lg font-bold text-slate-900 mb-2 flex items-center'>
                 <BookOpenIcon className='w-4 h-4 mr-2 text-black' />
-                <span className='text-black'>Trending Books</span>
+                <span className='text-black'>Trending E-Books</span>
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
@@ -992,7 +992,7 @@ export default function MediaContentMobile({
             <div className='flex-1'>
               <h3 className='text-lg font-bold text-slate-900 mb-2 flex items-center'>
                 <BookOpenIcon className='w-4 h-4 mr-2 text-black' />
-                <span className='text-black'>Premium Content</span>
+                <span className='text-black'>Premium E-Books</span>
               </h3>
               <div className='h-1 w-20 bg-black rounded-full'></div>
             </div>
