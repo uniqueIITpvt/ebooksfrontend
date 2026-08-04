@@ -17,7 +17,7 @@ export default async function FreeSummaryDetailPage({ params }: { params: Promis
 
   return (
     <SimpleLibraryDetail
-      backHref='/free-summaries'
+      backHref='/'
       backLabel='Back to Free Summaries'
       category={summary.category}
       title={summary.title}

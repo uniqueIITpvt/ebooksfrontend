@@ -328,6 +328,24 @@ export default function UserProfilePage() {
     }
   };
 
+  const handleProfileBack = () => {
+    if (typeof document !== 'undefined' && document.referrer) {
+      try {
+        const referrerUrl = new URL(document.referrer);
+        if (
+          referrerUrl.origin === window.location.origin &&
+          referrerUrl.pathname !== '/profile' &&
+          referrerUrl.pathname !== '/'
+        ) {
+          router.push(`${referrerUrl.pathname}${referrerUrl.search}`);
+          return;
+        }
+      } catch {}
+    }
+
+    router.push('/');
+  };
+
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
     return null;
@@ -350,7 +368,7 @@ export default function UserProfilePage() {
         {/* Back Button */}
         <div className="mb-6">
           <button
-            onClick={() => router.back()}
+            onClick={handleProfileBack}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2.5 rounded-lg shadow-sm"
           >
             <ArrowLeftIcon className="w-5 h-5" />
