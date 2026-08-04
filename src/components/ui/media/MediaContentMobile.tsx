@@ -68,6 +68,11 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
   };
   const displayPrice = formatPrice(item.price);
   const hasUniquePlus = hasActiveSubscription(user);
+  const isFreeSummaryDetail = item.componentType === 'free-summaries' || href.startsWith('/free-summaries/');
+  const navigateFromHomeFreeSummary = () => {
+    window.sessionStorage.setItem('freeSummaryDetailBackHref', '/');
+    router.push(href);
+  };
   const handleFreeSummaryClaim = async (navigateAfterClaim: boolean) => {
     const identifier = item.slug || item.id || item._id;
     if (!identifier) return;
@@ -112,8 +117,8 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
       }
       primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
       primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={() => router.push(href)}
-      onCoverClick={() => router.push(href)}
+      onPrimaryClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
+      onCoverClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
       isSaved={false}
       onSaveClick={() => {
         if (item.componentType === 'free-summaries') {

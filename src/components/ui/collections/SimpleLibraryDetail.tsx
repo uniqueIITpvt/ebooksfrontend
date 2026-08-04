@@ -71,6 +71,15 @@ export default function SimpleLibraryDetail({
   const [hoverRating, setHoverRating] = useState(0);
   const [displayRating, setDisplayRating] = useState(meta?.rating ?? 0);
   const [displayReviews, setDisplayReviews] = useState(meta?.reviews ?? 0);
+  const [resolvedBackHref] = useState(() => {
+    if (backHref !== '/free-summaries' || typeof window === 'undefined') {
+      return backHref;
+    }
+
+    const homeBackHref = window.sessionStorage.getItem('freeSummaryDetailBackHref');
+    window.sessionStorage.removeItem('freeSummaryDetailBackHref');
+    return homeBackHref || backHref;
+  });
 
   const handleActionClick = () => {
     if (!actionHref) return;
@@ -81,6 +90,10 @@ export default function SimpleLibraryDetail({
     }
 
     router.push(actionHref);
+  };
+
+  const handleBackClick = () => {
+    router.push(resolvedBackHref);
   };
 
   const publishDateLabel = meta?.publishDate
@@ -116,7 +129,7 @@ export default function SimpleLibraryDetail({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             type="button"
-            onClick={() => router.push(backHref)}
+            onClick={handleBackClick}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

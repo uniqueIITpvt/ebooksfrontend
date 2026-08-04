@@ -122,6 +122,10 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     });
   }, [book.id, book._id, book.slug, book.title, user?.savedBooks]);
   const isSaved = savedOverride ?? isSavedByUser;
+  const navigateFromHomeFreeSummary = () => {
+    window.sessionStorage.setItem('freeSummaryDetailBackHref', '/');
+    router.push(href);
+  };
 
   const handleClaimEnroll = useCallback(async (navigateAfterClaim = true) => {
     const identifier = book.slug || book.id || book._id;
@@ -183,7 +187,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     }
   }, [book, href, isSaved, openAuthModal, refreshUser]);
 
-  if (book.componentType === 'free-summaries' && subLabel?.toLowerCase() === 'free') {
+  if ((book.componentType === 'free-summaries' || href.startsWith('/free-summaries/')) && subLabel?.toLowerCase() === 'free') {
     return (
       <LibraryCardDesktop
         image={book.image}
@@ -193,8 +197,8 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         reviews={book.reviews}
         primaryLabel='Read Free'
         primaryVariant='free'
-        onPrimaryClick={() => router.push(href)}
-        onCoverClick={() => router.push(href)}
+        onPrimaryClick={navigateFromHomeFreeSummary}
+        onCoverClick={navigateFromHomeFreeSummary}
         isSaved={isSaved}
         onSaveClick={() => void handleSaveBook()}
         saveDisabled={saving}
