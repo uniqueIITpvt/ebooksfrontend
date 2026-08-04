@@ -86,7 +86,7 @@ const About = () => {
       description:
         'Started publishing curated books and audiobook resources for continuous learning',
       icon: TrophyIcon,
-      color: 'text-yellow-600',
+      color: 'text-purple-600',
     },
     {
       year: '2018',
@@ -179,19 +179,16 @@ const About = () => {
   ];
 
   return (
-    <section className='py-4 sm:py-8 lg:py-12 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden'>
-      {/* Animated Background */}
+    <section className='py-4 sm:py-8 lg:py-12 bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 relative overflow-hidden'>
+      {/* Background */}
       <div className='absolute inset-0 opacity-30'>
-        <div className='absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-100/50 via-transparent to-indigo-100/50'></div>
-        <div className='absolute top-20 right-20 w-64 h-64 bg-blue-200/30 rounded-full blur-3xl animate-pulse'></div>
-        <div className='absolute bottom-20 left-20 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl animate-pulse delay-1000'></div>
-        <div className='absolute top-1/2 left-1/4 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-500'></div>
+        <div className='absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/70 via-white/20 to-purple-100/60'></div>
       </div>
 
       <div className='max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 relative'>
         {/* Header */}
         <div className='text-center mb-16'>
-          <div className='inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6'>
+          <div className='inline-flex items-center bg-white/90 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm'>
             <CheckCircleIcon className='w-4 h-4 mr-2' />
             About TechUniqueIIT Research Center
           </div>
@@ -229,16 +226,16 @@ const About = () => {
         {activeTab === 'overview' && (
           <div className='mx-auto max-w-5xl'>
             {/* Left Content */}
-            <div className='relative overflow-hidden rounded-[28px] border border-blue-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(0,87,184,0.12)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0057b8] via-[#00a6d6] to-[#f58220]' />
-              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0057b8]/10 blur-3xl' />
-              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-[#f58220]/10 blur-3xl' />
+            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
+              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
               <div className='relative mx-auto mb-8 flex max-w-3xl flex-col items-center text-center'>
-                <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0057b8] via-[#00a6d6] to-[#f58220] text-white shadow-lg'>
+                <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg'>
                   <BookOpenIcon className='h-7 w-7' />
                 </div>
-                <p className='text-sm font-bold uppercase tracking-[0.22em] text-[#0057b8]'>
+                <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Digital Learning Platform
                 </p>
                 <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
@@ -249,15 +246,15 @@ const About = () => {
               <div className='relative mx-auto max-w-4xl space-y-6 text-center text-base leading-8 text-slate-600 sm:text-lg sm:leading-9'>
                 <p>
                   Our platform offers a{' '}
-                  <span className='rounded-lg bg-gradient-to-r from-[#f58220]/15 to-[#00a6d6]/10 px-2 py-1 font-semibold text-slate-900'>
+                  <span className='rounded-lg bg-gradient-to-r from-blue-100 to-indigo-100 px-2 py-1 font-semibold text-slate-900'>
                     curated collection of life-changing, motivational, self-growth, and learning-based books and audiobooks
                   </span>
                   . Users can listen to audiobooks through an{' '}
-                  <span className='font-semibold text-[#0057b8]'>
+                  <span className='font-semibold text-blue-700'>
                     interactive audiobook player
                   </span>{' '}
                   where words are{' '}
-                  <span className='font-semibold text-[#00a6d6]'>
+                  <span className='font-semibold text-indigo-700'>
                     highlighted step by step
                   </span>
                   , making the listening experience more focused, engaging, and easy to follow.
@@ -268,7 +265,7 @@ const About = () => {
                     read books page by page
                   </span>{' '}
                   through the built-in book reader. We also provide{' '}
-                  <span className='font-semibold text-[#008a67]'>
+                  <span className='font-semibold text-emerald-700'>
                     ebooks that readers can purchase and enjoy anytime, anywhere
                   </span>
                   .
@@ -289,13 +286,13 @@ const About = () => {
                 </p>
                 <p className='text-xl font-semibold text-slate-900'>
                   TechUniqueIIT Research Center{' '}
-                  <span className='text-[#0057b8]'>- learn, listen, read, and grow every day.</span>
+                  <span className='text-blue-700'>- learn, listen, read, and grow every day.</span>
                 </p>
               </div>
 
               {/* Credentials */}
               <div className='relative mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300'>
+                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
                   <div className='p-2 bg-green-100 rounded-xl mr-4'>
                     <CheckCircleIcon className='w-5 h-5 text-green-600' />
                   </div>
@@ -303,21 +300,21 @@ const About = () => {
                     Research-Led Publications
                   </span>
                 </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300'>
+                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
                   <div className='p-2 bg-blue-100 rounded-xl mr-4'>
                     <UserGroupIcon className='w-5 h-5 text-blue-600' />
                   </div>
                   <span className='font-semibold'>Expert Curation Team</span>
                 </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300'>
+                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
                   <div className='p-2 bg-indigo-100 rounded-xl mr-4'>
                     <UserGroupIcon className='w-5 h-5 text-indigo-600' />
                   </div>
                   <span className='font-semibold'>Community Learning</span>
                 </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300'>
-                  <div className='p-2 bg-yellow-100 rounded-xl mr-4'>
-                    <TrophyIcon className='w-5 h-5 text-yellow-600' />
+                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
+                  <div className='p-2 bg-purple-100 rounded-xl mr-4'>
+                    <TrophyIcon className='w-5 h-5 text-purple-600' />
                   </div>
                   <span className='font-semibold'>Curated Resources</span>
                 </div>
@@ -327,14 +324,14 @@ const About = () => {
               <div className='relative mt-8 flex flex-col justify-center gap-4 sm:flex-row'>
                 <a
                   href='/about'
-                  className='inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#0057b8] to-[#00a6d6] text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
+                  className='inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
                 >
                   Learn More About UniqueIIT Research Center
                   <ArrowRightIcon className='w-5 h-5 ml-2' />
                 </a>
                 <Link
                   href='/books'
-                  className='inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 rounded-2xl font-semibold hover:bg-orange-50 transition-all duration-300 shadow-lg hover:shadow-xl border border-[#f58220]/25'
+                  className='inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl border border-blue-100'
                 >
                   View Publications
                 </Link>
@@ -381,13 +378,13 @@ const About = () => {
         {/* Achievements Tab */}
         {activeTab === 'achievements' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[28px] border border-blue-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(0,87,184,0.12)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0057b8] via-[#00a6d6] to-[#f58220]' />
-              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0057b8]/10 blur-3xl' />
-              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-[#f58220]/10 blur-3xl' />
+            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
+              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
               <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-                <p className='text-sm font-bold uppercase tracking-[0.22em] text-[#0057b8]'>
+                <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Milestones
                 </p>
                 <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
@@ -402,10 +399,10 @@ const About = () => {
               {achievements.map((achievement, index) => (
                 <div
                   key={index}
-                  className={`min-h-[132px] cursor-pointer rounded-2xl border bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${
+                  className={`min-h-[132px] cursor-pointer rounded-2xl border bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
                     selectedAchievement === achievement.year
-                      ? 'border-[#00a6d6] ring-2 ring-[#00a6d6]/25'
-                      : 'border-blue-100'
+                      ? 'border-indigo-400 ring-2 ring-indigo-500/20'
+                      : 'border-white/80'
                   }`}
                   onClick={() =>
                     setSelectedAchievement(
@@ -417,7 +414,7 @@ const About = () => {
                 >
                   <div className='flex items-start gap-4'>
                     <div
-                      className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0057b8]/10 via-[#00a6d6]/10 to-[#f58220]/10 ${achievement.color}`}
+                      className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 ${achievement.color}`}
                     >
                       <achievement.icon className='w-6 h-6' />
                     </div>
@@ -426,7 +423,7 @@ const About = () => {
                         <span className='text-lg font-bold text-slate-900 sm:text-xl'>
                           {achievement.title}
                         </span>
-                        <span className='rounded-full bg-[#0057b8]/10 px-3 py-1 text-xs font-bold text-[#0057b8]'>
+                        <span className='rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700'>
                           {achievement.year}
                         </span>
                       </div>
@@ -434,7 +431,7 @@ const About = () => {
                         {achievement.description}
                       </p>
                       {selectedAchievement === achievement.year && (
-                        <div className='mt-4 rounded-xl border border-[#f58220]/20 bg-orange-50/70 p-4'>
+                        <div className='mt-4 rounded-xl border border-indigo-100 bg-indigo-50/70 p-4'>
                           <p className='text-sm text-slate-700'>
                             This achievement represents a significant milestone
                             for our work, demonstrating our commitment to
@@ -454,13 +451,13 @@ const About = () => {
         {/* Qualifications Tab */}
         {activeTab === 'qualifications' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[28px] border border-blue-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(0,87,184,0.12)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0057b8] via-[#00a6d6] to-[#f58220]' />
-              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0057b8]/10 blur-3xl' />
-              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-[#f58220]/10 blur-3xl' />
+            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
+              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
               <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-                <p className='text-sm font-bold uppercase tracking-[0.22em] text-[#0057b8]'>
+                <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Qualifications
                 </p>
                 <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
@@ -475,22 +472,22 @@ const About = () => {
               {qualifications.map((qual, index) => (
                 <div
                   key={index}
-                  className='min-h-[230px] rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl'
+                  className='min-h-[230px] rounded-2xl border border-white/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
                 >
                   <div className='flex h-full flex-col'>
-                    <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0057b8]/10 via-[#00a6d6]/10 to-[#f58220]/10'>
-                      <AcademicCapIcon className='w-6 h-6 text-[#0057b8]' />
+                    <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100'>
+                      <AcademicCapIcon className='w-6 h-6 text-blue-700' />
                     </div>
                     <div className='flex flex-1 flex-col'>
                       <div className='mb-3'>
                         <h3 className='text-lg font-bold leading-snug text-slate-900'>
                           {qual.degree}
                         </h3>
-                        <span className='mt-3 inline-flex rounded-full bg-[#0057b8]/10 px-3 py-1 text-xs font-bold text-[#0057b8]'>
+                        <span className='mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700'>
                           {qual.year}
                         </span>
                       </div>
-                      <p className='mb-2 text-sm font-semibold text-[#00a6d6]'>
+                      <p className='mb-2 text-sm font-semibold text-indigo-700'>
                         {qual.institution}
                       </p>
                       <p className='text-sm leading-6 text-slate-600'>
@@ -508,13 +505,13 @@ const About = () => {
         {/* Specializations Tab */}
         {activeTab === 'specializations' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[28px] border border-blue-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(0,87,184,0.12)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0057b8] via-[#00a6d6] to-[#f58220]' />
-              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0057b8]/10 blur-3xl' />
-              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-[#f58220]/10 blur-3xl' />
+            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
+              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+              <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+              <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
               <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-                <p className='text-sm font-bold uppercase tracking-[0.22em] text-[#0057b8]'>
+                <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Specializations
                 </p>
                 <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
@@ -529,11 +526,11 @@ const About = () => {
             {specializations.map((spec, index) => (
               <div
                 key={index}
-                className='min-h-[150px] rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl'
+                className='min-h-[150px] rounded-2xl border border-white/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
               >
                 <div className='flex items-start gap-4'>
                   <div
-                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0057b8]/10 via-[#00a6d6]/10 to-[#f58220]/10 ${spec.color}`}
+                    className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 ${spec.color}`}
                   >
                     <spec.icon className='w-6 h-6' />
                   </div>
@@ -542,7 +539,7 @@ const About = () => {
                       <h3 className='text-lg font-bold text-slate-900'>
                         {spec.name}
                       </h3>
-                      <span className='rounded-full bg-[#f58220]/12 px-2.5 py-1 text-xs font-bold text-[#9a4a00]'>
+                      <span className='rounded-full bg-purple-100 px-2.5 py-1 text-xs font-bold text-purple-700'>
                         {spec.experience}
                       </span>
                     </div>
@@ -560,16 +557,16 @@ const About = () => {
 
         {/* Contact Information */}
         <div className='mx-auto mt-16 max-w-5xl'>
-          <div className='relative overflow-hidden rounded-[28px] border border-blue-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(0,87,184,0.12)] backdrop-blur-sm sm:p-8 lg:p-10'>
-            <div className='absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0057b8] via-[#00a6d6] to-[#f58220]' />
-            <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-[#0057b8]/10 blur-3xl' />
-            <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-[#f58220]/10 blur-3xl' />
+          <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
+            <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+            <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+            <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
             <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-              <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0057b8] via-[#00a6d6] to-[#f58220] text-white shadow-lg'>
+              <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg'>
                 <EnvelopeIcon className='h-7 w-7' />
               </div>
-              <p className='text-sm font-bold uppercase tracking-[0.22em] text-[#0057b8]'>
+              <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                 Connect With Us
               </p>
               <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
@@ -581,18 +578,18 @@ const About = () => {
             </div>
 
             <div className='relative grid gap-4 md:grid-cols-3'>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-white/90 p-5 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#0057b8]/10'>
-                  <PhoneIcon className='w-5 h-5 text-[#0057b8]' />
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-100'>
+                  <PhoneIcon className='w-5 h-5 text-blue-700' />
                 </div>
                 <div className='min-w-0 text-left'>
                   <div className='font-semibold text-slate-900'>Call (Optional)</div>
                   <div className='text-sm text-slate-600'>+19-7838758293</div>
                 </div>
               </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-white/90 p-5 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#00a6d6]/10'>
-                  <EnvelopeIcon className='w-5 h-5 text-[#00a6d6]' />
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-100'>
+                  <EnvelopeIcon className='w-5 h-5 text-indigo-700' />
                 </div>
                 <div className='min-w-0 text-left'>
                   <div className='font-semibold text-slate-900'>Email</div>
@@ -601,9 +598,9 @@ const About = () => {
                   </div>
                 </div>
               </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-white/90 p-5 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#f58220]/10'>
-                  <CalendarIcon className='w-5 h-5 text-[#f58220]' />
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-purple-100'>
+                  <CalendarIcon className='w-5 h-5 text-purple-700' />
                 </div>
                 <div className='min-w-0 text-left'>
                   <div className='font-semibold text-slate-900'>Explore</div>
