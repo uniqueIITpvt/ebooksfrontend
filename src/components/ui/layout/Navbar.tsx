@@ -416,19 +416,19 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                             onClose={handleDropdownClose}
                           />
                         ) : (
-                          <div className='absolute left-0 mt-0 w-96 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-blue-200/60 hover:border-blue-300/80 py-4 z-10 animate-in slide-in-from-top-2 duration-300 transition-all'>
+                          <div className='absolute left-0 mt-0 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/60 hover:border-blue-300/80 py-2 z-10 animate-in slide-in-from-top-2 duration-300 transition-all'>
                             <div className='absolute -top-2 left-8 w-4 h-4 bg-white border-l border-t border-blue-200/60 rotate-45'></div>
-                            <div className='px-6 mb-4'>
-                              <div className='flex items-center space-x-3'>
+                            <div className='px-4 mb-1.5'>
+                              <div className='flex items-center space-x-2.5'>
                                 <div
-                                  className={`p-2 rounded-xl bg-gradient-to-r ${
+                                  className={`p-1.5 rounded-lg bg-gradient-to-r shadow-sm [&>svg]:h-4 [&>svg]:w-4 ${
                                     item.color || 'from-slate-500 to-gray-500'
                                   } text-white`}
                                 >
                                   {item.icon}
                                 </div>
                                 <h3
-                                  className={`text-lg font-bold bg-gradient-to-r ${
+                                  className={`text-base font-bold bg-gradient-to-r ${
                                     item.color || 'from-slate-500 to-gray-500'
                                   } bg-clip-text text-transparent`}
                                 >
@@ -441,28 +441,28 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                                 key={dropdownItem.name}
                                 href={dropdownItem.href}
                                 onClick={handleDropdownClose}
-                                className={`group flex items-start mt-1 px-6 py-4 text-sm transition-all duration-300 mx-2 rounded-2xl ${
+                                className={`group flex items-center mt-0.5 px-3 py-1.5 text-xs transition-all duration-300 mx-2 rounded-lg ${
                                   dropdownItem.featured
-                                    ? 'text-blue-700 bg-blue-100/60 hover:bg-blue-200/90 hover:text-blue-800 border-l-4 border-blue-500 shadow-sm'
-                                    : 'text-slate-700 bg-transparent hover:bg-blue-100/70 hover:text-blue-800 border-l-4 border-transparent hover:border-blue-400 hover:shadow-md'
+                                    ? 'text-blue-700 bg-blue-100/60 hover:bg-blue-200/90 hover:text-blue-800 border-l-2 border-blue-500 shadow-sm'
+                                    : 'text-slate-700 bg-transparent hover:bg-blue-100/70 hover:text-blue-800 border-l-2 border-transparent hover:border-blue-400 hover:shadow-md'
                                 }`}
                               >
                                 <div
-                                  className={`mr-4 mt-0.5 p-2 rounded-xl transition-all duration-300 ${
+                                  className={`mr-2.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all duration-300 [&>svg]:h-4 [&>svg]:w-4 ${
                                     dropdownItem.featured
-                                      ? 'bg-blue-200 text-blue-700 group-hover:bg-blue-300 group-hover:text-blue-800'
-                                      : 'bg-slate-100 text-slate-600 group-hover:bg-blue-200 group-hover:text-blue-700'
+                                      ? 'bg-blue-200 text-blue-700 shadow-sm group-hover:bg-blue-300 group-hover:text-blue-800'
+                                      : 'bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100 group-hover:bg-blue-200 group-hover:text-blue-700'
                                   }`}
                                 >
                                   {dropdownItem.icon}
                                 </div>
-                                <div className='flex-1'>
-                                  <div className='font-bold mb-1'>
+                                <div className='min-w-0 flex-1'>
+                                  <div className='font-bold leading-tight'>
                                     {dropdownItem.name}
                                   </div>
                                   {dropdownItem.description && (
                                     <div
-                                      className={`text-xs leading-relaxed ${
+                                      className={`mt-0.5 text-[11px] leading-tight ${
                                         dropdownItem.featured
                                           ? 'text-blue-600/80'
                                           : 'text-slate-500'
