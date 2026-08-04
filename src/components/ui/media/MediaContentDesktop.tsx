@@ -280,7 +280,7 @@ function SectionCarousel({
     : 'grid w-full grid-cols-[repeat(auto-fit,150px)] items-start justify-between gap-x-5 gap-y-10 overflow-hidden';
 
   return (
-    <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] bg-white px-12 pb-8 pt-0 font-dm-sans'}>
+    <section className={isFreeSection ? 'mb-10' : 'mx-auto mb-8 max-w-[1360px] px-8 pb-4 pt-0 font-dm-sans'}>
       <div className={isFreeSection ? 'flex items-center justify-between mb-6' : 'relative mb-6 flex items-center justify-between gap-8'}>
         <div className={isFreeSection ? 'flex-1' : 'min-w-0 flex-1'}>
           {!isFreeSection && headerLeading ? (
@@ -288,7 +288,7 @@ function SectionCarousel({
               {headerLeading}
             </div>
           ) : null}
-          <h3 className={isFreeSection ? 'text-2xl font-bold text-slate-950 mb-2 flex items-center font-syne tracking-tight' : 'text-[48px] font-bold leading-tight text-[#1E1B4B] font-dm-sans'}>
+          <h3 className={isFreeSection ? 'text-2xl font-bold text-slate-950 mb-2 flex items-center font-syne tracking-tight' : 'text-[26px] font-bold leading-tight text-[#1E1B4B] font-dm-sans'}>
             {isFreeSection && <BookOpenIcon className='w-6 h-6 mr-3 text-indigo-600 shrink-0' />}
             <span>{title}</span>
           </h3>
@@ -556,8 +556,8 @@ export default function MediaContentDesktop({
   return (
     <>
       {/* Background Elements shared */}
-      <section className='py-2 bg-gradient-to-br from-white via-slate-50 to-indigo-50/30 relative overflow-hidden'>
-        <div className='absolute inset-0 opacity-20 pointer-events-none'>
+      <section className=' relative overflow-hidden'>
+        <div className='absolute inset-0 hidden opacity-20 pointer-events-none'>
           <div className='absolute inset-0 bg-gradient-to-br from-indigo-100/20 via-transparent to-purple-100/20' />
           <div className='absolute top-20 right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-3xl animate-pulse' />
           <div className='absolute bottom-20 left-10 w-40 h-40 bg-purple-200/15 rounded-full blur-3xl animate-pulse delay-1000' />
@@ -584,7 +584,7 @@ export default function MediaContentDesktop({
           </div>
         )}
 
-        <div className='relative z-10 mt-6 w-full px-3 lg:px-5'>
+        <div className='relative z-10 w-full bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 px-3 py-6 lg:px-5'>
           <div className='mx-auto max-w-[1300px]'>
             <div ref={filterBoundaryRef} className='flex items-start gap-6'>
 
