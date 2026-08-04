@@ -21,13 +21,6 @@ import {
   LightBulbIcon,
 } from '@heroicons/react/24/outline';
 
-interface Achievement {
-  year: string;
-  title: string;
-  description: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
-  color: string;
-}
 
 interface Qualification {
   degree: string;
@@ -46,77 +39,7 @@ interface Specialization {
 
 const About = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedAchievement, setSelectedAchievement] = useState<string | null>(
-    null
-  );
 
-  const stats = [
-    {
-      number: '700+',
-      label: 'Resources Shared',
-      color: 'text-blue-600',
-      description:
-        'Books, audiobooks, and learning materials shared with readers and learners',
-    },
-    {
-      number: '5+',
-      label: 'Years of Work',
-      color: 'text-indigo-600',
-      description:
-        'Sustained focus on research, publishing, and knowledge-sharing initiatives',
-    },
-    {
-      number: 'Same Day',
-      label: 'Fast Access',
-      color: 'text-emerald-600',
-      description: 'Quick access to curated resources and updates as they are published',
-    },
-    {
-      number: '3',
-      label: 'Core Areas',
-      color: 'text-purple-600',
-      description: 'Books, audiobooks, and blogs focused on learning and research content',
-    },
-  ];
-
-  const achievements: Achievement[] = [
-    {
-      year: '2017',
-      title: 'Launched the Library',
-      description:
-        'Started publishing curated books and audiobook resources for continuous learning',
-      icon: TrophyIcon,
-      color: 'text-purple-600',
-    },
-    {
-      year: '2018',
-      title: 'Expanded Audio Resources',
-      description: 'Introduced audiobook-focused collections to support learning on the go',
-      icon: HeartIcon,
-      color: 'text-red-600',
-    },
-    {
-      year: '2016',
-      title: 'Research & Curation Workflow',
-      description: 'Established a consistent review and curation process for quality resources',
-      icon: ShieldCheckIcon,
-      color: 'text-blue-600',
-    },
-    {
-      year: '2006',
-      title: 'Long-Term Knowledge Work',
-      description: 'Built years of experience turning complex topics into clear learning materials',
-      icon: UserGroupIcon,
-      color: 'text-green-600',
-    },
-    {
-      year: '2006',
-      title: 'Foundational Research Focus',
-      description: 'Committed to research-driven publishing and accessible education resources',
-      icon: AcademicCapIcon,
-      color: 'text-indigo-600',
-    },
-  ];
 
   const qualifications: Qualification[] = [
     {
@@ -173,13 +96,12 @@ const About = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: UserGroupIcon },
-    { id: 'achievements', label: 'Achievements', icon: TrophyIcon },
     { id: 'qualifications', label: 'Qualifications', icon: AcademicCapIcon },
     { id: 'specializations', label: 'Specializations', icon: BeakerIcon },
   ];
 
   return (
-    <section className='py-4 sm:py-8 lg:py-12 bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 relative overflow-hidden'>
+    <section className='relative overflow-hidden bg-gradient-to-r from-blue-50 via-indigo-50 to-white py-4 font-dm-sans sm:py-8 lg:py-12'>
       {/* Background */}
       <div className='absolute inset-0 opacity-30'>
         <div className='absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/70 via-white/20 to-purple-100/60'></div>
@@ -187,24 +109,24 @@ const About = () => {
 
       <div className='max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 relative'>
         {/* Header */}
-        <div className='text-center mb-16'>
-          <div className='inline-flex items-center bg-white/90 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm'>
+        <div className='text-center mb-12'>
+          <div className='inline-flex items-center bg-white/70 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-5'>
             <CheckCircleIcon className='w-4 h-4 mr-2' />
             About TechUniqueIIT Research Center
           </div>
-          <h2 className='text-4xl md:text-5xl font-bold text-slate-900 leading-tight mb-6'>
+          <h2 className='font-syne text-4xl font-bold leading-tight text-[#1E1B4B] mb-5 md:text-5xl'>
             Learn, Listen, Read, and{' '}
             <span className='bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent'>
               Grow Every Day
             </span>
           </h2>
-          <p className='text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed'>
+          <p className='mx-auto max-w-3xl text-lg leading-8 text-slate-600'>
             TechUniqueIIT Research Center is a digital learning platform created to make powerful knowledge easy to access, easy to understand, and easy to experience.
           </p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className='flex flex-wrap justify-center gap-2 mb-12'>
+        <div className='flex flex-wrap justify-center gap-2 mb-10'>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -212,8 +134,8 @@ const About = () => {
               suppressHydrationWarning
               className={`flex items-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                  : 'bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white border border-blue-100 hover:border-blue-200'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+                  : 'bg-white/70 backdrop-blur-sm text-slate-700 hover:bg-white'
               }`}
             >
               <tab.icon className='w-4 h-4 mr-2' />
@@ -226,19 +148,18 @@ const About = () => {
         {activeTab === 'overview' && (
           <div className='mx-auto max-w-5xl'>
             {/* Left Content */}
-            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+            <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
               <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
               <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
               <div className='relative mx-auto mb-8 flex max-w-3xl flex-col items-center text-center'>
-                <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg'>
+                <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white'>
                   <BookOpenIcon className='h-7 w-7' />
                 </div>
                 <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Digital Learning Platform
                 </p>
-                <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
+                <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
                   Knowledge Designed for Reading, Listening, and Growth
                 </h3>
               </div>
@@ -289,97 +210,14 @@ const About = () => {
                   <span className='text-blue-700'>- learn, listen, read, and grow every day.</span>
                 </p>
               </div>
-
-              {/* Credentials */}
-              <div className='relative mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
-                  <div className='p-2 bg-green-100 rounded-xl mr-4'>
-                    <CheckCircleIcon className='w-5 h-5 text-green-600' />
-                  </div>
-                  <span className='font-semibold'>
-                    Research-Led Publications
-                  </span>
-                </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
-                  <div className='p-2 bg-blue-100 rounded-xl mr-4'>
-                    <UserGroupIcon className='w-5 h-5 text-blue-600' />
-                  </div>
-                  <span className='font-semibold'>Expert Curation Team</span>
-                </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
-                  <div className='p-2 bg-indigo-100 rounded-xl mr-4'>
-                    <UserGroupIcon className='w-5 h-5 text-indigo-600' />
-                  </div>
-                  <span className='font-semibold'>Community Learning</span>
-                </div>
-                <div className='flex min-h-[96px] items-center text-slate-700 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-white/80 shadow-sm hover:shadow-lg transition-all duration-300'>
-                  <div className='p-2 bg-purple-100 rounded-xl mr-4'>
-                    <TrophyIcon className='w-5 h-5 text-purple-600' />
-                  </div>
-                  <span className='font-semibold'>Curated Resources</span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className='relative mt-8 flex flex-col justify-center gap-4 sm:flex-row'>
-                <a
-                  href='/about'
-                  className='inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
-                >
-                  Learn More About UniqueIIT Research Center
-                  <ArrowRightIcon className='w-5 h-5 ml-2' />
-                </a>
-                <Link
-                  href='/books'
-                  className='inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl border border-blue-100'
-                >
-                  View Publications
-                </Link>
-              </div>
             </div>
-
-            {/* Right Stats Card */}
-            {/* <div className='relative lg:sticky lg:top-24 self-start'>
-              <div className='absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-3xl opacity-20 transform rotate-6'></div>
-              <div className='relative bg-white/95 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-blue-100'>
-                <div className='mb-6'>
-                  <p className='text-sm font-semibold uppercase tracking-[0.18em] text-blue-600'>
-                    At a glance
-                  </p>
-                  <h3 className='mt-2 text-2xl font-bold text-slate-900'>
-                    Main Highlights
-                  </h3>
-                </div>
-                <div className='grid grid-cols-2 gap-6'>
-                  {stats.map((stat, index) => (
-                    <div
-                      key={index}
-                      className='rounded-2xl bg-slate-50/80 px-4 py-6 text-center group cursor-pointer border border-slate-100'
-                    >
-                      <div
-                        className={`text-4xl font-bold ${stat.color} mb-2 group-hover:scale-110 transition-transform duration-300`}
-                      >
-                        {stat.number}
-                      </div>
-                      <div className='text-slate-600 font-medium mb-2'>
-                        {stat.label}
-                      </div>
-                      <div className='text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
-                        {stat.description}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div> */}
           </div>
         )}
 
         {/* Achievements Tab */}
         {activeTab === 'achievements' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+            <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
               <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
               <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
@@ -387,62 +225,12 @@ const About = () => {
                 <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Milestones
                 </p>
-                <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
+                <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
                   Building Better Access to Learning
                 </h3>
                 <p className='mt-3 text-sm leading-6 text-slate-600 sm:text-base'>
                   Key steps in our journey of research-led publishing, curation, and digital learning resources.
                 </p>
-              </div>
-
-              <div className='relative grid gap-4'>
-              {achievements.map((achievement, index) => (
-                <div
-                  key={index}
-                  className={`min-h-[132px] cursor-pointer rounded-2xl border bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
-                    selectedAchievement === achievement.year
-                      ? 'border-indigo-400 ring-2 ring-indigo-500/20'
-                      : 'border-white/80'
-                  }`}
-                  onClick={() =>
-                    setSelectedAchievement(
-                      selectedAchievement === achievement.year
-                        ? null
-                        : achievement.year
-                    )
-                  }
-                >
-                  <div className='flex items-start gap-4'>
-                    <div
-                      className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 ${achievement.color}`}
-                    >
-                      <achievement.icon className='w-6 h-6' />
-                    </div>
-                    <div className='min-w-0 flex-1'>
-                      <div className='mb-2 flex flex-wrap items-center gap-3'>
-                        <span className='text-lg font-bold text-slate-900 sm:text-xl'>
-                          {achievement.title}
-                        </span>
-                        <span className='rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700'>
-                          {achievement.year}
-                        </span>
-                      </div>
-                      <p className='text-sm leading-6 text-slate-600 sm:text-base'>
-                        {achievement.description}
-                      </p>
-                      {selectedAchievement === achievement.year && (
-                        <div className='mt-4 rounded-xl border border-indigo-100 bg-indigo-50/70 p-4'>
-                          <p className='text-sm text-slate-700'>
-                            This achievement represents a significant milestone
-                            for our work, demonstrating our commitment to
-                            accessible learning and consistent resource quality.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
               </div>
             </div>
           </div>
@@ -451,8 +239,7 @@ const About = () => {
         {/* Qualifications Tab */}
         {activeTab === 'qualifications' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+            <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
               <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
               <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
@@ -460,7 +247,7 @@ const About = () => {
                 <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Qualifications
                 </p>
-                <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
+                <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
                   Structured Review and Publishing Practice
                 </h3>
                 <p className='mt-3 text-sm leading-6 text-slate-600 sm:text-base'>
@@ -472,7 +259,7 @@ const About = () => {
               {qualifications.map((qual, index) => (
                 <div
                   key={index}
-                  className='min-h-[230px] rounded-2xl border border-white/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                  className='min-h-[230px] rounded-2xl bg-white/45 p-5 backdrop-blur-sm transition-all duration-300'
                 >
                   <div className='flex h-full flex-col'>
                     <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100'>
@@ -505,8 +292,7 @@ const About = () => {
         {/* Specializations Tab */}
         {activeTab === 'specializations' && (
           <div className='mx-auto max-w-5xl'>
-            <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
-              <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+            <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
               <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
               <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
@@ -514,7 +300,7 @@ const About = () => {
                 <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                   Specializations
                 </p>
-                <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
+                <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
                   Focus Areas for Everyday Learning
                 </h3>
                 <p className='mt-3 text-sm leading-6 text-slate-600 sm:text-base'>
@@ -526,7 +312,7 @@ const About = () => {
             {specializations.map((spec, index) => (
               <div
                 key={index}
-                className='min-h-[150px] rounded-2xl border border-white/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'
+                className='min-h-[150px] rounded-2xl bg-white/45 p-5 backdrop-blur-sm transition-all duration-300'
               >
                 <div className='flex items-start gap-4'>
                   <div
@@ -557,19 +343,18 @@ const About = () => {
 
         {/* Contact Information */}
         <div className='mx-auto mt-16 max-w-5xl'>
-          <div className='relative overflow-hidden rounded-[22px] border border-white/80 bg-white/75 p-6 shadow-[0_14px_35px_rgba(79,70,229,0.10)] backdrop-blur-sm sm:p-8 lg:p-10'>
-            <div className='absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-500' />
+          <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
             <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
             <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
             <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-              <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg'>
+              <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white'>
                 <EnvelopeIcon className='h-7 w-7' />
               </div>
               <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
                 Connect With Us
               </p>
-              <h3 className='mt-3 text-2xl font-bold text-slate-900 sm:text-3xl'>
+              <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
                 Ready to Explore More?
               </h3>
               <p className='mt-3 text-sm leading-6 text-slate-600 sm:text-base'>
@@ -578,7 +363,7 @@ const About = () => {
             </div>
 
             <div className='relative grid gap-4 md:grid-cols-3'>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
                 <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-100'>
                   <PhoneIcon className='w-5 h-5 text-blue-700' />
                 </div>
@@ -587,7 +372,7 @@ const About = () => {
                   <div className='text-sm text-slate-600'>+19-7838758293</div>
                 </div>
               </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
                 <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-100'>
                   <EnvelopeIcon className='w-5 h-5 text-indigo-700' />
                 </div>
@@ -598,7 +383,7 @@ const About = () => {
                   </div>
                 </div>
               </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-5 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg'>
+              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
                 <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-purple-100'>
                   <CalendarIcon className='w-5 h-5 text-purple-700' />
                 </div>

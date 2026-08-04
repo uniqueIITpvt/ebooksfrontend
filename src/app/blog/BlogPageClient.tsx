@@ -71,11 +71,11 @@ export default function BlogPageClient({
   };
 
   return (
-    <div className="min-h-screen sm:pt-3 lg:pt-3 bg-white">
-      <section className="bg-gradient-to-br from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white font-dm-sans sm:pt-3 lg:pt-3">
+      <section>
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-4">
+            <h1 className="mb-4 font-syne text-4xl font-bold text-[#1E1B4B] sm:text-5xl lg:text-6xl">
               {blogSettings.title}
               {blogSettings.subtitle && (
                 <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -87,7 +87,7 @@ export default function BlogPageClient({
         </div>
       </section>
 
-      <section className="bg-white border-b border-gray-100">
+      <section>
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative">
@@ -99,7 +99,7 @@ export default function BlogPageClient({
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="block w-full pl-12 pr-12 py-4 text-lg border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400"
+                className="block w-full rounded-xl bg-white/70 py-4 pl-12 pr-12 text-lg text-slate-900 transition-all duration-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               {searchTerm && (
                 <button
@@ -120,8 +120,8 @@ export default function BlogPageClient({
                   onClick={() => setSelectedCategory(category.value)}
                   className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm whitespace-nowrap ${
                     selectedCategory === category.value
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+                      : 'bg-white/70 text-slate-700 hover:bg-white'
                   }`}
                 >
                   {category.name}
@@ -154,7 +154,7 @@ export default function BlogPageClient({
                 </p>
                 <button
                   onClick={clearSearch}
-                  className="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
+                  className="mt-6 inline-flex items-center rounded-lg bg-white/70 px-6 py-3 text-sm font-medium text-blue-600 transition-colors duration-200 hover:bg-white"
                 >
                   Clear search
                 </button>
@@ -168,7 +168,7 @@ export default function BlogPageClient({
                 return (
                   <article
                     key={blog._id}
-                    className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:transform hover:scale-[1.02] overflow-hidden"
+                    className="group overflow-hidden rounded-xl bg-white/55 backdrop-blur-sm transition-all duration-300 hover:scale-[1.01]"
                   >
                     <div className="relative h-48 overflow-hidden">
                       {blog.image ? (
@@ -194,7 +194,7 @@ export default function BlogPageClient({
                         </div>
                       )}
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full">
+                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-medium rounded-full">
                           {blog.category}
                         </span>
                       </div>
@@ -212,7 +212,7 @@ export default function BlogPageClient({
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                      <h3 className="mb-3 line-clamp-2 font-syne text-xl font-bold text-[#1E1B4B] transition-colors duration-200 group-hover:text-blue-600">
                         {blog.title}
                       </h3>
 
@@ -225,7 +225,7 @@ export default function BlogPageClient({
                           {parsedTags.slice(0, 3).map((tag, index) => (
                             <span
                               key={`${tag}-${index}`}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600"
+                            className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
                             >
                               {tag}
                             </span>
@@ -261,9 +261,9 @@ export default function BlogPageClient({
         </div>
       </section>
 
-      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="mb-4 font-syne text-3xl font-bold text-[#1E1B4B] sm:text-4xl">
             Stay Updated
           </h2>
           <p className="text-xl text-gray-600 mb-8">
@@ -273,9 +273,9 @@ export default function BlogPageClient({
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 rounded-lg bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
-            <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200">
+            <button className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white transition-colors duration-200 hover:from-blue-700 hover:to-indigo-700">
               Subscribe
             </button>
           </div>
