@@ -87,7 +87,7 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
     window.history.pushState(null, '', '/free-summaries-section');
     const scrollOffset = window.innerWidth < 768 ? 80 : 120;
     window.scrollTo({
-      top: section.getBoundingClientRect().top + window.scrollY + scrollOffset,
+      top: section.getBoundingClientRect().top + window.scrollY - scrollOffset,
       behavior: 'smooth',
     });
   };
