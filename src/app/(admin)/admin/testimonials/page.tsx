@@ -233,24 +233,23 @@ export default function AdminTestimonialsPage() {
       setSavingStats(true);
       setError(null);
 
-      const response = await fetch(`${API_URL}/settings/key/testimonial_stats`, {
+      const response = await fetch(`${API_URL}/testimonials/admin/stats`, {
         method: 'PUT',
         headers: getAuthHeaders(true),
-        body: JSON.stringify({
-          value: JSON.stringify(stats),
-          description: 'Public testimonial section stat cards',
-          category: 'general',
-          isPublic: true,
-        }),
+        body: JSON.stringify({ stats }),
       });
       const data = await response.json();
 
-      if (data.success && typeof data.data?.value === 'string') {
-        const parsedStats = JSON.parse(data.data.value);
-        if (Array.isArray(parsedStats)) {
-          setStats(parsedStats);
-          return;
-        }
+      if (response.status === 404) {
+        setError(
+          'Testimonial stats route is not loaded yet. Please restart the backend server and try again.'
+        );
+        return;
+      }
+
+      if (data.success && Array.isArray(data.data)) {
+        setStats(data.data);
+        return;
       }
 
       setError(getErrorMessage(data, 'Failed to save testimonial stats'));

@@ -80,19 +80,8 @@ export default function Testimonials({ testimonials, stats }: TestimonialsProps)
     );
   };
 
-  const currentTestimonialData = testimonials[currentTestimonial];
-  const detailText =
-    currentTestimonialData.detailedContent ||
-    currentTestimonialData.content;
-  const readerMeta = [
-    currentTestimonialData.role,
-    currentTestimonialData.company,
-  ]
-    .filter(Boolean)
-    .join(' at ');
-
   return (
-    <section className='relative overflow-hidden bg-gradient-to-r from-blue-50 via-indigo-50 to-white py-20 font-dm-sans'>
+    <section className='relative overflow-hidden bg-gradient-to-r from-blue-50 via-indigo-50 to-white py-3 font-dm-sans'>
       <div className='absolute inset-0 pointer-events-none opacity-30'>
         <div className='absolute inset-0 bg-gradient-to-br from-blue-50/70 via-white/20 to-purple-100/60' />
       </div>
@@ -121,7 +110,7 @@ export default function Testimonials({ testimonials, stats }: TestimonialsProps)
           </p>
         </div>
 
-        <div
+        {/* <div
           className={`mb-14 grid grid-cols-2 gap-4 lg:grid-cols-4 ${
             isVisible
               ? 'animate-in slide-in-from-bottom duration-1000 delay-300'
@@ -150,94 +139,117 @@ export default function Testimonials({ testimonials, stats }: TestimonialsProps)
             </div>
           );
           })}
-        </div>
+        </div> */}
 
         <div
-          className={`mb-16 ${
+          className={`mb-12 ${
             isVisible
               ? 'animate-in slide-in-from-left duration-1000 delay-500'
               : 'opacity-0'
           }`}
         >
-          <div className='relative overflow-hidden rounded-3xl bg-white/55 p-8 backdrop-blur-sm md:p-12'>
+          <div className='relative overflow-hidden rounded-3xl bg-white/55 px-5 py-10 backdrop-blur-sm md:px-12'>
             <div className='absolute inset-0 bg-gradient-to-br from-blue-50/60 via-transparent to-indigo-50/50' />
 
-            <div className='relative z-10 grid gap-8 lg:grid-cols-[1fr_280px] lg:items-center'>
-              <div className='space-y-6'>
-                <div className='flex items-center gap-1'>
-                  {[...Array(currentTestimonialData.rating)].map((_, i) => (
-                    <StarIconSolid key={i} className='h-6 w-6 text-yellow-400' />
-                  ))}
-                  <span className='ml-3 text-sm font-medium text-slate-600'>
-                    {currentTestimonialData.rating}/5 - Verified Review
-                  </span>
-                </div>
+            <div className='relative z-10 overflow-hidden'>
+              <div
+                className='flex transition-transform duration-700 ease-out'
+                style={{
+                  transform: `translateX(-${currentTestimonial * 100}%)`,
+                }}
+              >
+                {testimonials.map((testimonial) => {
+                  const detailText =
+                    testimonial.detailedContent || testimonial.content;
+                  const readerMeta = [testimonial.role, testimonial.company]
+                    .filter(Boolean)
+                    .join(' at ');
 
-                <blockquote className='font-syne text-2xl font-semibold leading-relaxed text-[#1E1B4B] md:text-3xl'>
-                  &quot;{detailText}&quot;
-                </blockquote>
-
-                <div className='flex items-center gap-4'>
-                  <div
-                    className='flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-cover bg-center text-xl font-bold text-white'
-                    style={
-                      currentTestimonialData.image
-                        ? {
-                            backgroundImage: `url(${currentTestimonialData.image})`,
+                  return (
+                    <div
+                      key={testimonial._id}
+                      className='flex w-full shrink-0 justify-center px-2'
+                    >
+                      <article className='flex min-h-[320px] w-full max-w-[300px] flex-col items-center rounded-[8px] bg-white/85 px-6 py-7 text-center shadow-sm sm:max-w-[340px]'>
+                        <div
+                          className='mb-5 flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 bg-cover bg-center text-xl font-bold text-white'
+                          style={
+                            testimonial.image
+                              ? {
+                                  backgroundImage: `url(${testimonial.image})`,
+                                }
+                              : undefined
                           }
-                        : undefined
-                    }
-                  >
-                    {!currentTestimonialData.image &&
-                      getInitials(currentTestimonialData.name)}
-                  </div>
-                  <div>
-                    <div className='text-lg font-bold text-slate-900'>
-                      {currentTestimonialData.name}
+                        >
+                          {!testimonial.image && getInitials(testimonial.name)}
+                        </div>
+
+                        <h3 className='mb-2 font-syne text-base font-bold text-[#1E1B4B]'>
+                          {testimonial.name}
+                        </h3>
+
+                        <div className='mb-3 flex items-center justify-center gap-0.5'>
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <StarIconSolid
+                              key={i}
+                              className='h-4 w-4 text-yellow-400'
+                            />
+                          ))}
+                        </div>
+
+                        <blockquote className='mb-5 line-clamp-6 text-[13px] leading-6 text-slate-600'>
+                          {detailText}
+                        </blockquote>
+
+                        <div className='mt-auto'>
+                          <div className='font-syne text-sm font-bold text-slate-900'>
+                            {testimonial.role || 'Verified Reader'}
+                          </div>
+                          <div className='mt-1 text-[11px] font-medium text-slate-500'>
+                            {readerMeta || testimonial.format || 'Reader'}
+                          </div>
+                        </div>
+                      </article>
                     </div>
-                    <div className='text-slate-600'>
-                      {readerMeta || 'Reader'}
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </div>
 
-              <div className='relative z-10 mt-8 flex items-center justify-between'>
-                <div className='flex items-center gap-3'>
-                  <button
-                    onClick={prevTestimonial}
-                    className='flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-slate-600 transition hover:text-blue-600'
-                    aria-label='Previous testimonial'
-                  >
-                    <ChevronLeftIcon className='h-5 w-5' />
-                  </button>
-                  <button
-                    onClick={nextTestimonial}
-                    className='flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-slate-600 transition hover:text-blue-600'
-                    aria-label='Next testimonial'
-                  >
-                    <ChevronRightIcon className='h-5 w-5' />
-                  </button>
-                </div>
+            <button
+              onClick={prevTestimonial}
+              className='absolute left-5 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-slate-600 transition hover:text-blue-600 md:left-8'
+              aria-label='Previous testimonial'
+            >
+              <ChevronLeftIcon className='h-5 w-5' />
+            </button>
 
-                <div className='flex gap-2'>
-                  {testimonials.map((testimonial, index) => (
-                    <button
-                      key={testimonial._id}
-                      onClick={() => {
-                        setCurrentTestimonial(index);
-                      }}
-                      className={`h-3 rounded-full transition-all duration-300 ${
-                        index === currentTestimonial
-                          ? 'w-8 bg-blue-600'
-                          : 'w-3 bg-blue-200'
-                      }`}
-                      aria-label={`Show testimonial ${index + 1}`}
-                    />
-                  ))}
-                </div>
+            <button
+              onClick={nextTestimonial}
+              className='absolute right-5 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-slate-600 transition hover:text-blue-600 md:right-8'
+              aria-label='Next testimonial'
+            >
+              <ChevronRightIcon className='h-5 w-5' />
+            </button>
+
+            <div className='relative z-10 mt-8 flex items-center justify-center'>
+              <div className='flex gap-2'>
+                {testimonials.map((testimonial, index) => (
+                  <button
+                    key={testimonial._id}
+                    onClick={() => {
+                      setCurrentTestimonial(index);
+                    }}
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      index === currentTestimonial
+                        ? 'w-8 bg-blue-600'
+                        : 'w-3 bg-blue-200'
+                    }`}
+                    aria-label={`Show testimonial ${index + 1}`}
+                  />
+                ))}
               </div>
+            </div>
           </div>
         </div>
       </div>
