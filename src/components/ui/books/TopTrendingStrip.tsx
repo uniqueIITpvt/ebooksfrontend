@@ -31,7 +31,6 @@ export default function TopTrendingStrip({
   );
   const visibleCount = 5;
   const maxActiveIndex = Math.max(0, topItems.length - visibleCount);
-  const visibleItems = topItems.slice(activeIndex, activeIndex + visibleCount);
 
   useEffect(() => {
     setActiveIndex((current) => Math.min(current, maxActiveIndex));
@@ -102,10 +101,16 @@ export default function TopTrendingStrip({
             </>
           )}
 
-          <div className='flex justify-center gap-6'>
-            {visibleItems.map((item, index) => {
+          <div className='mx-auto max-w-[780px] overflow-hidden px-3 pb-1 pt-4'>
+            <div
+              className='flex gap-6 transition-transform duration-500 ease-out'
+              style={{
+                transform: `translateX(calc(-${activeIndex} * (132px + 1.5rem)))`,
+              }}
+            >
+            {topItems.map((item, index) => {
               const slug = item.slug || generateBookSlug(item.title);
-              const rank = activeIndex + index + 1;
+              const rank = index + 1;
 
               return (
                 <Link
@@ -143,6 +148,7 @@ export default function TopTrendingStrip({
                 </Link>
               );
             })}
+            </div>
           </div>
 
           {topItems.length > visibleCount && (
