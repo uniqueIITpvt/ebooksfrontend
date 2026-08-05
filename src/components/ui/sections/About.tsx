@@ -152,22 +152,23 @@ const About = () => {
               <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
               <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
-              <div className='relative mx-auto mb-8 flex max-w-3xl flex-col items-center text-center'>
-                <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white'>
+              <div className='relative mx-auto mb-10 flex max-w-4xl flex-col items-start'>
+                <div className='mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white'>
                   <BookOpenIcon className='h-7 w-7' />
                 </div>
-                <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
+                <p className='text-xs font-bold uppercase tracking-[0.28em] text-blue-700'>
                   Digital Learning Platform
                 </p>
-                <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
+                <h3 className='mt-4 max-w-3xl font-syne text-3xl font-bold leading-tight text-[#1E1B4B] sm:text-4xl'>
                   Knowledge Designed for Reading, Listening, and Growth
                 </h3>
               </div>
 
-              <div className='relative mx-auto max-w-4xl space-y-6 text-center text-base leading-8 text-slate-600 sm:text-lg sm:leading-9'>
+              <div className='relative mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1fr_260px]'>
+                <div className='space-y-5 text-left text-[15px] leading-8 text-slate-600 sm:text-base sm:leading-8'>
                 <p>
                   Our platform offers a{' '}
-                  <span className='rounded-lg bg-gradient-to-r from-blue-100 to-indigo-100 px-2 py-1 font-semibold text-slate-900'>
+                  <span className='font-semibold text-slate-900'>
                     curated collection of life-changing, motivational, self-growth, and learning-based books and audiobooks
                   </span>
                   . Users can listen to audiobooks through an{' '}
@@ -193,7 +194,7 @@ const About = () => {
                 </p>
                 <p>
                   At TechUniqueIIT Research Center, our goal is simple: to bring{' '}
-                  <span className='rounded-lg bg-blue-50 px-2 py-1 font-semibold text-slate-900'>
+                  <span className='font-semibold text-slate-900'>
                     meaningful books, audiobooks, and research-based learning content into one place
                   </span>{' '}
                   for students, professionals, and lifelong learners. Whether someone wants motivation, self-improvement, personal growth, or practical knowledge, our platform is designed to support their journey.
@@ -205,10 +206,32 @@ const About = () => {
                   </span>
                   . That is why we combine reading, listening, and digital technology to create a better learning experience for everyone.
                 </p>
-                <p className='text-xl font-semibold text-slate-900'>
+                <p className='pt-2 font-syne text-lg font-bold leading-8 text-slate-900'>
                   TechUniqueIIT Research Center{' '}
                   <span className='text-blue-700'>- learn, listen, read, and grow every day.</span>
                 </p>
+                </div>
+
+                <div className='rounded-2xl bg-white/55 p-5'>
+                  <p className='mb-4 text-xs font-bold uppercase tracking-[0.2em] text-blue-700'>
+                    What We Offer
+                  </p>
+                  <div className='space-y-4'>
+                    {[
+                      'Curated books and ebooks',
+                      'Interactive audiobook learning',
+                      'Research-based summaries',
+                      'Practical reading support',
+                    ].map((item) => (
+                      <div key={item} className='flex items-start gap-3'>
+                        <CheckCircleIcon className='mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600' />
+                        <span className='text-sm font-medium leading-6 text-slate-700'>
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -340,61 +363,6 @@ const About = () => {
             </div>
           </div>
         )}
-
-        {/* Contact Information */}
-        <div className='mx-auto mt-16 max-w-5xl'>
-          <div className='relative overflow-hidden rounded-[22px] bg-white/45 p-6 backdrop-blur-sm sm:p-8 lg:p-10'>
-            <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
-            <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
-
-            <div className='relative mx-auto mb-8 max-w-3xl text-center'>
-              <div className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white'>
-                <EnvelopeIcon className='h-7 w-7' />
-              </div>
-              <p className='text-sm font-bold uppercase tracking-[0.22em] text-blue-700'>
-                Connect With Us
-              </p>
-              <h3 className='mt-3 font-syne text-2xl font-bold text-[#1E1B4B] sm:text-3xl'>
-                Ready to Explore More?
-              </h3>
-              <p className='mt-3 text-sm leading-6 text-slate-600 sm:text-base'>
-                Get in touch to ask questions, request recommendations, or suggest new books and audiobooks.
-              </p>
-            </div>
-
-            <div className='relative grid gap-4 md:grid-cols-3'>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-blue-100'>
-                  <PhoneIcon className='w-5 h-5 text-blue-700' />
-                </div>
-                <div className='min-w-0 text-left'>
-                  <div className='font-semibold text-slate-900'>Call (Optional)</div>
-                  <div className='text-sm text-slate-600'>+19-7838758293</div>
-                </div>
-              </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-100'>
-                  <EnvelopeIcon className='w-5 h-5 text-indigo-700' />
-                </div>
-                <div className='min-w-0 text-left'>
-                  <div className='font-semibold text-slate-900'>Email</div>
-                  <div className='truncate text-sm text-slate-600'>
-                    unquebookpublishinghouse@gmail.com
-                  </div>
-                </div>
-              </div>
-              <div className='flex min-h-[112px] items-center justify-center gap-3 rounded-2xl bg-white/45 p-5 text-center backdrop-blur-sm transition-all duration-300'>
-                <div className='flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-purple-100'>
-                  <CalendarIcon className='w-5 h-5 text-purple-700' />
-                </div>
-                <div className='min-w-0 text-left'>
-                  <div className='font-semibold text-slate-900'>Explore</div>
-                  <div className='text-sm text-slate-600'>Browse the Library</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
