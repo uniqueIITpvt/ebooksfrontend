@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import MediaContent from "@/components/ui/media/MediaContent";
 import Hero from "@/components/ui/sections/Hero";
-import Testimonials from "@/components/ui/sections/Testimonials";
+// import Testimonials from "@/components/ui/sections/Testimonials";
 import { getHomePageData } from "@/lib/server/public-data";
-import { getPublishedTestimonials } from "@/services/api/testimonialsApi";
+// import { getPublishedTestimonials } from "@/services/api/testimonialsApi";
 import { SITE_DESCRIPTION, SITE_KEYWORDS, siteUrl } from "@/config/site.config";
 // import ChatbotFeatures from "@/components/ui/sections/ChatbotFeatures";
 
@@ -23,10 +23,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [homeData, testimonialsData] = await Promise.all([
-    getHomePageData(),
-    getPublishedTestimonials(),
-  ]);
+  const homeData = await getHomePageData();
+  // const [homeData, testimonialsData] = await Promise.all([
+  //   getHomePageData(),
+  //   getPublishedTestimonials(),
+  // ]);
 
   return (
     <div className='min-h-screen'>
@@ -48,12 +49,12 @@ export default async function Home() {
         />
       </div>
 
-      <div id='testimonials'>
+      {/* <div id='testimonials'>
         <Testimonials
           testimonials={testimonialsData.testimonials}
           stats={testimonialsData.stats}
         />
-      </div>
+      </div> */}
 
       {/* <div id='chatbot-features'>
         <ChatbotFeatures />
