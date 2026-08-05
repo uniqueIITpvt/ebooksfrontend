@@ -62,7 +62,7 @@ const quickStats = [
   {
     icon: CheckCircleIcon,
     label: 'Years Experience',
-    value: '5+',
+    value: '2+',
     color: 'from-rose-500 to-pink-600',
   },
 ];

@@ -162,7 +162,7 @@ const stats = [
   {
     icon: CheckBadgeIcon,
     label: 'Years Experience',
-    value: '10+',
+    value: '2+',
     color: 'from-purple-500 to-violet-600',
   },
 ];

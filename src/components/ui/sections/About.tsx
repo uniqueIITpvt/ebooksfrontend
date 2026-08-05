@@ -45,20 +45,20 @@ const About = () => {
     {
       degree: 'Content Curation & Review',
       institution: 'uniqueIIT Research Center',
-      year: '2004-2006',
+      year: '2024-2026',
       description:
         'Structured process to select, review, and present high-quality learning resources',
     },
     {
       degree: 'Research-Driven Publishing',
       institution: 'uniqueIIT Research Center',
-      year: '2001-2004',
+      year: '2024-2026',
       description: 'Creating clear summaries and resource collections grounded in research',
     },
     {
       degree: 'Learning Resource Development',
       institution: 'uniqueIIT Research Center',
-      year: '2001',
+      year: '2024-2026',
       description: 'Developing practical learning materials for students and professionals',
     },
   ];
