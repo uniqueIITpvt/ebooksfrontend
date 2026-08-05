@@ -116,17 +116,17 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 md:p-8 ${className}`}>
+    <div className={`rounded-xl bg-white/55 p-6 backdrop-blur-sm md:p-8 ${className}`}>
       <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-        <p className="text-gray-600">
+        <h2 className="mb-4 font-syne text-2xl font-bold text-[#1E1B4B] md:text-3xl">Get in Touch</h2>
+        <p className="text-slate-600">
           Have a question or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
         </p>
       </div>
 
       {/* Success Message */}
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+        <div className="mb-6 rounded-lg bg-green-50 p-4 text-green-700">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -138,7 +138,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+        <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-700">
           <div className="flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -151,7 +151,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
               Your Name *
             </label>
             <input
@@ -161,14 +161,14 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full rounded-lg bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               placeholder="John Doe"
               disabled={loading}
             />
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
               Email Address *
             </label>
             <input
@@ -178,7 +178,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full rounded-lg bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               placeholder="john@example.com"
               disabled={loading}
             />
@@ -186,7 +186,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
         </div>
 
         <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-2">
             Subject *
           </label>
           <input
@@ -196,14 +196,14 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             value={formData.subject}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full rounded-lg bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             placeholder="How can we help you?"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-2">
             Message *
           </label>
           <textarea
@@ -215,24 +215,24 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             rows={6}
             minLength={10}
             maxLength={2000}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+            className="w-full resize-none rounded-lg bg-white/70 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             placeholder="Tell us more about your question or feedback..."
             disabled={loading}
           />
-          <div className="mt-2 text-sm text-gray-500">
+          <div className="mt-2 text-sm text-slate-500">
             {formData.message.length}/2000 characters (minimum 10)
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-600">
             <span className="text-red-500">*</span> Required fields
           </div>
           
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-medium text-white transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <>
@@ -254,7 +254,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
         </div>
       </form>
 
-      <div className="mt-8 pt-8 border-t border-gray-200">
+      <div className="mt-8 pt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
@@ -263,9 +263,9 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Email Support</h3>
-              <p className="text-sm text-gray-600">unquebookpublishinghouse@gmail.com</p>
-              <p className="text-xs text-gray-500 mt-1">We respond within 24-48 hours</p>
+              <h3 className="text-sm font-medium text-slate-900">Email Support</h3>
+              <p className="text-sm text-slate-600">unquebookpublishinghouse@gmail.com</p>
+              <p className="text-xs text-slate-500 mt-1">We respond within 24-48 hours</p>
             </div>
           </div>
           
@@ -276,9 +276,9 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Response Time</h3>
-              <p className="text-sm text-gray-600">Monday - Friday, 9AM - 6PM</p>
-              <p className="text-xs text-gray-500 mt-1">Business hours only</p>
+              <h3 className="text-sm font-medium text-slate-900">Response Time</h3>
+              <p className="text-sm text-slate-600">Monday - Friday, 9AM - 6PM</p>
+              <p className="text-xs text-slate-500 mt-1">Business hours only</p>
             </div>
           </div>
         </div>
