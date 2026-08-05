@@ -52,6 +52,7 @@ import {
   Quiz,
   ContactMail,
   ViewList,
+  RateReview,
 } from '@mui/icons-material';
 import { useThemeMode } from './MuiThemeProvider';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +68,7 @@ const navigation = [
   { name: 'Banners', href: '/admin/banners', icon: Campaign },
   { name: 'Book Formats', href: '/admin/formats', icon: ViewList },
   { name: 'FAQ', href: '/admin/faq', icon: Quiz },
+  { name: 'Testimonials', href: '/admin/testimonials', icon: RateReview },
   { name: 'Contact', href: '/admin/contact', icon: ContactMail },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },
