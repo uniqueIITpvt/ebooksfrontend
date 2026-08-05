@@ -178,7 +178,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
                   placeholder='Search questions...'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className='w-full min-w-0 pl-12 pr-4 py-3 text-slate-900 caret-slate-900 placeholder:text-slate-400 bg-white/70 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all duration-300'
+                  className='w-full min-w-0 rounded-2xl border border-blue-100 bg-white/80 py-2.5 pl-12 pr-4 text-slate-900 caret-slate-900 placeholder:text-slate-400 transition-all duration-300 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20'
                 />
               </div>
 
