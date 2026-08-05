@@ -175,7 +175,7 @@ const navItems: NavItem[] = [
   },
 
   {
-    name: 'Resource',
+    name: 'Resources',
     href: '/blog',
     icon: <Squares2X2Icon className='w-5 h-5' />,
     color: 'from-blue-500 to-indigo-600',

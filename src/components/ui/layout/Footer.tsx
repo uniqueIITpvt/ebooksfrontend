@@ -44,6 +44,7 @@ interface FooterProps {
 }
 export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
   const [siteLogo, setSiteLogo] = useState<string>(siteLogoProp || '');
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     if (siteLogoProp) {
@@ -196,7 +197,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
           {/* Bottom Bar */}
           <div className='border-t border-blue-100 mt-10 pt-5'>
             <p className='text-slate-500 text-xs sm:text-sm text-center'>
-              Copyright © 2026 uniqueIIT Research Center. All Rights Reserved.
+              Copyright {'\u00A9'} {currentYear} uniqueIIT Research Center. All Rights Reserved.
             </p>
           </div>
         </div>
@@ -204,3 +205,4 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
     </footer>
   );
 }
+

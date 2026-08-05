@@ -279,7 +279,7 @@ export default function MobileNavigation({
                       {item.name === 'Blog' && 'Read Insights'}
                       {item.name === 'About' && 'Know More'}
                       {item.name === 'FAQ' && 'Help & Support'}
-                      {item.name === 'Resource' && 'Explore More'}
+                      {item.name === 'Resources' && 'Explore More'}
                     </div>
                   </div>
                 </Link>
