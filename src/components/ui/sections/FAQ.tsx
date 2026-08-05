@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FaqItem } from '@/types/faq';
 import {
   ChevronDownIcon,
@@ -78,6 +78,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isVisible, setIsVisible] = useState(false);
   const [showDetailed, setShowDetailed] = useState<string[]>([]);
+  const categoryScrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -108,6 +109,13 @@ export default function FAQ({ faqs, categories }: FAQProps) {
     );
   };
 
+  const scrollCategories = (direction: 'left' | 'right') => {
+    categoryScrollerRef.current?.scrollBy({
+      left: direction === 'left' ? -160 : 160,
+      behavior: 'smooth',
+    });
+  };
+
   const filteredFAQs = enrichedFaqs.filter((faq) => {
     const normalizedSearch = searchTerm.toLowerCase();
     const matchesSearch =
@@ -123,22 +131,9 @@ export default function FAQ({ faqs, categories }: FAQProps) {
   const popularFAQs = enrichedFaqs.filter((faq) => faq.popular);
 
   return (
-    <section className='py-20 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative overflow-hidden'>
-      <div className='absolute inset-0 opacity-20'>
-        <div className='absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-indigo-600/5' />
-        <div
-          className='w-full h-full bg-repeat opacity-30'
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23e0e7ff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='m0 40l40-40h-40z'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      <div className='absolute inset-0 pointer-events-none'>
-        <div className='absolute top-20 left-10 w-24 h-24 bg-blue-200/20 rounded-full blur-xl animate-pulse' />
-        <div className='absolute top-40 right-20 w-32 h-32 bg-indigo-200/15 rounded-full blur-2xl animate-pulse delay-1000' />
-        <div className='absolute bottom-20 left-20 w-28 h-28 bg-purple-200/20 rounded-full blur-xl animate-pulse delay-2000' />
-        <div className='absolute bottom-40 right-10 w-20 h-20 bg-emerald-200/15 rounded-full blur-2xl animate-pulse delay-3000' />
+    <section className='relative overflow-hidden bg-gradient-to-r from-blue-50 via-indigo-50 to-white py-10 font-dm-sans'>
+      <div className='absolute inset-0 opacity-30 pointer-events-none'>
+        <div className='absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50/70 via-white/20 to-purple-100/60' />
       </div>
 
       <div className='max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 relative'>
@@ -149,11 +144,11 @@ export default function FAQ({ faqs, categories }: FAQProps) {
               : 'opacity-0'
           }`}
         >
-          <div className='inline-flex items-center bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-6 py-3 rounded-full text-sm font-semibold mb-6 shadow-lg'>
+          <div className='inline-flex items-center bg-white/70 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6'>
             <QuestionMarkCircleIconSolid className='w-5 h-5 mr-2' />
             Frequently Asked Questions
           </div>
-          <h2 className='text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight'>
+          <h2 className='font-syne text-4xl md:text-5xl lg:text-6xl font-bold text-[#1E1B4B] mb-6 leading-tight'>
             Get Your{' '}
             <span className='bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent'>
               Questions Answered
@@ -162,35 +157,10 @@ export default function FAQ({ faqs, categories }: FAQProps) {
           <p className='text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed'>
             Find answers about our books, audiobooks, and learning resources from{' '}
             <span className='text-blue-600 font-semibold'>
-              UniqueIIT Research Center
+              TechUniqueIIT Research Center
             </span>
           </p>
         </div>
-
-        {/* <div
-          className={`grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16 ${
-            isVisible
-              ? 'animate-in slide-in-from-bottom duration-1000 delay-300'
-              : 'opacity-0'
-          }`}
-        >
-          {quickStats.map((stat, index) => (
-            <div
-              key={index}
-              className='bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 border border-slate-200/50 hover:border-slate-300/50 text-center group hover:scale-105'
-            >
-              <div
-                className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-r ${stat.color} text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
-              >
-                <stat.icon className='w-6 h-6' />
-              </div>
-              <div className='text-2xl font-bold text-slate-800 mb-2'>
-                {stat.value}
-              </div>
-              <div className='text-sm text-slate-600'>{stat.label}</div>
-            </div>
-          ))}
-        </div> */}
 
         <div
           className={`mb-12 ${
@@ -199,33 +169,54 @@ export default function FAQ({ faqs, categories }: FAQProps) {
               : 'opacity-0'
           }`}
         >
-          <div className='bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-slate-200/50'>
-            <div className='flex flex-col lg:flex-row gap-4 items-center'>
-              <div className='relative flex-1 min-w-[240px] lg:min-w-[320px]'>
+          <div className='bg-white/45 backdrop-blur-sm rounded-3xl p-6'>
+            <div className='flex flex-col lg:flex-row gap-3 items-center'>
+              <div className='relative w-full lg:w-[330px] lg:shrink-0'>
                 <MagnifyingGlassIcon className='absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400' />
                 <input
                   type='text'
                   placeholder='Search questions...'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className='w-full min-w-0 pl-12 pr-4 py-3 text-slate-900 caret-slate-900 placeholder:text-slate-400 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300'
+                  className='w-full min-w-0 pl-12 pr-4 py-3 text-slate-900 caret-slate-900 placeholder:text-slate-400 bg-white/70 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all duration-300'
                 />
               </div>
 
-              <div className='flex flex-wrap gap-2'>
+              <div className='relative w-full min-w-0 flex-1 lg:w-auto'>
+                <button
+                  type='button'
+                  onClick={() => scrollCategories('left')}
+                  className='absolute inset-y-0 left-0 z-10 flex w-8 items-center justify-start bg-gradient-to-r from-white/90 via-white/70 to-transparent text-sm font-semibold text-slate-500 lg:hidden'
+                  aria-label='Scroll categories left'
+                >
+                  &lt;
+                </button>
+                <button
+                  type='button'
+                  onClick={() => scrollCategories('right')}
+                  className='absolute inset-y-0 right-0 z-10 flex w-8 items-center justify-end bg-gradient-to-l from-white/90 via-white/70 to-transparent text-sm font-semibold text-slate-500 lg:hidden'
+                  aria-label='Scroll categories right'
+                >
+                  &gt;
+                </button>
+                <div
+                  ref={categoryScrollerRef}
+                  className='flex w-full min-w-0 flex-nowrap items-center gap-2 overflow-x-auto overflow-y-hidden px-9 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:justify-end lg:gap-1.5 lg:overflow-hidden lg:px-0 lg:pb-0'
+                >
                 {categoryOptions.map((category) => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    className={`shrink-0 whitespace-nowrap rounded-xl px-3 py-2 text-[13px] font-medium leading-none transition-all duration-300 lg:shrink ${
                       selectedCategory === category
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+                        : 'bg-white/70 text-slate-600 hover:bg-white'
                     }`}
                   >
                     {category}
                   </button>
                 ))}
+                </div>
               </div>
             </div>
           </div>
@@ -240,7 +231,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
             }`}
           >
             <div className='text-center mb-8'>
-              <h3 className='text-2xl md:text-3xl font-bold text-slate-900 mb-4'>
+              <h3 className='font-syne text-2xl md:text-3xl font-bold text-[#1E1B4B] mb-4'>
                 Most Popular Questions
               </h3>
               <p className='text-lg text-slate-600'>
@@ -252,7 +243,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
               {popularFAQs.map((faq) => (
                 <div
                   key={faq._id}
-                  className='group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 border border-slate-200/50 hover:border-blue-200/50 hover:scale-[1.02]'
+                  className='group bg-white/45 backdrop-blur-sm rounded-2xl p-6 transition-all duration-500 hover:scale-[1.01]'
                 >
                   <div className='flex items-start space-x-4'>
                     <div
@@ -288,7 +279,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
           }`}
         >
           <div className='text-center mb-8'>
-            <h3 className='text-2xl md:text-3xl font-bold text-slate-900 mb-4'>
+            <h3 className='font-syne text-2xl md:text-3xl font-bold text-[#1E1B4B] mb-4'>
               {searchTerm
                 ? `Search Results (${filteredFAQs.length})`
                 : 'All Questions'}
@@ -304,11 +295,11 @@ export default function FAQ({ faqs, categories }: FAQProps) {
             {filteredFAQs.map((faq) => (
               <div
                 key={faq._id}
-                className='group bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 border border-slate-200/50 hover:border-blue-200/50 overflow-hidden'
+                className='group bg-white/45 backdrop-blur-sm rounded-3xl transition-all duration-500 overflow-hidden'
               >
                 <button
                   onClick={() => toggleItem(faq._id)}
-                  className='w-full p-6 text-left hover:bg-blue-50/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset'
+                  className='w-full p-6 text-left hover:bg-white/35 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20'
                 >
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center space-x-4 flex-1'>
@@ -350,7 +341,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
                       : 'max-h-0 opacity-0'
                   }`}
                 >
-                  <div className='px-6 pb-6 border-t border-slate-200/50'>
+                  <div className='px-6 pb-6'>
                     <div className='pt-4'>
                       <div className='text-slate-700 leading-relaxed mb-4'>
                         {showDetailed.includes(faq._id) && faq.detailedAnswer
@@ -400,29 +391,23 @@ export default function FAQ({ faqs, categories }: FAQProps) {
               : 'opacity-0'
           }`}
         >
-          <div className='bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden'>
-            <div className='absolute inset-0 opacity-20'>
-              <div
-                className='w-full h-full bg-repeat'
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                }}
-              />
-            </div>
+          <div className='relative overflow-hidden rounded-3xl bg-white/45 p-8 text-[#1E1B4B] backdrop-blur-sm md:p-12'>
+            <div className='absolute -right-20 -top-24 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl' />
+            <div className='absolute -bottom-28 -left-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl' />
 
             <div className='relative z-10'>
-              <h3 className='text-3xl md:text-4xl font-bold mb-4'>
+              <h3 className='mb-4 font-syne text-3xl font-bold md:text-4xl'>
                 Still Have Questions?
               </h3>
-              <p className='text-xl mb-8 opacity-90 max-w-2xl mx-auto'>
+              <p className='mx-auto mb-8 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl'>
                 Need help choosing the right book or audiobook? Contact
-                UniqueIIT Research Center and we&apos;ll guide you.
+                TechUniqueIIT Research Center and we&apos;ll guide you.
               </p>
 
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                 <a
                   href='/contact'
-                  className='group inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-2xl font-semibold text-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
+                  className='group inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-indigo-700'
                 >
                   <ChatBubbleLeftRightIcon className='w-5 h-5 mr-2' />
                   Contact Us
@@ -430,13 +415,13 @@ export default function FAQ({ faqs, categories }: FAQProps) {
                 </a>
                 <a
                   href='/about'
-                  className='inline-flex items-center justify-center px-8 py-4 bg-white/10 text-white rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all duration-300 border border-white/20'
+                  className='inline-flex items-center justify-center rounded-2xl bg-white/70 px-8 py-4 text-lg font-semibold text-slate-700 transition-all duration-300 hover:bg-white'
                 >
-                  Learn About UniqueIIT Research Center
+                  Learn About TechUniqueIIT Research Center
                 </a>
               </div>
 
-              <div className='mt-8 flex flex-wrap justify-center items-center gap-6 text-sm opacity-80'>
+              <div className='mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600'>
                 <div className='flex items-center'>
                   <ClockIcon className='w-5 h-5 mr-2' />
                   Weekly Releases
