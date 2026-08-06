@@ -152,7 +152,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f2f0ea] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-50 to-white">
         <div className="h-10 w-10 rounded-full border-2 border-amber-200 border-t-amber-700 animate-spin" />
       </div>
     );
@@ -162,7 +162,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
 
   if (ebookUrl) {
     return (
-      <div className="min-h-screen bg-[#f2f0ea] px-0 py-3 sm:px-8 sm:py-6">
+      <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white px-0 py-3 sm:px-8 sm:py-6">
         <button
           onClick={() => router.push('/profile?tab=library')}
           aria-label="Back to library"
@@ -174,8 +174,8 @@ export default function BookReadClient({ slug }: { slug: string }) {
         </button>
 
         <div className="mx-auto w-full max-w-[760px] px-2 sm:px-0">
-          <div className="relative aspect-[210/297] overflow-hidden bg-[#f7f0e5] shadow-2xl ring-1 ring-black/10">
-            <div className="absolute inset-y-0 left-0 z-10 w-3 bg-gradient-to-r from-[#a47719] via-[#d4aa35] to-[#7b5717]" />
+          <div className="relative aspect-[210/297] overflow-hidden rounded-[18px] bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-xl ring-1 ring-blue-100/80">
+            <div className="absolute inset-y-0 left-0 z-10 w-3 bg-gradient-to-b from-blue-500 via-indigo-500 to-violet-500" />
 
             {isPdf ? (
               pdfPreviewLoading ? (
@@ -184,7 +184,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
                 </div>
               ) : pdfPreviewUrl ? (
                 <div
-                  className="absolute inset-0 touch-none overflow-hidden overscroll-none bg-[#f7f0e5]"
+                  className="absolute inset-0 touch-none overflow-hidden overscroll-none bg-gradient-to-r from-blue-50 via-indigo-50 to-white"
                 >
                   <iframe
                     key={`pdf-page-${pdfPage}`}
@@ -192,10 +192,10 @@ export default function BookReadClient({ slug }: { slug: string }) {
                     src={getPdfViewerUrl(pdfPage)}
                     scrolling="no"
                     onLoad={() => setPdfPageChanging(false)}
-                    className="pointer-events-none h-full w-full border-0 bg-[#f7f0e5]"
+                    className="pointer-events-none h-full w-full border-0 bg-gradient-to-r from-blue-50 via-indigo-50 to-white"
                   />
                   {pdfPageChanging ? (
-                    <div className="absolute inset-0 bg-[#f7f0e5]" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-indigo-50 to-white" />
                   ) : null}
                 </div>
               ) : (
@@ -241,7 +241,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
             >
               <ArrowLeftIcon className="h-5 w-5" />
             </button>
-            <div className="flex h-2 w-7 items-center justify-center rounded-full bg-[#aa8a32]" />
+            <div className="flex h-2 w-7 items-center justify-center rounded-full bg-blue-600" />
             <button
               onClick={() => goToPdfPage(pdfPage + 1)}
               disabled={!isPdf || pdfPage >= pdfPageCount}
@@ -257,7 +257,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f0ea] py-6 px-4 sm:px-8">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white px-4 py-6 sm:px-8">
       <button
         onClick={() => router.push('/profile?tab=library')}
         aria-label="Back to library"
@@ -269,27 +269,27 @@ export default function BookReadClient({ slug }: { slug: string }) {
       </button>
 
       <div className="mx-auto max-w-[760px]">
-        <div className="relative min-h-[78vh] bg-[#f7f0e5] shadow-2xl ring-1 ring-black/10">
-          <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-[#a47719] via-[#d4aa35] to-[#7b5717]" />
+        <div className="relative min-h-[78vh] overflow-hidden rounded-[18px] bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-xl ring-1 ring-blue-100/80">
+          <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-b from-blue-500 via-indigo-500 to-violet-500" />
           <div className="px-8 py-10 sm:px-14 sm:py-12">
             <header className="text-center">
-              <p className="text-[11px] uppercase tracking-[0.42em] text-[#9b6a2d]">
+              <p className="text-[11px] uppercase tracking-[0.42em] text-blue-700">
                 {book.subtitle || book.category}
               </p>
-              <p className="mt-3 text-sm text-[#8b5d23]">Page {page + 1}</p>
-              <div className="mt-6 border-t border-[#cfbd9e]" />
+              <p className="mt-3 text-sm text-slate-500">Page {page + 1}</p>
+              <div className="mt-6 border-t border-blue-100" />
             </header>
 
             <main className="mt-8 min-h-[430px]">
-              <p className="font-serif text-[19px] leading-[2.05] text-black sm:text-[21px]">
-                <span className="float-left mr-3 mt-1 font-serif text-7xl font-bold leading-[0.8] text-[#bd8a21]">
+              <p className="font-serif text-[19px] leading-[2.05] text-slate-950 sm:text-[21px]">
+                <span className="float-left mr-3 mt-1 font-serif text-7xl font-bold leading-[0.8] text-blue-600">
                   {currentPage.trim().charAt(0)}
                 </span>
                 {currentPage.trim().slice(1)}
               </p>
             </main>
 
-            <footer className="mt-8 text-center text-sm text-[#8b5d23]">
+            <footer className="mt-8 text-center text-sm text-slate-500">
               - {page + 1} -
             </footer>
           </div>
@@ -304,7 +304,7 @@ export default function BookReadClient({ slug }: { slug: string }) {
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
-          <div className="h-2 w-7 rounded-full bg-[#aa8a32]" />
+          <div className="h-2 w-7 rounded-full bg-blue-600" />
           <button
             onClick={() => setPage((value) => Math.min(pages.length - 1, value + 1))}
             disabled={page >= pages.length - 1}
