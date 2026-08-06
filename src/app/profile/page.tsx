@@ -353,7 +353,7 @@ export default function UserProfilePage() {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 via-indigo-50 to-white">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
           <p className="text-gray-600">Loading profile...</p>
@@ -363,13 +363,13 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <div className="mb-6">
           <button
             onClick={handleProfileBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2.5 rounded-lg shadow-sm"
+            className="flex items-center gap-2 rounded-lg border border-blue-100 bg-white/85 px-4 py-2.5 text-gray-600 shadow-sm transition-colors hover:bg-white hover:text-gray-900"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span className="font-medium">Back</span>
@@ -377,7 +377,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Profile Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div className="mb-8 overflow-hidden rounded-2xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-sm">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-32"></div>
           <div className="px-8 pb-8">
             <div className="relative -mt-16 mb-4">
@@ -451,7 +451,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+        <div className="mb-8 rounded-2xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-sm">
           <div className="border-b border-gray-100">
             <div className="flex">
               <button
@@ -510,7 +510,7 @@ export default function UserProfilePage() {
           <div className="p-8">
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                     <CalendarIcon className="w-6 h-6 text-blue-600" />
                   </div>
@@ -523,7 +523,7 @@ export default function UserProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
                   <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                     <StarIcon className="w-6 h-6 text-indigo-600" />
                   </div>
@@ -535,7 +535,7 @@ export default function UserProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
                     <BookOpenIcon className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -547,7 +547,7 @@ export default function UserProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                     <EnvelopeIcon className="w-6 h-6 text-purple-600" />
                   </div>
@@ -557,7 +557,7 @@ export default function UserProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-6">
+                <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
                     <PhoneIcon className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -584,7 +584,7 @@ export default function UserProfilePage() {
                   </p>
                 )}
                 {hasUserActiveSubscription ? (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                  <div className="rounded-xl border border-blue-100 bg-white/75 p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="inline-block px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold capitalize mb-2">
@@ -628,7 +628,7 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                  <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
                     <p className="text-gray-600 mb-4">You don't have an active subscription</p>
                     <Link
                       href="/subscription"
@@ -642,7 +642,7 @@ export default function UserProfilePage() {
             )}
 
             {activeTab === 'orders' && (
-              <div className="text-center py-12 bg-gray-50 rounded-xl">
+              <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
                 <BookOpenIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-2">No orders yet</p>
                 <p className="text-gray-500 text-sm mb-4">Start exploring our book collection</p>
@@ -675,7 +675,7 @@ export default function UserProfilePage() {
                     <div className="h-10 w-10 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin" />
                   </div>
                 ) : savedBooks.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                  <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
                     <BookmarkIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">No saved books yet</p>
                     <p className="text-gray-500 text-sm mb-4">Tap Save on any book to find it here later</p>
@@ -699,7 +699,7 @@ export default function UserProfilePage() {
                       return (
                         <article
                           key={itemKey}
-                          className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                          className="group relative overflow-hidden rounded-xl border border-blue-100/80 bg-white/80 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                         >
                           <button
                             type="button"
@@ -733,7 +733,7 @@ export default function UserProfilePage() {
                           )}
 
                           <Link href={`/books/${slug}`} className="block">
-                            <div className="relative h-44 bg-gray-100">
+                            <div className="relative h-44 bg-blue-50/70">
                             {image ? (
                               <Image
                                 src={image}
@@ -798,7 +798,7 @@ export default function UserProfilePage() {
                     <div className="h-10 w-10 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin" />
                   </div>
                 ) : libraryItems.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-xl">
+                  <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
                     <BookOpenIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 mb-2">Your library is empty</p>
                     <p className="text-gray-500 text-sm mb-4">Claim a free item or buy a book to see it here</p>
@@ -823,9 +823,9 @@ export default function UserProfilePage() {
                             router.push(item.redirectTarget);
                           }
                         }}
-                        className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm cursor-pointer transition-shadow hover:shadow-md"
+                        className="cursor-pointer overflow-hidden rounded-xl border border-blue-100/80 bg-white/80 shadow-sm transition-shadow hover:shadow-md"
                       >
-                        <div className="relative h-44 bg-gray-100">
+                        <div className="relative h-44 bg-blue-50/70">
                           {item.image ? (
                             <Image
                               src={item.image}
