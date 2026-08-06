@@ -14,6 +14,7 @@ import {
   CameraIcon,
   CheckCircleIcon,
   EllipsisVerticalIcon,
+  MagnifyingGlassIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon } from '@heroicons/react/24/solid';
@@ -30,6 +31,8 @@ export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'saved' | 'library' | 'orders'>('overview');
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [libraryProgress, setLibraryProgress] = useState<Record<string, number>>({});
   const [savedBooks, setSavedBooks] = useState<SavedBook[]>([]);
   const [savedBooksLoading, setSavedBooksLoading] = useState(false);
   const [savedBookMenuOpen, setSavedBookMenuOpen] = useState<string | null>(null);
@@ -188,6 +191,24 @@ export default function UserProfilePage() {
       ignore = true;
     };
   }, [activeTab, isAuthenticated]);
+
+  useEffect(() => {
+    const progressByItem: Record<string, number> = {};
+
+    libraryItems.forEach((item) => {
+      if (!item.slug) return;
+
+      try {
+        const rawProgress = localStorage.getItem(`techuniqueiit:ebook-reader:${item.slug}`);
+        if (!rawProgress) return;
+
+        const parsed = JSON.parse(rawProgress) as { completed?: number };
+        progressByItem[item.id] = Math.max(0, Math.min(100, Number(parsed.completed) || 0));
+      } catch {}
+    });
+
+    setLibraryProgress(progressByItem);
+  }, [libraryItems]);
 
   useEffect(() => {
     if (activeTab !== 'saved' || !isAuthenticated) return;
@@ -362,14 +383,73 @@ export default function UserProfilePage() {
     );
   }
 
+  const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
+  const planLabel = hasUserActiveSubscription ? `${user.subscriptionPlan} Plan` : 'Free Plan';
+  const booksAccessLabel =
+    hasUserActiveSubscription && user.subscriptionPlan === 'pro' ? 'Unlimited' :
+    hasUserActiveSubscription && user.subscriptionPlan === 'premium' ? 'Premium + Standard' :
+    hasUserActiveSubscription && user.subscriptionPlan === 'basic' ? 'Standard Only' : 'Limited';
+  const profileStats = [
+    {
+      label: 'Books in Library',
+      value: libraryItems.length || 0,
+      icon: BookOpenIcon,
+      iconWrap: 'bg-blue-100 text-blue-600',
+      action: 'View Library',
+      tab: 'library' as const,
+    },
+    {
+      label: 'Currently Reading',
+      value: libraryItems.length || 0,
+      icon: BookOpenIcon,
+      iconWrap: 'bg-emerald-100 text-emerald-600',
+      action: 'Continue Reading',
+      tab: 'library' as const,
+    },
+    {
+      label: 'Saved Books',
+      value: savedBooks.length || 0,
+      icon: StarIcon,
+      iconWrap: 'bg-amber-100 text-amber-600',
+      action: 'View Saved',
+      tab: 'saved' as const,
+    },
+    {
+      label: 'Books Access',
+      value: booksAccessLabel,
+      icon: CheckCircleIcon,
+      iconWrap: 'bg-indigo-100 text-indigo-600',
+      action: 'View Plan',
+      tab: 'subscription' as const,
+    },
+  ];
+  const tabs = [
+    { key: 'overview' as const, label: 'Overview' },
+    { key: 'subscription' as const, label: 'Subscription' },
+    { key: 'orders' as const, label: 'My Orders' },
+    { key: 'saved' as const, label: 'Saved Books' },
+    { key: 'library' as const, label: 'My Library' },
+  ];
+  const filteredLibraryItems = libraryItems.filter((item) => {
+    const query = librarySearch.trim().toLowerCase();
+    if (!query) return true;
+
+    return [item.title, item.author, item.category, item.format]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white pb-12 pt-3">
+      <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
-        <div className="mb-6">
+        <div className="mb-3">
           <button
             onClick={handleProfileBack}
-            className="flex items-center gap-2 rounded-lg border border-blue-100 bg-white/85 px-4 py-2.5 text-gray-600 shadow-sm transition-colors hover:bg-white hover:text-gray-900"
+            className="flex items-center gap-2 rounded-lg border border-blue-100 bg-white/90 px-3 py-2 text-sm text-gray-600 shadow-sm transition-colors hover:bg-white hover:text-gray-900"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span className="font-medium">Back</span>
@@ -377,137 +457,180 @@ export default function UserProfilePage() {
         </div>
 
         {/* Profile Header */}
-        <div className="mb-8 overflow-hidden rounded-2xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-sm">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-32"></div>
-          <div className="px-8 pb-8">
-            <div className="relative -mt-16 mb-4">
-              <div className="w-32 h-32 rounded-2xl bg-white p-2 shadow-lg">
-                <div className="relative w-full h-full rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 overflow-hidden flex items-center justify-center text-white text-4xl font-bold">
-                  {user.avatar ? (
-                    <Image
-                      src={user.avatar}
-                      alt={user.name}
-                      fill
-                      className="object-cover"
-                      sizes="128px"
-                    />
-                  ) : (
-                    user.name.charAt(0).toUpperCase()
-                  )}
-                  {avatarUploading && (
-                    <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                      <div className="h-7 w-7 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-                    </div>
-                  )}
-                  <label className="absolute bottom-2 right-2 h-9 w-9 rounded-full bg-white text-blue-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors">
-                    <CameraIcon className="h-5 w-5" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      disabled={avatarUploading}
-                      className="hidden"
-                    />
-                  </label>
+        <div className="mb-5 rounded-xl border border-blue-100/80 bg-white/85 p-4 shadow-sm backdrop-blur">
+          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              <div className="relative h-[92px] w-[92px] shrink-0 rounded-2xl bg-white p-2 shadow-md ring-1 ring-blue-100">
+                <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl font-bold text-white">
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name}
+                    fill
+                    className="object-cover"
+                    sizes="92px"
+                  />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )}
+                {avatarUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60">
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  </div>
+                )}
+                <label className="absolute bottom-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white text-blue-700 shadow-md transition-colors hover:bg-blue-50">
+                  <CameraIcon className="h-4 w-4" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    disabled={avatarUploading}
+                    className="hidden"
+                  />
+                </label>
                 </div>
+                {avatarError && (
+                  <p className="absolute left-0 top-full mt-2 w-64 text-sm font-medium text-red-600">{avatarError}</p>
+                )}
               </div>
-              {avatarError && (
-                <p className="mt-3 text-sm font-medium text-red-600">{avatarError}</p>
-              )}
-            </div>
-            
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                <p className="text-gray-500">{user.email}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">
-                    {user.role}
-                  </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold text-slate-950 sm:text-2xl">Hello, {user.name}</h1>
                   {hasUserActiveSubscription && (
-                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium capitalize">
-                      {user.subscriptionPlan} Plan
+                    <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
+                      Premium Member
                     </span>
                   )}
                 </div>
-              </div>
-              
-              <div className="flex gap-3">
-                <Link
-                  href="/subscription"
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  {hasUserActiveSubscription ? 'Manage Plan' : 'Subscribe'}
-                </Link>
-                <button
-                  onClick={() => logout()}
-                  className="px-6 py-2.5 border border-red-300 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-colors"
-                >
-                  Logout
-                </button>
+                <p className="mt-2 text-sm text-slate-500">{user.email}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold capitalize text-blue-700">
+                    {user.role}
+                  </span>
+                  {hasUserActiveSubscription && (
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                      Verified
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-blue-100">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    Member Since {memberSince}
+                  </span>
+                </div>
               </div>
             </div>
+
+            <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-white to-blue-50 p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md">
+                  <StarIcon className="h-5 w-5" />
+                </div>
+                <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-blue-100">
+                  Current Plan
+                </span>
+              </div>
+              <h2 className="mt-3 text-lg font-bold capitalize text-slate-950">{planLabel}</h2>
+              <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+                <div>
+                  <p className="text-slate-500">Next Billing Date</p>
+                  <p className="font-bold text-slate-950">
+                    {user.subscriptionEndDate
+                      ? new Date(user.subscriptionEndDate).toLocaleDateString('en-US', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : 'Not Active'}
+                  </p>
+                </div>
+                <Link
+                  href="/subscription"
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700"
+                >
+                  Manage Plan
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {profileStats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <button
+                  key={stat.label}
+                  type="button"
+                  onClick={() => setActiveTab(stat.tab)}
+                  className="min-h-[118px] rounded-xl border border-blue-100 bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.iconWrap}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <p className="mt-3 text-lg font-bold text-slate-950">{stat.value}</p>
+                  <p className="mt-1 text-xs font-medium text-slate-500">{stat.label}</p>
+                  <p className="mt-2 text-xs font-bold text-blue-700">{stat.action} -&gt;</p>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="mb-8 rounded-2xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50 to-white shadow-sm">
-          <div className="border-b border-gray-100">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'overview' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+        <div className="mb-8 grid overflow-hidden rounded-xl border border-blue-100/80 bg-white/85 shadow-sm backdrop-blur lg:grid-cols-[180px_1fr]">
+          <aside className="hidden border-r border-blue-100 bg-white/75 p-3 lg:block">
+            <div className="space-y-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-xs font-bold transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-indigo-50 text-blue-700'
+                      : 'text-slate-500 hover:bg-blue-50 hover:text-blue-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-6 border-t border-blue-100 pt-3">
+              <Link
+                href="/faq"
+                className="block rounded-lg px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-blue-50 hover:text-blue-700"
               >
-                Overview
-              </button>
+                Help & Support
+              </Link>
               <button
-                onClick={() => setActiveTab('subscription')}
-                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'subscription' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                type="button"
+                onClick={() => logout()}
+                className="mt-1 block w-full rounded-lg px-3 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50"
               >
-                Subscription
+                Logout
               </button>
-              <button
-                onClick={() => setActiveTab('orders')}
-                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'orders' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                My Orders
-              </button>
-              <button
-                onClick={() => setActiveTab('saved')}
-                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'saved'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Saved Books
-              </button>
-              <button
-                onClick={() => setActiveTab('library')}
-                className={`px-6 py-4 font-semibold text-sm border-b-2 transition-colors ${
-                  activeTab === 'library'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                My Library
-              </button>
+            </div>
+          </aside>
+
+          <div className="min-w-0">
+          <div className="border-b border-gray-100 lg:hidden">
+            <div className="flex gap-2 overflow-x-auto px-4 py-3">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`shrink-0 rounded-lg px-4 py-2.5 text-xs font-bold transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                      : 'text-gray-500 hover:bg-blue-50 hover:text-blue-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-5">
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <div className="rounded-xl border border-blue-100/70 bg-white/75 p-6">
@@ -659,12 +782,12 @@ export default function UserProfilePage() {
               <div>
                 <div className="flex items-center justify-between gap-4 mb-6">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Saved Books</h3>
-                    <p className="text-sm text-gray-500">Books you saved for later</p>
+                    <h3 className="text-base font-bold text-gray-900">Saved Books</h3>
+                    <p className="text-xs text-gray-500">Books you saved for later</p>
                   </div>
                   <Link
                     href="/books"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
                   >
                     Browse
                   </Link>
@@ -687,7 +810,7 @@ export default function UserProfilePage() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {savedBooks.map((savedBook) => {
                       const rawBook = typeof savedBook.bookId === 'object' ? savedBook.bookId : null;
                       const title = savedBook.title || rawBook?.title || 'Saved Book';
@@ -733,7 +856,7 @@ export default function UserProfilePage() {
                           )}
 
                           <Link href={`/books/${slug}`} className="block">
-                            <div className="relative h-44 bg-blue-50/70">
+                            <div className="relative h-36 bg-blue-50/70">
                             {image ? (
                               <Image
                                 src={image}
@@ -748,21 +871,21 @@ export default function UserProfilePage() {
                             )}
                             </div>
                           </Link>
-                          <div className="p-4">
+                          <div className="p-3">
                             {savedBook.category && (
                               <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">
                                 {savedBook.category}
                               </span>
                             )}
                             <Link href={`/books/${slug}`}>
-                              <h4 className="mt-2 font-bold text-gray-900 line-clamp-2 group-hover:text-blue-700">
+                              <h4 className="mt-2 text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-blue-700">
                                 {title}
                               </h4>
                             </Link>
                             {savedBook.author && (
                               <p className="text-sm text-gray-500 mt-1 line-clamp-1">{savedBook.author}</p>
                             )}
-                            <p className="text-xs text-gray-400 mt-3">
+                            <p className="mt-2 text-xs text-gray-400">
                               Saved {new Date(savedBook.savedAt).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
@@ -780,28 +903,57 @@ export default function UserProfilePage() {
 
             {activeTab === 'library' && (
               <div>
-                <div className="flex items-center justify-between gap-4 mb-6">
+                <div className="mb-4 flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">My Library</h3>
-                    <p className="text-sm text-gray-500">Your purchased and claimed ebooks and audiobooks</p>
+                    <h3 className="text-base font-bold text-gray-900">My Library</h3>
+                    <p className="text-xs text-gray-500">All your purchased and subscription books in one place.</p>
                   </div>
                   <Link
                     href="/books"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
                   >
                     Browse
                   </Link>
+                </div>
+
+                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex h-10 w-full max-w-md items-center gap-2 rounded-lg border border-blue-100 bg-white px-3">
+                    <MagnifyingGlassIcon className="h-4 w-4 text-slate-400" />
+                    <input
+                      value={librarySearch}
+                      onChange={(event) => setLibrarySearch(event.target.value)}
+                      placeholder="Search your library..."
+                      className="h-full min-w-0 flex-1 bg-transparent text-xs font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['All Books', 'In Progress', 'Completed', 'Purchased', 'Subscription', 'Saved'].map((filter, index) => (
+                      <button
+                        key={filter}
+                        type="button"
+                        className={`rounded-full px-3 py-1.5 text-[11px] font-bold ${
+                          index === 0 ? 'bg-blue-600 text-white' : 'bg-blue-50 text-slate-500 hover:text-blue-700'
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {libraryLoading ? (
                   <div className="py-12 flex justify-center">
                     <div className="h-10 w-10 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin" />
                   </div>
-                ) : libraryItems.length === 0 ? (
+                ) : filteredLibraryItems.length === 0 ? (
                   <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
                     <BookOpenIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">Your library is empty</p>
-                    <p className="text-gray-500 text-sm mb-4">Claim a free item or buy a book to see it here</p>
+                    <p className="text-gray-600 mb-2">
+                      {libraryItems.length ? 'No library books match your search' : 'Your library is empty'}
+                    </p>
+                    <p className="text-gray-500 text-sm mb-4">
+                      {libraryItems.length ? 'Try another title, author, or category' : 'Claim a free item or buy a book to see it here'}
+                    </p>
                     <Link
                       href="/books"
                       className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
@@ -810,8 +962,17 @@ export default function UserProfilePage() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {libraryItems.map((item) => (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                    {filteredLibraryItems.map((item) => {
+                      const progress = libraryProgress[item.id] ?? 0;
+                      const completed = progress >= 100;
+                      const actionLabel = item.itemType === 'audiobook'
+                        ? 'Listen'
+                        : progress > 0
+                          ? 'Continue Reading'
+                          : 'Read Again';
+
+                      return (
                       <div
                         key={item.id}
                         role="link"
@@ -823,48 +984,78 @@ export default function UserProfilePage() {
                             router.push(item.redirectTarget);
                           }
                         }}
-                        className="cursor-pointer overflow-hidden rounded-xl border border-blue-100/80 bg-white/80 shadow-sm transition-shadow hover:shadow-md"
+                        className="cursor-pointer overflow-hidden rounded-xl border border-blue-100/80 bg-white shadow-sm transition-shadow hover:shadow-md"
                       >
-                        <div className="relative h-44 bg-blue-50/70">
+                        <div className="relative flex h-28 items-center justify-center bg-blue-50/70">
                           {item.image ? (
                             <Image
                               src={item.image}
                               alt={item.title}
-                              fill
-                              className="object-contain p-3"
+                              width={86}
+                              height={112}
+                              className="max-h-[98px] w-auto object-contain"
                             />
                           ) : (
                             <div className="h-full flex items-center justify-center text-gray-400">
                               <BookOpenIcon className="w-10 h-10" />
                             </div>
                           )}
+                          <span className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-bold ${
+                            completed ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-slate-500 ring-1 ring-blue-100'
+                          }`}>
+                            {completed ? 'Finished' : item.accessMode}
+                          </span>
                         </div>
-                        <div className="p-4">
-                          <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="p-2.5">
+                          <div className="mb-2 flex items-center justify-between gap-2">
                             <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">
                               {item.format || (item.itemType === 'audiobook' ? 'Audiobook' : 'Ebook')}
                             </span>
-                            <span className="text-xs text-gray-500 capitalize">{item.accessMode}</span>
+                            <button
+                              type="button"
+                              onClick={(event) => event.stopPropagation()}
+                              className="rounded-full p-1 text-slate-400 hover:bg-blue-50 hover:text-blue-700"
+                              aria-label={`More options for ${item.title}`}
+                            >
+                              <EllipsisVerticalIcon className="h-4 w-4" />
+                            </button>
                           </div>
-                          <h4 className="font-bold text-gray-900 line-clamp-2">{item.title}</h4>
-                          <p className="text-sm text-gray-500 mt-1 line-clamp-1">{item.author}</p>
+                          <h4 className="line-clamp-2 text-[13px] font-bold leading-5 text-gray-900">{item.title}</h4>
+                          <p className="mt-1 line-clamp-1 text-xs text-gray-500">{item.author}</p>
+                          <div className="mt-3">
+                            <div className="mb-1 flex items-center justify-between text-[10px] font-semibold text-slate-500">
+                              <span>{progress}% Completed</span>
+                              <span>{completed ? 'Completed' : 'In Progress'}</span>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full bg-blue-100">
+                              <div
+                                className="h-full rounded-full bg-blue-600 transition-all"
+                                style={{ width: `${Math.max(progress, progress > 0 ? progress : 8)}%` }}
+                              />
+                            </div>
+                            <p className="mt-2 text-[10px] text-slate-400">
+                              {progress > 0 ? 'Last opened recently' : 'Not started yet'}
+                            </p>
+                          </div>
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
                               router.push(item.redirectTarget);
                             }}
-                            className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                            className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
                           >
-                            {item.itemType === 'audiobook' ? 'Listen' : 'Read'}
+                            {actionLabel}
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>
