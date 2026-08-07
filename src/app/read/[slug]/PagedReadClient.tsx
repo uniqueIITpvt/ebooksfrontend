@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  ArrowDownTrayIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowsPointingOutIcon,
@@ -14,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { freeSummariesApi, type FreeSummary } from '@/services/api/freeSummariesApi';
-import { booksApi } from '@/services/api/booksApi';
+import { booksApi, type BookFile } from '@/services/api/booksApi';
 
 const WORDS_PER_PAGE = 520;
 const READER_PROGRESS_PREFIX = 'techuniqueiit:free-summary-reader';
@@ -22,6 +23,12 @@ const READER_PROGRESS_PREFIX = 'techuniqueiit:free-summary-reader';
 type ReaderTheme = 'light' | 'sepia' | 'dark';
 type ReaderWidth = 'narrow' | 'standard' | 'wide';
 type LineSpacing = 'compact' | 'normal' | 'relaxed';
+
+type ReaderSummary = FreeSummary & {
+  files?: {
+    ebook?: BookFile | null;
+  };
+};
 
 const themeClasses: Record<ReaderTheme, {
   shell: string;
@@ -93,9 +100,20 @@ function splitParagraphs(text: string) {
   return paragraphs.length ? paragraphs : [text.trim()].filter(Boolean);
 }
 
+function getPdfPageCount(buffer: ArrayBuffer) {
+  const text = new TextDecoder('latin1').decode(buffer);
+  const pageMatches = text.match(/\/Type\s*\/Page\b/g);
+  const pagesTreeCounts = Array.from(text.matchAll(/\/Type\s*\/Pages[\s\S]{0,300}?\/Count\s+(\d+)/g))
+    .map((match) => Number(match[1]))
+    .filter(Number.isFinite);
+  const maxPagesTreeCount = pagesTreeCounts.length ? Math.max(...pagesTreeCounts) : 0;
+
+  return Math.max(pageMatches?.length || 0, maxPagesTreeCount, 1);
+}
+
 export default function PagedReadClient({ slug }: { slug: string }) {
   const router = useRouter();
-  const [summary, setSummary] = useState<FreeSummary | null>(null);
+  const [summary, setSummary] = useState<ReaderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [readerError, setReaderError] = useState('');
   const [page, setPage] = useState(0);
@@ -109,16 +127,18 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [bookmarkedPages, setBookmarkedPages] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [pdfPageCount, setPdfPageCount] = useState(1);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
+  const [pdfPreviewLoading, setPdfPreviewLoading] = useState(false);
+  const [pdfPreviewError, setPdfPreviewError] = useState('');
 
   useEffect(() => {
     let ignore = false;
 
     const loadSummary = async () => {
       try {
-        let data: FreeSummary;
+        let data: ReaderSummary | null = null;
         try {
-          data = await freeSummariesApi.getReadPayload(slug);
-        } catch {
           const response = await booksApi.getReadPayload(slug);
           data = {
             _id: response.data._id || response.data.id || slug,
@@ -138,7 +158,10 @@ export default function PagedReadClient({ slug }: { slug: string }) {
             tags: response.data.tags || [],
             createdAt: response.data.createdAt || response.data.publishDate || '',
             updatedAt: response.data.updatedAt || response.data.publishDate || '',
+            files: response.data.files,
           };
+        } catch {
+          data = await freeSummariesApi.getReadPayload(slug);
         }
         if (!ignore) setSummary(data);
       } catch (error: any) {
@@ -163,9 +186,20 @@ export default function PagedReadClient({ slug }: { slug: string }) {
     };
   }, [router, slug]);
 
+  const ebookFile = summary?.files?.ebook || null;
+  const ebookUrl = ebookFile?.url || '';
+  const isPdf =
+    Boolean(ebookUrl) &&
+    (ebookFile?.mimeType === 'application/pdf' || ebookUrl.toLowerCase().includes('.pdf'));
+  const hasExternalFile = Boolean(ebookUrl) && !isPdf;
   const pages = useMemo(() => chunkWords(summary?.description || ''), [summary]);
+  const totalPages = isPdf ? pdfPageCount : pages.length;
+  const pageIndexes = useMemo(
+    () => Array.from({ length: Math.max(totalPages, 1) }, (_, index) => index),
+    [totalPages]
+  );
   const currentPage = pages[page] || '';
-  const progress = Math.round(((page + 1) / Math.max(pages.length, 1)) * 100);
+  const progress = Math.round(((page + 1) / Math.max(totalPages, 1)) * 100);
   const activeTheme = themeClasses[theme];
   const isBookmarked = bookmarkedPages.includes(page);
 
@@ -182,6 +216,59 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   }, [pages, searchQuery]);
 
   useEffect(() => {
+    if (!ebookUrl || !isPdf) {
+      setPdfPageCount(1);
+      setPdfPreviewUrl('');
+      setPdfPreviewLoading(false);
+      setPdfPreviewError('');
+      return;
+    }
+
+    let ignore = false;
+    let objectUrl = '';
+
+    const loadPdfPreview = async () => {
+      setPdfPreviewLoading(true);
+      setPdfPreviewError('');
+      setPdfPreviewUrl('');
+
+      try {
+        const response = await fetch(ebookUrl);
+        if (!response.ok) {
+          throw new Error('Unable to load PDF preview');
+        }
+
+        const buffer = await response.arrayBuffer();
+        const pdfBlob = new Blob([buffer], { type: 'application/pdf' });
+        objectUrl = URL.createObjectURL(pdfBlob);
+
+        if (!ignore) {
+          setPdfPreviewUrl(objectUrl);
+          setPdfPageCount(getPdfPageCount(buffer));
+        }
+      } catch {
+        if (!ignore) {
+          setPdfPreviewError('This PDF could not be previewed in the browser.');
+          setPdfPageCount(Math.max(summary?.pages || 1, 1));
+        }
+      } finally {
+        if (!ignore) {
+          setPdfPreviewLoading(false);
+        }
+      }
+    };
+
+    loadPdfPreview();
+
+    return () => {
+      ignore = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [ebookUrl, isPdf, summary?.pages]);
+
+  useEffect(() => {
     try {
       const rawProgress = localStorage.getItem(`${READER_PROGRESS_PREFIX}:${slug}`);
       const rawBookmarks = localStorage.getItem(`${READER_PROGRESS_PREFIX}:bookmarks:${slug}`);
@@ -189,7 +276,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
       if (rawProgress) {
         const saved = JSON.parse(rawProgress) as { page?: number };
         if (Number.isInteger(saved.page)) {
-          setPage(Math.min(Math.max(saved.page || 0, 0), Math.max(pages.length - 1, 0)));
+          setPage(Math.min(Math.max(saved.page || 0, 0), Math.max(totalPages - 1, 0)));
         }
       }
 
@@ -200,7 +287,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
         }
       }
     } catch {}
-  }, [pages.length, slug]);
+  }, [slug, totalPages]);
 
   useEffect(() => {
     if (!summary) return;
@@ -217,9 +304,8 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   }, [page, progress, slug, summary]);
 
   const goToPage = (nextPage: number) => {
-    setPage(Math.min(Math.max(nextPage, 0), Math.max(pages.length - 1, 0)));
+    setPage(Math.min(Math.max(nextPage, 0), Math.max(totalPages - 1, 0)));
     setTocOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleBookmark = () => {
@@ -278,7 +364,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   }
 
   return (
-    <div className={`min-h-screen ${activeTheme.shell} ${activeTheme.text}`}>
+    <div className={`h-screen overflow-hidden ${activeTheme.shell} ${activeTheme.text}`}>
       <header className={`sticky top-0 z-40 border-b ${activeTheme.border} ${activeTheme.surface}/95 backdrop-blur-xl`}>
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-3 sm:px-5 lg:px-8">
           <button
@@ -294,7 +380,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
           <div className="min-w-0 flex-1 px-2 text-center sm:text-left">
             <p className={`truncate text-sm font-bold ${activeTheme.text}`}>{summary.title}</p>
             <p className={`truncate text-xs ${activeTheme.muted}`}>
-              {summary.subtitle || summary.category} · Page {page + 1} of {pages.length}
+              {summary.subtitle || summary.category} - Page {page + 1} of {totalPages}
             </p>
           </div>
 
@@ -422,12 +508,12 @@ export default function PagedReadClient({ slug }: { slug: string }) {
               </button>
             </div>
             <div className="mt-5 space-y-2">
-              {pages.map((_, index) => (
+              {pageIndexes.map((index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => goToPage(index)}
-                  className={`w-full rounded-xl px-3 py-3 text-left text-sm font-semibold ${
+                  className={`w-full rounded-lg px-3 py-2 text-left text-xs font-semibold ${
                     page === index ? activeTheme.active : activeTheme.control
                   }`}
                 >
@@ -439,35 +525,35 @@ export default function PagedReadClient({ slug }: { slug: string }) {
         </div>
       )}
 
-      <main className="mx-auto grid max-w-[1440px] gap-5 px-0 pb-24 pt-5 md:px-5 lg:grid-cols-[240px_minmax(0,1fr)_96px] lg:pb-10 lg:pt-6">
-        <aside className={`sticky top-[84px] hidden h-[calc(100vh-96px)] rounded-2xl border p-4 lg:block ${activeTheme.border} ${activeTheme.surface}`}>
-          <p className={`text-xs font-bold uppercase tracking-[0.22em] ${activeTheme.muted}`}>Contents</p>
-          <nav className="mt-4 space-y-1 overflow-y-auto pr-1">
-            {pages.map((_, index) => (
+      <main className="mx-auto grid h-[calc(100vh-64px)] max-w-[1440px] gap-5 overflow-hidden px-0 py-4 md:px-5 lg:grid-cols-[240px_minmax(0,1fr)_96px]">
+        <aside className={`hidden h-full min-h-0 overflow-hidden rounded-2xl border p-3 lg:block ${activeTheme.border} ${activeTheme.surface}`}>
+          <p className={`px-1 text-[11px] font-bold uppercase tracking-[0.2em] ${activeTheme.muted}`}>Contents</p>
+          <nav className="mt-3 h-[calc(100%-28px)] space-y-1 overflow-y-auto pr-1">
+            {pageIndexes.map((index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => goToPage(index)}
-                className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
+                className={`w-full rounded-lg px-3 py-1.5 text-left text-xs font-semibold transition ${
                   page === index ? activeTheme.active : activeTheme.control
                 }`}
               >
                 Page {index + 1}
-                <span className={`block text-xs ${page === index ? 'text-white/75' : activeTheme.muted}`}>
-                  Summary section
+                <span className={`block text-[10px] leading-4 ${page === index ? 'text-white/75' : activeTheme.muted}`}>
+                  Section
                 </span>
               </button>
             ))}
           </nav>
         </aside>
 
-        <section className="min-w-0 px-5 md:px-0">
-          <div className={`mx-auto ${widthClasses[readerWidth]}`}>
-            <article className={`rounded-2xl border p-5 shadow-sm sm:p-8 lg:p-12 ${activeTheme.border} ${activeTheme.surface}`}>
-              <div className="mb-8 flex flex-col gap-3 border-b border-current/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="min-h-0 min-w-0 overflow-hidden px-5 md:px-0">
+          <div className={`mx-auto flex h-full min-h-0 flex-col ${widthClasses[readerWidth]}`}>
+            <article className={`flex min-h-0 flex-1 flex-col rounded-2xl border p-4 shadow-sm sm:p-5 lg:p-6 ${activeTheme.border} ${activeTheme.surface}`}>
+              <div className="mb-4 flex shrink-0 flex-col gap-3 border-b border-current/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className={`text-xs font-bold uppercase tracking-[0.24em] ${activeTheme.muted}`}>Free Summary</p>
-                  <h1 className={`mt-3 text-3xl font-bold tracking-normal ${activeTheme.text}`}>
+                  <h1 className={`mt-2 text-2xl font-bold tracking-normal ${activeTheme.text}`}>
                     {summary.subtitle || summary.title}
                   </h1>
                   <p className={`mt-2 text-sm ${activeTheme.muted}`}>by {summary.author}</p>
@@ -477,28 +563,74 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 </div>
               </div>
 
-              <div
-                className="font-serif text-left"
-                style={{
-                  fontSize: `clamp(18px, 1vw + 14px, ${fontSize}px)`,
-                  lineHeight: lineHeights[lineSpacing],
-                }}
-              >
-                {splitParagraphs(currentPage).map((paragraph, index) => (
-                  <p key={index} className="mb-[22px]">
-                    {index === 0 && paragraph ? (
-                      <>
-                        <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
-                          {paragraph.charAt(0)}
-                        </span>
-                        {paragraph.slice(1)}
-                      </>
-                    ) : (
-                      paragraph
-                    )}
+              {isPdf ? (
+                <div className="relative mx-auto flex min-h-0 flex-1 w-full max-w-[860px] items-center justify-center overflow-hidden rounded-xl border border-blue-100 bg-white">
+                  {pdfPreviewLoading ? (
+                    <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+                  ) : pdfPreviewUrl ? (
+                    <iframe
+                      key={`${pdfPreviewUrl}-${page}`}
+                      title={`${summary.title} page ${page + 1}`}
+                      src={`${pdfPreviewUrl}#page=${page + 1}&zoom=page-fit&view=Fit&toolbar=0&navpanes=0&scrollbar=0&pagemode=none`}
+                      scrolling="no"
+                      className="pointer-events-none absolute inset-y-0 left-0 h-full w-[calc(100%+120px)] border-0 bg-white"
+                    />
+                  ) : (
+                    <div className="px-6 text-center">
+                      <p className="text-sm text-slate-600">
+                        {pdfPreviewError || 'This PDF could not be previewed in the browser.'}
+                      </p>
+                      <a
+                        href={ebookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                      >
+                        <ArrowDownTrayIcon className="h-4 w-4" />
+                        Open Uploaded File
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ) : hasExternalFile ? (
+                <div className="flex min-h-[420px] flex-col items-center justify-center rounded-xl border border-blue-100 bg-blue-50/50 px-6 text-center">
+                  <p className="max-w-md text-sm text-slate-600">
+                    This uploaded summary file cannot be previewed directly in the browser.
                   </p>
-                ))}
-              </div>
+                  <a
+                    href={ebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    <ArrowDownTrayIcon className="h-4 w-4" />
+                    Open Uploaded File
+                  </a>
+                </div>
+              ) : (
+                <div
+                  className="font-serif text-left"
+                  style={{
+                    fontSize: `clamp(18px, 1vw + 14px, ${fontSize}px)`,
+                    lineHeight: lineHeights[lineSpacing],
+                  }}
+                >
+                  {splitParagraphs(currentPage).map((paragraph, index) => (
+                    <p key={index} className="mb-[22px]">
+                      {index === 0 && paragraph ? (
+                        <>
+                          <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
+                            {paragraph.charAt(0)}
+                          </span>
+                          {paragraph.slice(1)}
+                        </>
+                      ) : (
+                        paragraph
+                      )}
+                    </p>
+                  ))}
+                </div>
+              )}
             </article>
 
             {searchOpen && searchQuery.trim() && (
@@ -522,7 +654,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
               </div>
             )}
 
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-3 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 disabled={page === 0}
@@ -542,7 +674,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
               <button
                 type="button"
-                disabled={page >= pages.length - 1}
+                disabled={page >= totalPages - 1}
                 onClick={() => goToPage(page + 1)}
                 className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${activeTheme.control}`}
               >
@@ -553,7 +685,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
           </div>
         </section>
 
-        <aside className={`sticky top-[84px] hidden h-fit rounded-2xl border p-3 lg:block ${activeTheme.border} ${activeTheme.surface}`}>
+        <aside className={`hidden h-fit rounded-2xl border p-3 lg:block ${activeTheme.border} ${activeTheme.surface}`}>
           <div className="space-y-2">
             <button type="button" onClick={toggleBookmark} className={`flex w-full flex-col items-center gap-1 rounded-xl p-3 text-xs font-semibold ${isBookmarked ? activeTheme.active : activeTheme.control}`}>
               {isBookmarked ? <BookmarkSolidIcon className="h-5 w-5" /> : <BookmarkIcon className="h-5 w-5" />}
