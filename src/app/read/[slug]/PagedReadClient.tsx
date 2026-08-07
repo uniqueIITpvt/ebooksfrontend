@@ -269,6 +269,16 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const progress = Math.round(((page + 1) / Math.max(totalPages, 1)) * 100);
   const activeTheme = themeClasses[theme];
   const isBookmarked = bookmarkedPages.includes(page);
+  const pdfWidthPercent = {
+    narrow: 86,
+    standard: 100,
+    wide: 114,
+  }[readerWidth] * (fontSize / 19);
+  const pdfPagePadding = {
+    compact: '0px',
+    normal: '10px',
+    relaxed: '20px',
+  }[lineSpacing];
 
   const searchMatches = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -717,12 +727,16 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                     lineHeight: lineHeights[lineSpacing],
                   }}
                 >
-                  <div className={`min-h-0 flex-1 break-normal ${isPdf ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'}`}>
+                  <div
+                    className={`min-h-0 flex-1 break-normal ${isPdf ? 'overflow-auto' : 'overflow-hidden'}`}
+                    style={isPdf ? { padding: pdfPagePadding } : undefined}
+                  >
                     {isPdf && currentPageVisual ? (
                       <img
                         src={currentPageVisual}
                         alt={`${summary.title} page ${page + 1}`}
-                        className="mx-auto block h-auto w-full"
+                        className="mx-auto block h-auto max-w-none"
+                        style={{ width: `${pdfWidthPercent}%` }}
                       />
                     ) : (
                       splitParagraphs(currentPage).map((paragraph, index) => (
