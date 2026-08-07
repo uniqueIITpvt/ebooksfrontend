@@ -741,7 +741,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                       ))
                     )}
                   </div>
-                  {currentPageFooter ? (
+                  {currentPageFooter && !isPdf ? (
                     <div className={`shrink-0 pt-3 text-center text-sm font-semibold ${activeTheme.muted}`}>
                       {currentPageFooter}
                     </div>
@@ -782,6 +782,13 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 <span className="truncate">Previous Page</span>
               </button>
 
+              <div className="col-span-2 flex items-center gap-3 px-1 md:order-none md:col-span-1 md:flex-1 md:px-2">
+                <div className={`h-2 flex-1 overflow-hidden rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-blue-100'}`}>
+                  <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
+                </div>
+                <span className={`text-xs font-bold ${activeTheme.muted}`}>{progress}%</span>
+              </div>
+
               <button
                 type="button"
                 disabled={page >= totalPages - 1}
@@ -791,13 +798,6 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 <span className="truncate">Next Page</span>
                 <ArrowRightIcon className="h-4 w-4 shrink-0" />
               </button>
-
-              <div className="col-span-2 flex items-center gap-3 px-1 md:order-none md:col-span-1 md:flex-1 md:px-2">
-                <div className={`h-2 flex-1 overflow-hidden rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-blue-100'}`}>
-                  <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
-                </div>
-                <span className={`text-xs font-bold ${activeTheme.muted}`}>{progress}%</span>
-              </div>
             </div>
           </div>
         </section>
