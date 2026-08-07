@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowDownTrayIcon,
@@ -36,15 +36,6 @@ type PdfTextItem = {
   width?: number;
   height?: number;
   fontName?: string;
-};
-
-type PdfTextSpan = {
-  text: string;
-  left: number;
-  top: number;
-  fontSize: number;
-  scaleX: number;
-  fontFamily: string;
 };
 
 const themeClasses: Record<ReaderTheme, {
@@ -179,17 +170,6 @@ function pdfItemsToLines(items: PdfTextItem[]) {
     .filter(Boolean);
 }
 
-function transformPdfMatrix(m1: number[], m2: number[]) {
-  return [
-    m1[0] * m2[0] + m1[2] * m2[1],
-    m1[1] * m2[0] + m1[3] * m2[1],
-    m1[0] * m2[2] + m1[2] * m2[3],
-    m1[1] * m2[2] + m1[3] * m2[3],
-    m1[0] * m2[4] + m1[2] * m2[5] + m1[4],
-    m1[1] * m2[4] + m1[3] * m2[5] + m1[5],
-  ];
-}
-
 export default function PagedReadClient({ slug }: { slug: string }) {
   const router = useRouter();
   const [summary, setSummary] = useState<ReaderSummary | null>(null);
@@ -208,14 +188,9 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [fileTextPages, setFileTextPages] = useState<string[]>([]);
   const [filePageFooters, setFilePageFooters] = useState<string[]>([]);
+  const [pdfPageVisuals, setPdfPageVisuals] = useState<string[]>([]);
   const [fileTextLoading, setFileTextLoading] = useState(false);
-  const [pdfDocument, setPdfDocument] = useState<any>(null);
   const [pdfPageCount, setPdfPageCount] = useState(0);
-  const [pdfRenderLoading, setPdfRenderLoading] = useState(false);
-  const [pdfLoadError, setPdfLoadError] = useState('');
-  const [pdfTextLayer, setPdfTextLayer] = useState<PdfTextSpan[]>([]);
-  const [pdfPageSize, setPdfPageSize] = useState({ width: 0, height: 0 });
-  const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -290,6 +265,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   );
   const currentPage = pages[page] || '';
   const currentPageFooter = filePageFooters[page] || '';
+  const currentPageVisual = pdfPageVisuals[page] || '';
   const progress = Math.round(((page + 1) / Math.max(totalPages, 1)) * 100);
   const activeTheme = themeClasses[theme];
   const isBookmarked = bookmarkedPages.includes(page);
@@ -310,11 +286,8 @@ export default function PagedReadClient({ slug }: { slug: string }) {
     if (!ebookUrl || !canExtractFileText) {
       setFileTextPages([]);
       setFilePageFooters([]);
-      setPdfDocument(null);
+      setPdfPageVisuals([]);
       setPdfPageCount(0);
-      setPdfLoadError('');
-      setPdfTextLayer([]);
-      setPdfPageSize({ width: 0, height: 0 });
       setFileTextLoading(false);
       return;
     }
@@ -325,11 +298,8 @@ export default function PagedReadClient({ slug }: { slug: string }) {
       setFileTextLoading(true);
       setFileTextPages([]);
       setFilePageFooters([]);
-      setPdfDocument(null);
+      setPdfPageVisuals([]);
       setPdfPageCount(0);
-      setPdfLoadError('');
-      setPdfTextLayer([]);
-      setPdfPageSize({ width: 0, height: 0 });
 
       try {
         const response = await fetch(ebookUrl);
@@ -348,9 +318,9 @@ export default function PagedReadClient({ slug }: { slug: string }) {
           ).toString();
           const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
           const extractedFooters: string[] = [];
+          const pageVisuals: string[] = [];
 
           if (!ignore) {
-            setPdfDocument(pdf);
             setPdfPageCount(pdf.numPages);
             setFileTextLoading(false);
           }
@@ -360,12 +330,26 @@ export default function PagedReadClient({ slug }: { slug: string }) {
             const textContent = await pdfPage.getTextContent();
             const lines = pdfItemsToLines(textContent.items as PdfTextItem[]);
             const { body, footer } = extractFooterNumber(lines);
+            const viewport = pdfPage.getViewport({ scale: 1.35 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = Math.floor(viewport.width);
+            canvas.height = Math.floor(viewport.height);
+
+            if (context) {
+              await pdfPage.render({ canvasContext: context, viewport }).promise;
+              pageVisuals.push(canvas.toDataURL('image/webp', 0.82));
+            } else {
+              pageVisuals.push('');
+            }
 
             extractedPages.push(body || `Page ${pageNumber}`);
             extractedFooters.push(footer);
           }
 
           if (!ignore) setFilePageFooters(extractedFooters);
+          if (!ignore) setPdfPageVisuals(pageVisuals);
         } else if (isTextFile) {
           extractedPages = chunkWords(new TextDecoder('utf-8').decode(buffer));
         } else if (isEpub) {
@@ -390,9 +374,9 @@ export default function PagedReadClient({ slug }: { slug: string }) {
         }
       } catch {
         if (!ignore) {
-          setPdfLoadError('This uploaded PDF could not be opened in the reader.');
           setFileTextPages(chunkWords(summary?.description || ''));
           setFilePageFooters([]);
+          setPdfPageVisuals([]);
         }
       } finally {
         if (!ignore) {
@@ -407,87 +391,6 @@ export default function PagedReadClient({ slug }: { slug: string }) {
       ignore = true;
     };
   }, [canExtractFileText, ebookUrl, isEpub, isPdf, isTextFile, summary?.description]);
-
-  useEffect(() => {
-    if (!isPdf || !pdfDocument || !pdfCanvasRef.current) return;
-
-    let cancelled = false;
-    let renderTask: { cancel?: () => void; promise?: Promise<unknown> } | null = null;
-
-    const renderPdfPage = async () => {
-      setPdfRenderLoading(true);
-      setPdfTextLayer([]);
-
-      try {
-        const pdfPage = await pdfDocument.getPage(page + 1);
-        if (cancelled || !pdfCanvasRef.current) return;
-
-        const canvas = pdfCanvasRef.current;
-        const context = canvas.getContext('2d');
-        const parent = canvas.parentElement;
-
-        if (!context || !parent) return;
-
-        const baseViewport = pdfPage.getViewport({ scale: 1 });
-        const availableWidth = Math.max(parent.clientWidth, 320);
-        const displayScale = availableWidth / baseViewport.width;
-        const deviceScale = window.devicePixelRatio || 1;
-        const displayViewport = pdfPage.getViewport({ scale: displayScale });
-        const viewport = pdfPage.getViewport({ scale: displayScale * deviceScale });
-
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        canvas.style.width = `${Math.floor(displayViewport.width)}px`;
-        canvas.style.height = `${Math.floor(displayViewport.height)}px`;
-
-        setPdfPageSize({
-          width: Math.floor(displayViewport.width),
-          height: Math.floor(displayViewport.height),
-        });
-
-        const task = pdfPage.render({ canvasContext: context, viewport });
-        renderTask = task;
-        await task.promise;
-
-        const textContent = await pdfPage.getTextContent();
-        if (!cancelled) {
-          const spans = (textContent.items as PdfTextItem[])
-            .filter((item) => item.str?.trim())
-            .map((item) => {
-              const transform = transformPdfMatrix(displayViewport.transform, item.transform || [1, 0, 0, 1, 0, 0]);
-              const fontSize = Math.max(Math.hypot(transform[2], transform[3]), 8);
-              const textWidth = Math.max((item.width || 0) * displayScale, 1);
-              const measuredWidth = Math.max((item.str || '').length * fontSize * 0.52, 1);
-              const font = textContent.styles?.[item.fontName || ''];
-
-              return {
-                text: item.str || '',
-                left: transform[4],
-                top: transform[5] - fontSize,
-                fontSize,
-                scaleX: Math.max(Math.min(textWidth / measuredWidth, 3), 0.35),
-                fontFamily: font?.fontFamily || 'serif',
-              };
-            });
-
-          setPdfTextLayer(spans);
-        }
-      } catch (error: any) {
-        if (!cancelled && error?.name !== 'RenderingCancelledException') {
-          setPdfLoadError('This PDF page could not be rendered.');
-        }
-      } finally {
-        if (!cancelled) setPdfRenderLoading(false);
-      }
-    };
-
-    renderPdfPage();
-
-    return () => {
-      cancelled = true;
-      renderTask?.cancel?.();
-    };
-  }, [isPdf, page, pdfDocument]);
 
   useEffect(() => {
     try {
@@ -791,59 +694,6 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                     {isPdf ? 'Opening PDF page...' : 'Preparing reader text...'}
                   </p>
                 </div>
-              ) : isPdf ? (
-                <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-slate-900/90">
-                  {pdfRenderLoading ? (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
-                      <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-                    </div>
-                  ) : null}
-                  {pdfLoadError && !pdfDocument ? (
-                    <div className="px-6 text-center">
-                      <p className="text-sm text-white">{pdfLoadError}</p>
-                      <a
-                        href={ebookUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                      >
-                        <ArrowDownTrayIcon className="h-4 w-4" />
-                        Open Uploaded File
-                      </a>
-                    </div>
-                  ) : (
-                    <div
-                      className="relative max-h-full max-w-full overflow-hidden bg-white shadow-lg"
-                      style={{
-                        width: pdfPageSize.width ? `${pdfPageSize.width}px` : undefined,
-                        height: pdfPageSize.height ? `${pdfPageSize.height}px` : undefined,
-                      }}
-                    >
-                      <canvas
-                        ref={pdfCanvasRef}
-                        className="block h-full w-full bg-white"
-                        aria-label={`${summary.title} page ${page + 1}`}
-                      />
-                      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-                        {pdfTextLayer.map((item, index) => (
-                          <span
-                            key={`${index}-${item.left}-${item.top}`}
-                            className="absolute origin-left select-text whitespace-pre leading-none text-transparent"
-                            style={{
-                              left: `${item.left}px`,
-                              top: `${item.top}px`,
-                              fontSize: `${item.fontSize}px`,
-                              fontFamily: item.fontFamily,
-                              transform: `scaleX(${item.scaleX})`,
-                            }}
-                          >
-                            {item.text}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
               ) : hasExternalFile ? (
                 <div className="flex min-h-[420px] flex-col items-center justify-center rounded-xl border border-blue-100 bg-blue-50/50 px-6 text-center">
                   <p className="max-w-md text-sm text-slate-600">
@@ -867,21 +717,29 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                     lineHeight: lineHeights[lineSpacing],
                   }}
                 >
-                  <div className="min-h-0 flex-1 overflow-hidden">
-                    {splitParagraphs(currentPage).map((paragraph, index) => (
-                      <p key={index} className="mb-[22px] whitespace-pre-line">
-                        {index === 0 && paragraph ? (
-                          <>
-                            <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
-                              {paragraph.charAt(0)}
-                            </span>
-                            {paragraph.slice(1)}
-                          </>
-                        ) : (
-                          paragraph
-                        )}
-                      </p>
-                    ))}
+                  <div className={`min-h-0 flex-1 break-normal ${isPdf ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'}`}>
+                    {isPdf && currentPageVisual ? (
+                      <img
+                        src={currentPageVisual}
+                        alt={`${summary.title} page ${page + 1}`}
+                        className="mx-auto block h-auto w-full"
+                      />
+                    ) : (
+                      splitParagraphs(currentPage).map((paragraph, index) => (
+                        <p key={index} className="mb-[22px] whitespace-normal break-normal">
+                          {index === 0 && paragraph ? (
+                            <>
+                              <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
+                                {paragraph.charAt(0)}
+                              </span>
+                              {paragraph.slice(1)}
+                            </>
+                          ) : (
+                            paragraph
+                          )}
+                        </p>
+                      ))
+                    )}
                   </div>
                   {currentPageFooter ? (
                     <div className={`shrink-0 pt-3 text-center text-sm font-semibold ${activeTheme.muted}`}>
