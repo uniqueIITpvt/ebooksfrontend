@@ -771,18 +771,18 @@ export default function PagedReadClient({ slug }: { slug: string }) {
               </div>
             )}
 
-            <div className="mt-2 grid shrink-0 grid-cols-2 gap-2 pb-16 md:mt-3 md:flex md:items-center md:justify-between md:gap-3 md:pb-0">
+            <div className="mt-2 flex shrink-0 items-center gap-2 pb-16 md:mt-3 md:gap-3 md:pb-0">
               <button
                 type="button"
                 disabled={page === 0}
                 onClick={() => goToPage(page - 1)}
-                className={`inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:px-5 md:py-3 ${activeTheme.control}`}
+                className={`inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-1 rounded-xl px-2 text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:flex-none md:gap-2 md:px-5 md:py-3 ${activeTheme.control}`}
               >
                 <ArrowLeftIcon className="h-4 w-4 shrink-0" />
                 <span className="truncate">Previous Page</span>
               </button>
 
-              <div className="col-span-2 flex items-center gap-3 px-1 md:order-none md:col-span-1 md:flex-1 md:px-2">
+              <div className="flex min-w-0 flex-[1.15] items-center gap-2 px-1 md:flex-1 md:gap-3 md:px-2">
                 <div className={`h-2 flex-1 overflow-hidden rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-blue-100'}`}>
                   <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
                 </div>
@@ -793,7 +793,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 type="button"
                 disabled={page >= totalPages - 1}
                 onClick={() => goToPage(page + 1)}
-                className={`inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:px-5 md:py-3 ${activeTheme.control}`}
+                className={`inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-1 rounded-xl px-2 text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:flex-none md:gap-2 md:px-5 md:py-3 ${activeTheme.control}`}
               >
                 <span className="truncate">Next Page</span>
                 <ArrowRightIcon className="h-4 w-4 shrink-0" />
