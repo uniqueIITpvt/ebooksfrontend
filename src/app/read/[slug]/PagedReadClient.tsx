@@ -340,7 +340,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
             const textContent = await pdfPage.getTextContent();
             const lines = pdfItemsToLines(textContent.items as PdfTextItem[]);
             const { body, footer } = extractFooterNumber(lines);
-            const viewport = pdfPage.getViewport({ scale: 1.35 });
+            const viewport = pdfPage.getViewport({ scale: 2.6 });
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
 
@@ -349,7 +349,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
             if (context) {
               await pdfPage.render({ canvasContext: context, viewport }).promise;
-              pageVisuals.push(canvas.toDataURL('image/webp', 0.82));
+              pageVisuals.push(canvas.toDataURL('image/png'));
             } else {
               pageVisuals.push('');
             }
