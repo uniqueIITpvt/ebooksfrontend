@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowDownTrayIcon,
@@ -30,6 +30,23 @@ type ReaderSummary = FreeSummary & {
   };
 };
 
+type PdfTextItem = {
+  str?: string;
+  transform?: number[];
+  width?: number;
+  height?: number;
+  fontName?: string;
+};
+
+type PdfTextSpan = {
+  text: string;
+  left: number;
+  top: number;
+  fontSize: number;
+  scaleX: number;
+  fontFamily: string;
+};
+
 const themeClasses: Record<ReaderTheme, {
   shell: string;
   surface: string;
@@ -40,7 +57,7 @@ const themeClasses: Record<ReaderTheme, {
   active: string;
 }> = {
   light: {
-    shell: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-white',
+    shell: 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50',
     surface: 'bg-white',
     text: 'text-slate-950',
     muted: 'text-slate-500',
@@ -100,15 +117,77 @@ function splitParagraphs(text: string) {
   return paragraphs.length ? paragraphs : [text.trim()].filter(Boolean);
 }
 
-function getPdfPageCount(buffer: ArrayBuffer) {
-  const text = new TextDecoder('latin1').decode(buffer);
-  const pageMatches = text.match(/\/Type\s*\/Page\b/g);
-  const pagesTreeCounts = Array.from(text.matchAll(/\/Type\s*\/Pages[\s\S]{0,300}?\/Count\s+(\d+)/g))
-    .map((match) => Number(match[1]))
-    .filter(Number.isFinite);
-  const maxPagesTreeCount = pagesTreeCounts.length ? Math.max(...pagesTreeCounts) : 0;
+function decodeHtmlEntities(value: string) {
+  if (typeof window === 'undefined') return value;
 
-  return Math.max(pageMatches?.length || 0, maxPagesTreeCount, 1);
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
+function htmlToText(value: string) {
+  return decodeHtmlEntities(
+    value
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<\/(p|div|h[1-6]|li|section|article|br)>/gi, '\n\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim()
+  );
+}
+
+function extractFooterNumber(lines: string[]) {
+  const cleanedLines = lines.map((line) => line.trim()).filter(Boolean);
+  const lastLine = cleanedLines.at(-1);
+
+  if (!lastLine || !/^\d+$/.test(lastLine)) {
+    return { body: cleanedLines.join('\n'), footer: '' };
+  }
+
+  return {
+    body: cleanedLines.slice(0, -1).join('\n'),
+    footer: lastLine,
+  };
+}
+
+function pdfItemsToLines(items: PdfTextItem[]) {
+  const rows = new Map<number, PdfTextItem[]>();
+
+  items
+    .filter((item) => item.str?.trim())
+    .forEach((item) => {
+      const y = Math.round(item.transform?.[5] || 0);
+      const nearbyKey = Array.from(rows.keys()).find((key) => Math.abs(key - y) <= 3);
+      const key = nearbyKey ?? y;
+      rows.set(key, [...(rows.get(key) || []), item]);
+    });
+
+  return Array.from(rows.entries())
+    .sort(([a], [b]) => b - a)
+    .map(([, rowItems]) =>
+      rowItems
+        .sort((a, b) => (a.transform?.[4] || 0) - (b.transform?.[4] || 0))
+        .map((item) => item.str?.trim() || '')
+        .filter(Boolean)
+        .join(' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+    )
+    .filter(Boolean);
+}
+
+function transformPdfMatrix(m1: number[], m2: number[]) {
+  return [
+    m1[0] * m2[0] + m1[2] * m2[1],
+    m1[1] * m2[0] + m1[3] * m2[1],
+    m1[0] * m2[2] + m1[2] * m2[3],
+    m1[1] * m2[2] + m1[3] * m2[3],
+    m1[0] * m2[4] + m1[2] * m2[5] + m1[4],
+    m1[1] * m2[4] + m1[3] * m2[5] + m1[5],
+  ];
 }
 
 export default function PagedReadClient({ slug }: { slug: string }) {
@@ -127,10 +206,16 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [bookmarkedPages, setBookmarkedPages] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [pdfPageCount, setPdfPageCount] = useState(1);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
-  const [pdfPreviewLoading, setPdfPreviewLoading] = useState(false);
-  const [pdfPreviewError, setPdfPreviewError] = useState('');
+  const [fileTextPages, setFileTextPages] = useState<string[]>([]);
+  const [filePageFooters, setFilePageFooters] = useState<string[]>([]);
+  const [fileTextLoading, setFileTextLoading] = useState(false);
+  const [pdfDocument, setPdfDocument] = useState<any>(null);
+  const [pdfPageCount, setPdfPageCount] = useState(0);
+  const [pdfRenderLoading, setPdfRenderLoading] = useState(false);
+  const [pdfLoadError, setPdfLoadError] = useState('');
+  const [pdfTextLayer, setPdfTextLayer] = useState<PdfTextSpan[]>([]);
+  const [pdfPageSize, setPdfPageSize] = useState({ width: 0, height: 0 });
+  const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -188,17 +273,23 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
   const ebookFile = summary?.files?.ebook || null;
   const ebookUrl = ebookFile?.url || '';
-  const isPdf =
-    Boolean(ebookUrl) &&
-    (ebookFile?.mimeType === 'application/pdf' || ebookUrl.toLowerCase().includes('.pdf'));
-  const hasExternalFile = Boolean(ebookUrl) && !isPdf;
-  const pages = useMemo(() => chunkWords(summary?.description || ''), [summary]);
-  const totalPages = isPdf ? pdfPageCount : pages.length;
+  const ebookName = (ebookFile?.originalName || ebookUrl).toLowerCase();
+  const isPdf = Boolean(ebookUrl) && (ebookFile?.mimeType === 'application/pdf' || ebookName.includes('.pdf'));
+  const isTextFile = Boolean(ebookUrl) && (ebookFile?.mimeType?.startsWith('text/') || ebookName.includes('.txt'));
+  const isEpub = Boolean(ebookUrl) && (ebookFile?.mimeType === 'application/epub+zip' || ebookName.includes('.epub'));
+  const canExtractFileText = isPdf || isTextFile || isEpub;
+  const hasExternalFile = Boolean(ebookUrl) && !canExtractFileText;
+  const pages = useMemo(
+    () => (fileTextPages.length ? fileTextPages : chunkWords(summary?.description || '')),
+    [fileTextPages, summary]
+  );
+  const totalPages = isPdf ? Math.max(pdfPageCount, fileTextPages.length, summary?.pages || 1) : pages.length;
   const pageIndexes = useMemo(
     () => Array.from({ length: Math.max(totalPages, 1) }, (_, index) => index),
     [totalPages]
   );
   const currentPage = pages[page] || '';
+  const currentPageFooter = filePageFooters[page] || '';
   const progress = Math.round(((page + 1) / Math.max(totalPages, 1)) * 100);
   const activeTheme = themeClasses[theme];
   const isBookmarked = bookmarkedPages.includes(page);
@@ -216,57 +307,187 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   }, [pages, searchQuery]);
 
   useEffect(() => {
-    if (!ebookUrl || !isPdf) {
-      setPdfPageCount(1);
-      setPdfPreviewUrl('');
-      setPdfPreviewLoading(false);
-      setPdfPreviewError('');
+    if (!ebookUrl || !canExtractFileText) {
+      setFileTextPages([]);
+      setFilePageFooters([]);
+      setPdfDocument(null);
+      setPdfPageCount(0);
+      setPdfLoadError('');
+      setPdfTextLayer([]);
+      setPdfPageSize({ width: 0, height: 0 });
+      setFileTextLoading(false);
       return;
     }
 
     let ignore = false;
-    let objectUrl = '';
 
-    const loadPdfPreview = async () => {
-      setPdfPreviewLoading(true);
-      setPdfPreviewError('');
-      setPdfPreviewUrl('');
+    const loadFileText = async () => {
+      setFileTextLoading(true);
+      setFileTextPages([]);
+      setFilePageFooters([]);
+      setPdfDocument(null);
+      setPdfPageCount(0);
+      setPdfLoadError('');
+      setPdfTextLayer([]);
+      setPdfPageSize({ width: 0, height: 0 });
 
       try {
         const response = await fetch(ebookUrl);
         if (!response.ok) {
-          throw new Error('Unable to load PDF preview');
+          throw new Error('Unable to load uploaded file');
         }
 
         const buffer = await response.arrayBuffer();
-        const pdfBlob = new Blob([buffer], { type: 'application/pdf' });
-        objectUrl = URL.createObjectURL(pdfBlob);
+        let extractedPages: string[] = [];
+
+        if (isPdf) {
+          const pdfjs: any = await import('pdfjs-dist/legacy/build/pdf.mjs');
+          pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+            'pdfjs-dist/legacy/build/pdf.worker.mjs',
+            import.meta.url
+          ).toString();
+          const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+          const extractedFooters: string[] = [];
+
+          if (!ignore) {
+            setPdfDocument(pdf);
+            setPdfPageCount(pdf.numPages);
+            setFileTextLoading(false);
+          }
+
+          for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+            const pdfPage = await pdf.getPage(pageNumber);
+            const textContent = await pdfPage.getTextContent();
+            const lines = pdfItemsToLines(textContent.items as PdfTextItem[]);
+            const { body, footer } = extractFooterNumber(lines);
+
+            extractedPages.push(body || `Page ${pageNumber}`);
+            extractedFooters.push(footer);
+          }
+
+          if (!ignore) setFilePageFooters(extractedFooters);
+        } else if (isTextFile) {
+          extractedPages = chunkWords(new TextDecoder('utf-8').decode(buffer));
+        } else if (isEpub) {
+          const JSZip = (await import('jszip')).default;
+          const zip = await JSZip.loadAsync(buffer);
+          const entries = Object.values(zip.files)
+            .filter((file) => !file.dir && /\.(xhtml|html|htm)$/i.test(file.name))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          const textParts: string[] = [];
+
+          for (const entry of entries) {
+            const html = await entry.async('text');
+            const text = htmlToText(html);
+            if (text) textParts.push(text);
+          }
+
+          extractedPages = chunkWords(textParts.join('\n\n'));
+        }
 
         if (!ignore) {
-          setPdfPreviewUrl(objectUrl);
-          setPdfPageCount(getPdfPageCount(buffer));
+          setFileTextPages(extractedPages.length ? extractedPages : chunkWords(summary?.description || ''));
         }
       } catch {
         if (!ignore) {
-          setPdfPreviewError('This PDF could not be previewed in the browser.');
-          setPdfPageCount(Math.max(summary?.pages || 1, 1));
+          setPdfLoadError('This uploaded PDF could not be opened in the reader.');
+          setFileTextPages(chunkWords(summary?.description || ''));
+          setFilePageFooters([]);
         }
       } finally {
         if (!ignore) {
-          setPdfPreviewLoading(false);
+          setFileTextLoading(false);
         }
       }
     };
 
-    loadPdfPreview();
+    loadFileText();
 
     return () => {
       ignore = true;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
+    };
+  }, [canExtractFileText, ebookUrl, isEpub, isPdf, isTextFile, summary?.description]);
+
+  useEffect(() => {
+    if (!isPdf || !pdfDocument || !pdfCanvasRef.current) return;
+
+    let cancelled = false;
+    let renderTask: { cancel?: () => void; promise?: Promise<unknown> } | null = null;
+
+    const renderPdfPage = async () => {
+      setPdfRenderLoading(true);
+      setPdfTextLayer([]);
+
+      try {
+        const pdfPage = await pdfDocument.getPage(page + 1);
+        if (cancelled || !pdfCanvasRef.current) return;
+
+        const canvas = pdfCanvasRef.current;
+        const context = canvas.getContext('2d');
+        const parent = canvas.parentElement;
+
+        if (!context || !parent) return;
+
+        const baseViewport = pdfPage.getViewport({ scale: 1 });
+        const availableWidth = Math.max(parent.clientWidth, 320);
+        const displayScale = availableWidth / baseViewport.width;
+        const deviceScale = window.devicePixelRatio || 1;
+        const displayViewport = pdfPage.getViewport({ scale: displayScale });
+        const viewport = pdfPage.getViewport({ scale: displayScale * deviceScale });
+
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        canvas.style.width = `${Math.floor(displayViewport.width)}px`;
+        canvas.style.height = `${Math.floor(displayViewport.height)}px`;
+
+        setPdfPageSize({
+          width: Math.floor(displayViewport.width),
+          height: Math.floor(displayViewport.height),
+        });
+
+        const task = pdfPage.render({ canvasContext: context, viewport });
+        renderTask = task;
+        await task.promise;
+
+        const textContent = await pdfPage.getTextContent();
+        if (!cancelled) {
+          const spans = (textContent.items as PdfTextItem[])
+            .filter((item) => item.str?.trim())
+            .map((item) => {
+              const transform = transformPdfMatrix(displayViewport.transform, item.transform || [1, 0, 0, 1, 0, 0]);
+              const fontSize = Math.max(Math.hypot(transform[2], transform[3]), 8);
+              const textWidth = Math.max((item.width || 0) * displayScale, 1);
+              const measuredWidth = Math.max((item.str || '').length * fontSize * 0.52, 1);
+              const font = textContent.styles?.[item.fontName || ''];
+
+              return {
+                text: item.str || '',
+                left: transform[4],
+                top: transform[5] - fontSize,
+                fontSize,
+                scaleX: Math.max(Math.min(textWidth / measuredWidth, 3), 0.35),
+                fontFamily: font?.fontFamily || 'serif',
+              };
+            });
+
+          setPdfTextLayer(spans);
+        }
+      } catch (error: any) {
+        if (!cancelled && error?.name !== 'RenderingCancelledException') {
+          setPdfLoadError('This PDF page could not be rendered.');
+        }
+      } finally {
+        if (!cancelled) setPdfRenderLoading(false);
       }
     };
-  }, [ebookUrl, isPdf, summary?.pages]);
+
+    renderPdfPage();
+
+    return () => {
+      cancelled = true;
+      renderTask?.cancel?.();
+    };
+  }, [isPdf, page, pdfDocument]);
 
   useEffect(() => {
     try {
@@ -563,23 +784,23 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 </div>
               </div>
 
-              {isPdf ? (
-                <div className="relative mx-auto flex min-h-0 flex-1 w-full max-w-[860px] items-center justify-center overflow-hidden rounded-xl border border-blue-100 bg-white">
-                  {pdfPreviewLoading ? (
-                    <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-                  ) : pdfPreviewUrl ? (
-                    <iframe
-                      key={`${pdfPreviewUrl}-${page}`}
-                      title={`${summary.title} page ${page + 1}`}
-                      src={`${pdfPreviewUrl}#page=${page + 1}&zoom=page-fit&view=Fit&toolbar=0&navpanes=0&scrollbar=0&pagemode=none`}
-                      scrolling="no"
-                      className="pointer-events-none absolute inset-y-0 left-0 h-full w-[calc(100%+120px)] border-0 bg-white"
-                    />
-                  ) : (
+              {fileTextLoading ? (
+                <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-blue-100 bg-blue-50/50 px-6 text-center">
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+                  <p className={`mt-4 text-sm font-semibold ${activeTheme.muted}`}>
+                    {isPdf ? 'Opening PDF page...' : 'Preparing reader text...'}
+                  </p>
+                </div>
+              ) : isPdf ? (
+                <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-slate-900/90">
+                  {pdfRenderLoading ? (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+                      <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+                    </div>
+                  ) : null}
+                  {pdfLoadError && !pdfDocument ? (
                     <div className="px-6 text-center">
-                      <p className="text-sm text-slate-600">
-                        {pdfPreviewError || 'This PDF could not be previewed in the browser.'}
-                      </p>
+                      <p className="text-sm text-white">{pdfLoadError}</p>
                       <a
                         href={ebookUrl}
                         target="_blank"
@@ -589,6 +810,37 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                         <ArrowDownTrayIcon className="h-4 w-4" />
                         Open Uploaded File
                       </a>
+                    </div>
+                  ) : (
+                    <div
+                      className="relative max-h-full max-w-full overflow-hidden bg-white shadow-lg"
+                      style={{
+                        width: pdfPageSize.width ? `${pdfPageSize.width}px` : undefined,
+                        height: pdfPageSize.height ? `${pdfPageSize.height}px` : undefined,
+                      }}
+                    >
+                      <canvas
+                        ref={pdfCanvasRef}
+                        className="block h-full w-full bg-white"
+                        aria-label={`${summary.title} page ${page + 1}`}
+                      />
+                      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+                        {pdfTextLayer.map((item, index) => (
+                          <span
+                            key={`${index}-${item.left}-${item.top}`}
+                            className="absolute origin-left select-text whitespace-pre leading-none text-transparent"
+                            style={{
+                              left: `${item.left}px`,
+                              top: `${item.top}px`,
+                              fontSize: `${item.fontSize}px`,
+                              fontFamily: item.fontFamily,
+                              transform: `scaleX(${item.scaleX})`,
+                            }}
+                          >
+                            {item.text}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -609,26 +861,33 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 </div>
               ) : (
                 <div
-                  className="font-serif text-left"
+                  className="flex min-h-0 flex-1 flex-col overflow-hidden font-serif text-left"
                   style={{
                     fontSize: `clamp(18px, 1vw + 14px, ${fontSize}px)`,
                     lineHeight: lineHeights[lineSpacing],
                   }}
                 >
-                  {splitParagraphs(currentPage).map((paragraph, index) => (
-                    <p key={index} className="mb-[22px]">
-                      {index === 0 && paragraph ? (
-                        <>
-                          <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
-                            {paragraph.charAt(0)}
-                          </span>
-                          {paragraph.slice(1)}
-                        </>
-                      ) : (
-                        paragraph
-                      )}
-                    </p>
-                  ))}
+                  <div className="min-h-0 flex-1 overflow-hidden">
+                    {splitParagraphs(currentPage).map((paragraph, index) => (
+                      <p key={index} className="mb-[22px] whitespace-pre-line">
+                        {index === 0 && paragraph ? (
+                          <>
+                            <span className="float-left mr-3 mt-2 text-7xl font-bold leading-[0.72] text-blue-600">
+                              {paragraph.charAt(0)}
+                            </span>
+                            {paragraph.slice(1)}
+                          </>
+                        ) : (
+                          paragraph
+                        )}
+                      </p>
+                    ))}
+                  </div>
+                  {currentPageFooter ? (
+                    <div className={`shrink-0 pt-3 text-center text-sm font-semibold ${activeTheme.muted}`}>
+                      {currentPageFooter}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </article>
@@ -654,33 +913,33 @@ export default function PagedReadClient({ slug }: { slug: string }) {
               </div>
             )}
 
-            <div className="mt-3 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-2 grid shrink-0 grid-cols-2 gap-2 pb-16 md:mt-3 md:flex md:items-center md:justify-between md:gap-3 md:pb-0">
               <button
                 type="button"
                 disabled={page === 0}
                 onClick={() => goToPage(page - 1)}
-                className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${activeTheme.control}`}
+                className={`inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:px-5 md:py-3 ${activeTheme.control}`}
               >
-                <ArrowLeftIcon className="h-4 w-4" />
-                Previous Page
+                <ArrowLeftIcon className="h-4 w-4 shrink-0" />
+                <span className="truncate">Previous Page</span>
               </button>
-
-              <div className="flex flex-1 items-center gap-3 px-2">
-                <div className={`h-2 flex-1 overflow-hidden rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-blue-100'}`}>
-                  <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
-                </div>
-                <span className={`text-xs font-bold ${activeTheme.muted}`}>{progress}%</span>
-              </div>
 
               <button
                 type="button"
                 disabled={page >= totalPages - 1}
                 onClick={() => goToPage(page + 1)}
-                className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${activeTheme.control}`}
+                className={`inline-flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl px-3 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm md:h-auto md:px-5 md:py-3 ${activeTheme.control}`}
               >
-                Next Page
-                <ArrowRightIcon className="h-4 w-4" />
+                <span className="truncate">Next Page</span>
+                <ArrowRightIcon className="h-4 w-4 shrink-0" />
               </button>
+
+              <div className="col-span-2 flex items-center gap-3 px-1 md:order-none md:col-span-1 md:flex-1 md:px-2">
+                <div className={`h-2 flex-1 overflow-hidden rounded-full ${theme === 'dark' ? 'bg-slate-700' : 'bg-blue-100'}`}>
+                  <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
+                </div>
+                <span className={`text-xs font-bold ${activeTheme.muted}`}>{progress}%</span>
+              </div>
             </div>
           </div>
         </section>
