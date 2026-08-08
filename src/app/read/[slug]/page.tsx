@@ -9,5 +9,12 @@ interface ReadPageProps {
 export default async function ReadPage({ params }: ReadPageProps) {
   const { slug } = await params;
 
-  return <PagedReadClient slug={slug} />;
+  return (
+    <PagedReadClient
+      slug={slug}
+      backHref="/profile?tab=library"
+      backLabel="Back to Library"
+      unavailableBackLabel="Back to Library"
+    />
+  );
 }

@@ -189,7 +189,19 @@ function getPageHeading(text: string, fallback: string) {
   return heading.length > 34 ? `${heading.slice(0, 31).trim()}...` : heading;
 }
 
-export default function PagedReadClient({ slug }: { slug: string }) {
+interface PagedReadClientProps {
+  slug: string;
+  backHref?: string;
+  backLabel?: string;
+  unavailableBackLabel?: string;
+}
+
+export default function PagedReadClient({
+  slug,
+  backHref = `/free-summaries/${slug}`,
+  backLabel = 'Back to Free Summary',
+  unavailableBackLabel = 'Back to Summary',
+}: PagedReadClientProps) {
   const router = useRouter();
   const [summary, setSummary] = useState<ReaderSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,11 +260,11 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
         const message = String(error?.message || '');
         if (message.includes('401') || message.toLowerCase().includes('login')) {
-          router.replace(`/free-summaries/${slug}`);
+          router.replace(backHref);
           return;
         }
 
-        setReaderError(message || 'Unable to open this summary right now.');
+        setReaderError(message || 'Unable to open this ebook right now.');
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -263,7 +275,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
     return () => {
       ignore = true;
     };
-  }, [router, slug]);
+  }, [backHref, router, slug]);
 
   const ebookFile = summary?.files?.ebook || null;
   const ebookUrl = ebookFile?.url || '';
@@ -514,14 +526,14 @@ export default function PagedReadClient({ slug }: { slug: string }) {
         <div className="w-full max-w-lg rounded-2xl border border-blue-100 bg-white/90 p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold text-slate-950">Reader unavailable</h1>
           <p className="mt-3 text-slate-600">
-            {readerError || 'This summary could not be opened right now.'}
+            {readerError || 'This ebook could not be opened right now.'}
           </p>
           <button
             type="button"
-            onClick={() => router.push(`/free-summaries/${slug}`)}
+            onClick={() => router.push(backHref)}
             className="mt-6 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Back to Summary
+            {unavailableBackLabel}
           </button>
         </div>
       </div>
@@ -534,11 +546,11 @@ export default function PagedReadClient({ slug }: { slug: string }) {
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-3 sm:px-5 lg:px-8">
           <button
             type="button"
-            onClick={() => router.push(`/free-summaries/${slug}`)}
+            onClick={() => router.push(backHref)}
             className={`inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold ${activeTheme.control}`}
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            <span className="hidden sm:inline">Back to Free Summary</span>
+            <span className="hidden sm:inline">{backLabel}</span>
             <span className="sm:hidden">Back</span>
           </button>
 

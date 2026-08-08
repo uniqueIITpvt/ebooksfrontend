@@ -442,6 +442,15 @@ export default function UserProfilePage() {
       .some((value) => String(value).toLowerCase().includes(query));
   });
 
+  const getLibraryReadTarget = (item: LibraryItem) => {
+    if (item.itemType === 'audiobook') {
+      return item.redirectTarget;
+    }
+
+    const slug = item.slug || item.redirectTarget.match(/\/books\/([^/]+)\/read/)?.[1] || item.itemId;
+    return `/read/${slug}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 via-indigo-50 to-white pb-12 pt-3">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
@@ -966,6 +975,7 @@ export default function UserProfilePage() {
                     {filteredLibraryItems.map((item) => {
                       const progress = libraryProgress[item.id] ?? 0;
                       const completed = progress >= 100;
+                      const readTarget = getLibraryReadTarget(item);
                       const actionLabel = item.itemType === 'audiobook'
                         ? 'Listen'
                         : progress > 0
@@ -977,11 +987,11 @@ export default function UserProfilePage() {
                         key={item.id}
                         role="link"
                         tabIndex={0}
-                        onClick={() => router.push(item.redirectTarget)}
+                        onClick={() => router.push(readTarget)}
                         onKeyDown={(event) => {
                           if (event.key === 'Enter' || event.key === ' ') {
                             event.preventDefault();
-                            router.push(item.redirectTarget);
+                            router.push(readTarget);
                           }
                         }}
                         className="cursor-pointer overflow-hidden rounded-xl border border-blue-100/80 bg-white shadow-sm transition-shadow hover:shadow-md"
@@ -1041,7 +1051,7 @@ export default function UserProfilePage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              router.push(item.redirectTarget);
+                              router.push(readTarget);
                             }}
                             className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
                           >
