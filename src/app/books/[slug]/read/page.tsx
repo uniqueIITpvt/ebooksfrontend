@@ -12,9 +12,9 @@ export default async function BookReadPage({ params }: BookReadPageProps) {
   return (
     <PagedReadClient
       slug={slug}
-      backHref="/profile?tab=library"
-      backLabel="Back to Library"
-      unavailableBackLabel="Back to Library"
+      backHref={`/books/${slug}`}
+      backLabel="Back to Book"
+      unavailableBackLabel="Back to Book"
     />
   );
 }
