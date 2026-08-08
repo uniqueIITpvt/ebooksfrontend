@@ -11,6 +11,7 @@ import {
   ShareIcon,
   HeartIcon,
   CheckIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import {
   StarIcon as SolidStarIcon,
@@ -42,6 +43,7 @@ export default function BookDetailClient({
   const [userRating, setUserRating] = useState<number>(0);
   const [savingFavorite, setSavingFavorite] = useState(false);
   const [savingRelatedId, setSavingRelatedId] = useState<string | null>(null);
+  const [downloadingZip, setDownloadingZip] = useState(false);
   const [relatedSavedOverrides, setRelatedSavedOverrides] = useState<Record<string, boolean>>({});
 
   const parseCurrency = (value?: string | number | null) =>
@@ -93,6 +95,28 @@ export default function BookDetailClient({
     (collection) => Array.isArray(collection) && collection.some(matchesCurrentBook),
   );
   const canReadCurrentBook = hasKeepForeverAccess || hasUniquePlusAccess;
+  const canDownloadCurrentBook = hasKeepForeverAccess || hasUniquePlusAccess;
+  const ebookDownloadUrl = currentBook.files?.ebook?.url || '';
+
+  const sanitizeFileName = (value: string) =>
+    value.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim() || 'ebook';
+
+  const getEbookFileName = () => {
+    const originalName = currentBook.files?.ebook?.originalName;
+    if (originalName) return sanitizeFileName(originalName);
+
+    const mimeType = currentBook.files?.ebook?.mimeType || '';
+    const extension =
+      mimeType === 'application/pdf'
+        ? 'pdf'
+        : mimeType === 'application/epub+zip'
+          ? 'epub'
+          : mimeType === 'text/plain'
+            ? 'txt'
+            : 'pdf';
+
+    return `${sanitizeFileName(currentBook.title)}.${extension}`;
+  };
 
   const getCheckoutPath = () => {
     const params = new URLSearchParams({
@@ -168,6 +192,35 @@ export default function BookDetailClient({
     }
 
     router.push(subscriptionPath);
+  };
+
+  const handleDownloadZip = async () => {
+    if (!ebookDownloadUrl) return;
+
+    setDownloadingZip(true);
+    try {
+      const JSZip = (await import('jszip')).default;
+      const response = await fetch(ebookDownloadUrl);
+      if (!response.ok) throw new Error('Unable to download ebook file');
+
+      const ebookBlob = await response.blob();
+      const zip = new JSZip();
+      zip.file(getEbookFileName(), ebookBlob);
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const downloadUrl = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${sanitizeFileName(currentBook.title)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error: any) {
+      alert(error?.message || 'Unable to download ZIP file.');
+    } finally {
+      setDownloadingZip(false);
+    }
   };
 
   const handleRatingClick = async (newRating: number) => {
@@ -424,6 +477,17 @@ export default function BookDetailClient({
                   </div>
                 </div>
               </div>
+              {canDownloadCurrentBook && (
+                <button
+                  type="button"
+                  onClick={handleDownloadZip}
+                  disabled={!ebookDownloadUrl || downloadingZip}
+                  className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ArrowDownTrayIcon className="h-5 w-5" />
+                  {downloadingZip ? 'Preparing ZIP...' : 'ZIP Download'}
+                </button>
+              )}
             </div>
             {canReadCurrentBook && (
               <button
@@ -434,7 +498,7 @@ export default function BookDetailClient({
                 Read Now
               </button>
             )}
-            {!isReadFreeSummary && (
+            {!isReadFreeSummary && !canReadCurrentBook && (
               <AccessChoicePanel
                 itemLabel="book"
                 price={currentBook.price}
