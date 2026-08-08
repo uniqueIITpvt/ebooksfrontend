@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import { freeSummariesApi, type FreeSummary } from '@/services/api/freeSummariesApi';
-import { booksApi, type BookFile } from '@/services/api/booksApi';
+import { booksApi, type Book, type BookFile } from '@/services/api/booksApi';
 
 const WORDS_PER_PAGE = 520;
 const READER_PROGRESS_PREFIX = 'techuniqueiit:free-summary-reader';
@@ -25,6 +25,10 @@ type ReaderWidth = 'narrow' | 'standard' | 'wide';
 type LineSpacing = 'compact' | 'normal' | 'relaxed';
 
 type ReaderSummary = FreeSummary & {
+  type?: Book['type'];
+  componentType?: Book['componentType'];
+  accessLevel?: Book['accessLevel'];
+  price?: Book['price'];
   files?: {
     ebook?: BookFile | null;
   };
@@ -189,6 +193,30 @@ function getPageHeading(text: string, fallback: string) {
   return heading.length > 34 ? `${heading.slice(0, 31).trim()}...` : heading;
 }
 
+function getReaderContentLabel(summary: ReaderSummary) {
+  const priceValue = String(summary.price || '').trim();
+  const hasPrice = priceValue.length > 0;
+  const numericPrice = Number.parseFloat(priceValue.replace(/[^0-9.]/g, '')) || 0;
+
+  if (summary.componentType === 'free-summaries' || summary.accessLevel === 'free') {
+    return 'Free Summary';
+  }
+
+  if (summary.componentType === 'premium-summaries' || summary.accessLevel === 'premium' || (hasPrice && numericPrice > 0)) {
+    return 'Premium E-Book';
+  }
+
+  if (summary.componentType === 'trending-books') {
+    return 'Trending E-Book';
+  }
+
+  if (summary.type === 'Audiobook') {
+    return 'Audiobook';
+  }
+
+  return 'E-Book';
+}
+
 interface PagedReadClientProps {
   slug: string;
   backHref?: string;
@@ -249,10 +277,21 @@ export default function PagedReadClient({
             tags: response.data.tags || [],
             createdAt: response.data.createdAt || response.data.publishDate || '',
             updatedAt: response.data.updatedAt || response.data.publishDate || '',
+            type: response.data.type,
+            componentType: response.data.componentType,
+            accessLevel: response.data.accessLevel,
+            price: response.data.price,
             files: response.data.files,
           };
         } catch {
-          data = await freeSummariesApi.getReadPayload(slug);
+          const freeSummary = await freeSummariesApi.getReadPayload(slug);
+          data = {
+            ...freeSummary,
+            type: 'Books',
+            componentType: 'free-summaries',
+            accessLevel: 'free',
+            price: '0',
+          };
         }
         if (!ignore) setSummary(data);
       } catch (error: any) {
@@ -312,6 +351,8 @@ export default function PagedReadClient({
   const currentPageVisual = pdfPageVisuals[page] || '';
   const progress = Math.round(((page + 1) / Math.max(totalPages, 1)) * 100);
   const activeTheme = themeClasses[theme];
+  const readerContentLabel = summary ? getReaderContentLabel(summary) : 'E-Book';
+  const readerAccessLabel = readerContentLabel === 'Free Summary' ? 'Free access' : 'Premium access';
   const isBookmarked = bookmarkedPages.includes(page);
   const pdfWidthPercent = {
     narrow: 86,
@@ -568,7 +609,7 @@ export default function PagedReadClient({
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search summary"
+                  placeholder={`Search ${readerContentLabel.toLowerCase()}`}
                   className={`w-44 bg-transparent text-sm outline-none placeholder:text-slate-400 ${activeTheme.text}`}
                 />
               </div>
@@ -732,7 +773,7 @@ export default function PagedReadClient({
             <article className={`flex min-h-0 flex-1 flex-col rounded-2xl border p-4 shadow-sm sm:p-5 lg:p-6 ${activeTheme.border} ${activeTheme.surface}`}>
               <div className="mb-4 flex shrink-0 flex-col gap-3 border-b border-current/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className={`text-xs font-bold uppercase tracking-[0.24em] ${activeTheme.muted}`}>Free Summary</p>
+                  <p className={`text-xs font-bold uppercase tracking-[0.24em] ${activeTheme.muted}`}>{readerContentLabel}</p>
                   <h1 className={`mt-2 text-2xl font-bold tracking-normal ${activeTheme.text}`}>
                     {summary.subtitle || summary.title}
                   </h1>
@@ -882,8 +923,8 @@ export default function PagedReadClient({
 
       {moreOpen && (
         <div className={`fixed right-4 top-20 z-50 w-56 rounded-2xl border p-3 shadow-xl ${activeTheme.border} ${activeTheme.surface}`}>
-          <p className={`text-xs font-bold uppercase tracking-[0.2em] ${activeTheme.muted}`}>Summary Reader</p>
-          <p className={`mt-2 text-sm ${activeTheme.muted}`}>Free access</p>
+          <p className={`text-xs font-bold uppercase tracking-[0.2em] ${activeTheme.muted}`}>{readerContentLabel} Reader</p>
+          <p className={`mt-2 text-sm ${activeTheme.muted}`}>{readerAccessLabel}</p>
         </div>
       )}
 
