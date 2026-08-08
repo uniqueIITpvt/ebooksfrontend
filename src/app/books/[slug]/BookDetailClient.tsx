@@ -92,6 +92,7 @@ export default function BookDetailClient({
   const hasKeepForeverAccess = purchasedCollections.some(
     (collection) => Array.isArray(collection) && collection.some(matchesCurrentBook),
   );
+  const canReadCurrentBook = hasKeepForeverAccess || hasUniquePlusAccess;
 
   const getCheckoutPath = () => {
     const params = new URLSearchParams({
@@ -131,7 +132,7 @@ export default function BookDetailClient({
           text: currentBook.subtitle,
           url: window.location.href,
         });
-      } catch {}
+      } catch { }
       return;
     }
 
@@ -325,11 +326,10 @@ export default function BookDetailClient({
               <button
                 onClick={handleToggleFavorite}
                 disabled={savingFavorite}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed ${
-                  isFavorited
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-white rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed ${isFavorited
                     ? 'bg-rose-600 hover:bg-rose-700'
                     : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                  }`}
               >
                 {isFavorited ? (
                   <SolidHeartIcon className="w-5 h-5 fill-white text-white" />
@@ -417,15 +417,23 @@ export default function BookDetailClient({
                   <div className="font-semibold">
                     {currentBook.publishDate
                       ? new Date(currentBook.publishDate).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                        })
+                        year: 'numeric',
+                        month: 'short',
+                      })
                       : 'N/A'}
                   </div>
                 </div>
               </div>
             </div>
-
+            {canReadCurrentBook && (
+              <button
+                type="button"
+                onClick={() => router.push(currentBookReadPath)}
+                className="w-full md:wml-auto inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+              >
+                Read Now
+              </button>
+            )}
             {!isReadFreeSummary && (
               <AccessChoicePanel
                 itemLabel="book"
