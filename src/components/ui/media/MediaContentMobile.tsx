@@ -20,10 +20,11 @@ import { generateBookSlug } from '@/utils/slugify';
 import type { Category } from '@/services/api/categoriesApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { useAuth } from '@/contexts/AuthContext';
-import { libraryApi } from '@/services/api/libraryApi';
+import { libraryApi, type LibraryItem } from '@/services/api/libraryApi';
 import { tokenStore } from '@/services/api/tokenStore';
 import { LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { isPurchasedLibraryItem, useOwnedLibraryAccess } from '@/hooks/useOwnedLibraryAccess';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -53,9 +54,10 @@ interface MobileShowcaseCardProps {
   index: number;
   meta: string;
   href: string;
+  libraryItems?: LibraryItem[];
 }
 
-function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps) {
+function MobileShowcaseCard({ item, index, meta, href, libraryItems = [] }: MobileShowcaseCardProps) {
   const router = useRouter();
   const { openAuthModal, user } = useAuth();
   const [claiming, setClaiming] = useState(false);
@@ -68,6 +70,9 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
   };
   const displayPrice = formatPrice(item.price);
   const hasUniquePlus = hasActiveSubscription(user);
+  const isAudiobook = item.type === 'Audiobook';
+  const hasKeepForeverAccess = !isAudiobook && libraryItems.some((libraryItem) => isPurchasedLibraryItem(libraryItem, item, 'ebook'));
+  const ownedReadTarget = `/read/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
   const isFreeSummaryDetail = item.componentType === 'free-summaries' || href.startsWith('/free-summaries/');
   const navigateFromHomeFreeSummary = () => {
     window.sessionStorage.setItem('freeSummaryDetailBackHref', '/');
@@ -107,7 +112,9 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
       rating={item.rating}
       reviews={item.reviews}
       priceLine={
-        isFreeItem ? null : (
+        isFreeItem ? null : hasKeepForeverAccess ? (
+          <span className='font-semibold text-[#16A34A]'>Owned</span>
+        ) : (
           <>
             {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
             <span className='font-semibold text-[#16A34A]'>Free</span>
@@ -115,9 +122,9 @@ function MobileShowcaseCard({ item, index, meta, href }: MobileShowcaseCardProps
           </>
         )
       }
-      primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-      primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
+      primaryLabel={hasKeepForeverAccess ? 'Read Now' : isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+      primaryVariant={hasKeepForeverAccess ? 'free' : isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+      onPrimaryClick={hasKeepForeverAccess ? () => router.push(ownedReadTarget) : isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
       onCoverClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
       isSaved={false}
       onSaveClick={() => {
@@ -328,6 +335,7 @@ export default function MediaContentMobile({
   const isLoadingTrendingBooks = false;
   const isLoadingPremiumSummaries = false;
   const isLoadingCategories = false;
+  const { libraryItems } = useOwnedLibraryAccess();
 
   const itemsPerPage = 3; // Keep each landing hub to 3 cards; full lists live behind See More.
   
@@ -762,6 +770,7 @@ export default function MediaContentMobile({
                 index={index}
                 meta={summary.pages ? `${summary.pages} pages` : 'Free Summary'}
                 href={`/free-summaries/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
+                libraryItems={libraryItems}
               />
             ))}
           </div>
@@ -840,6 +849,7 @@ export default function MediaContentMobile({
                 index={index}
                 meta={book.pages ? `${book.pages} pages` : book.duration || book.type}
                 href={`/books/${book.slug || book.id || book._id || generateBookSlug(book.title)}`}
+                libraryItems={libraryItems}
               />
             ))}
           </div>
@@ -903,6 +913,7 @@ export default function MediaContentMobile({
                 index={index}
                 meta={book.duration || book.type}
                 href={`/audiobooks/${book.slug || book.id || book._id || generateBookSlug(book.title)}`}
+                libraryItems={libraryItems}
               />
             ))}
           </div>
@@ -965,6 +976,7 @@ export default function MediaContentMobile({
                 index={index}
                 meta={book.pages ? `${book.pages} pages` : 'Trending'}
                 href={`/books/${(book as any).slug || (book as any).id || (book as any)._id || generateBookSlug(book.title)}`}
+                libraryItems={libraryItems}
               />
             ))}
           </div>
@@ -1027,6 +1039,7 @@ export default function MediaContentMobile({
                 index={index}
                 meta={summary.pages ? `${summary.pages} pages` : 'Premium Summary'}
                 href={`/books/${(summary as any).slug || (summary as any).id || (summary as any)._id || generateBookSlug(summary.title)}`}
+                libraryItems={libraryItems}
               />
             ))}
           </div>

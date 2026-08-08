@@ -29,6 +29,7 @@ import { tokenStore } from '@/services/api/tokenStore';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { isPurchasedLibraryItem } from '@/hooks/useOwnedLibraryAccess';
 
 const LANDING_ITEM_LIMIT = 5;
 const LANDING_COLLAPSED_ITEM_LIMIT = 6;
@@ -61,7 +62,6 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
   const { openAuthModal, refreshUser, user } = useAuth();
   const [claiming, setClaiming] = useState(false);
   const [saving, setSaving] = useState(false);
-  const itemKey = book.slug || book.id || book._id || generateBookSlug(book.title);
   const [savedOverride, setSavedOverride] = useState<boolean | null>(null);
 
   const parsePrice = (p?: string | null): number => {
@@ -84,17 +84,8 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     : isAudiobook
       ? `/audiobooks/${book.slug || book.id || book._id}/listen`
       : `/books/${book.slug || book.id || book._id}/read`;
-  const serverLibraryItem = libraryItems.find((item) => {
-    const matchesIdentity =
-      item.slug === itemKey ||
-      String(item.itemId || '') === String(book.id || book._id || '') ||
-      item.title === book.title;
-
-    if (!matchesIdentity) return false;
-    if (isAudiobook) return item.itemType === 'audiobook';
-    return item.itemType === 'ebook';
-  });
-  const claimedReadTarget = serverLibraryItem?.redirectTarget || null;
+  const hasKeepForeverAccess = !isAudiobook && libraryItems.some((item) => isPurchasedLibraryItem(item, book, 'ebook'));
+  const ownedReadTarget = `/read/${book.slug || book.id || book._id || generateBookSlug(book.title)}`;
   const hasUniquePlus = hasActiveSubscription(user);
   const displayPrice = book.price
     ? `${'\u20B9'}${book.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
@@ -218,7 +209,9 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       rating={book.rating}
       reviews={book.reviews}
       priceLine={
-        isFreeItem ? null : (
+        isFreeItem ? null : hasKeepForeverAccess ? (
+          <span className='font-semibold text-[#16A34A]'>Owned</span>
+        ) : (
           <>
             {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
             <span className='font-semibold text-[#16A34A]'>Free</span>
@@ -226,9 +219,9 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
           </>
         )
       }
-      primaryLabel={isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-      primaryVariant={isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={() => router.push(href)}
+      primaryLabel={hasKeepForeverAccess ? 'Read Now' : isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+      primaryVariant={hasKeepForeverAccess ? 'free' : isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+      onPrimaryClick={() => router.push(hasKeepForeverAccess ? ownedReadTarget : href)}
       onCoverClick={() => router.push(href)}
       isSaved={isSaved}
       onSaveClick={() => void handleSaveBook()}
@@ -790,6 +783,7 @@ export default function MediaContentDesktop({
                       }
                       return baseUrl;
                     }}
+                    libraryItems={libraryItems}
                   />
                 )}
                 {filteredNewReleaseAudiobooks.length > 0 && (
@@ -846,6 +840,7 @@ export default function MediaContentDesktop({
                         return baseUrl;
                       }}
                       subLabel='Premium'
+                      libraryItems={libraryItems}
                     />
                   </div>
                 )}

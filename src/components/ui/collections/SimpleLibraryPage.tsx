@@ -10,6 +10,7 @@ import { generateBookSlug } from '@/utils/slugify';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop, LibraryCardMobile } from '@/components/ui/cards/LibraryCard';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { useOwnedLibraryAccess } from '@/hooks/useOwnedLibraryAccess';
 import BooksSidebar from '@/components/ui/books/BooksSidebar';
 import {
   ArrowLeftIcon,
@@ -68,6 +69,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const { isOwned } = useOwnedLibraryAccess();
 
   const categories = useMemo(() => {
     return [...new Set(items.map((item) => item.category))];
@@ -312,7 +314,11 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const isSaved = isItemSaved(item);
     const hasUniquePlus = hasActiveSubscription(user);
     const displayPrice = formatDisplayPrice(item.price);
-    const priceLine = isFreeItem ? null : (
+    const hasKeepForeverAccess = !isFreeSummaryCard && isOwned(item, 'ebook');
+    const ownedReadTarget = `/read/${item.slug || item._id || item.id || generateBookSlug(item.title)}`;
+    const priceLine = isFreeItem ? null : hasKeepForeverAccess ? (
+      <span className='font-semibold text-[#16A34A]'>Owned</span>
+    ) : (
       <>
         {hasUniquePlus ? 'Read ' : <>{displayPrice ? `${displayPrice} or ` : ''}</>}
         <span className='font-semibold text-[#16A34A]'>Free</span>
@@ -321,12 +327,12 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     );
 
     const handlePrimaryClick = () => {
-      router.push(getHref(item));
+      router.push(hasKeepForeverAccess ? ownedReadTarget : getHref(item));
     };
     const handleCoverClick = () => router.push(getHref(item));
     const handleSaveClick = () => void handleSaveBook(item);
-    const primaryLabel = isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus';
-    const primaryVariant = isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus';
+    const primaryLabel = hasKeepForeverAccess ? 'Read Now' : isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus';
+    const primaryVariant = hasKeepForeverAccess ? 'free' : isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus';
 
     return (
       <div key={itemId} className='contents'>

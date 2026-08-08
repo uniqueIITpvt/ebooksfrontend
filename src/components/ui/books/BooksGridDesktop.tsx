@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { LibraryCardDesktop } from '@/components/ui/cards/LibraryCard';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { useOwnedLibraryAccess } from '@/hooks/useOwnedLibraryAccess';
 
 // Add the blob animation styles
 const blobStyles = `
@@ -54,6 +55,7 @@ export default function BooksGridDesktop({
   const [savedOverrides, setSavedOverrides] = useState<Record<string, boolean>>({});
   const { currentTrack, isPlaying, toggleTrack } = usePersistentAudioPlayer();
   const hasUniquePlus = hasActiveSubscription(user);
+  const { isOwned } = useOwnedLibraryAccess();
 
   useEffect(() => {
     // Inject blob animation styles only once
@@ -171,7 +173,11 @@ export default function BooksGridDesktop({
           const isAudiobook = item.type === 'Audiobook';
           const href = isAudiobook ? getAudiobookHref(item) : getBookHref(item);
           const free = isFreeItem(item);
-          const priceLine = free ? null : (
+          const hasKeepForeverAccess = !isAudiobook && isOwned(item, 'ebook');
+          const ownedReadTarget = `/read/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
+          const priceLine = free ? null : hasKeepForeverAccess ? (
+            <span className='font-semibold text-[#16A34A]'>Owned</span>
+          ) : (
             <>
               {hasUniquePlus ? 'Read ' : <>{formatPrice(item.price) ? `${formatPrice(item.price)} or ` : ''}</>}
               <span className='font-semibold text-[#16A34A]'>Free</span>
@@ -200,9 +206,9 @@ export default function BooksGridDesktop({
                 rating={item.rating}
                 reviews={item.reviews}
                 priceLine={priceLine}
-                primaryLabel={free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
-                primaryVariant={free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-                onPrimaryClick={() => handleUniquePlusAction(href)}
+                primaryLabel={hasKeepForeverAccess ? 'Read Now' : free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
+                primaryVariant={hasKeepForeverAccess ? 'free' : free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
+                onPrimaryClick={() => handleUniquePlusAction(hasKeepForeverAccess ? ownedReadTarget : href)}
                 onCoverClick={() => router.push(href)}
                 isSaved={isItemSaved(item)}
                 onSaveClick={() => void handleSaveBook(item, href)}
