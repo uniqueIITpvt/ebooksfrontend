@@ -273,11 +273,20 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const isEpub = Boolean(ebookUrl) && (ebookFile?.mimeType === 'application/epub+zip' || ebookName.includes('.epub'));
   const canExtractFileText = isPdf || isTextFile || isEpub;
   const hasExternalFile = Boolean(ebookUrl) && !canExtractFileText;
+  const isPreparingUploadedFile =
+    canExtractFileText && !fileTextPages.length && !pdfPageVisuals.length;
   const pages = useMemo(
-    () => (fileTextPages.length ? fileTextPages : chunkWords(summary?.description || '')),
-    [fileTextPages, summary]
+    () => {
+      if (isPreparingUploadedFile) return [''];
+      return fileTextPages.length ? fileTextPages : chunkWords(summary?.description || '');
+    },
+    [fileTextPages, isPreparingUploadedFile, summary]
   );
-  const totalPages = isPdf ? Math.max(pdfPageCount, fileTextPages.length, summary?.pages || 1) : pages.length;
+  const totalPages = isPreparingUploadedFile
+    ? 1
+    : isPdf
+      ? Math.max(pdfPageCount, fileTextPages.length, summary?.pages || 1)
+      : pages.length;
   const pageIndexes = useMemo(
     () => Array.from({ length: Math.max(totalPages, 1) }, (_, index) => index),
     [totalPages]
@@ -355,7 +364,6 @@ export default function PagedReadClient({ slug }: { slug: string }) {
 
           if (!ignore) {
             setPdfPageCount(pdf.numPages);
-            setFileTextLoading(false);
           }
 
           for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
@@ -723,7 +731,7 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 </div>
               </div>
 
-              {fileTextLoading ? (
+              {fileTextLoading || isPreparingUploadedFile ? (
                 <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-blue-100 bg-blue-50/50 px-6 text-center">
                   <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
                   <p className={`mt-4 text-sm font-semibold ${activeTheme.muted}`}>
