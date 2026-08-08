@@ -297,7 +297,7 @@ export default function PagedReadClient({
   const totalPages = isPreparingUploadedFile
     ? 1
     : isPdf
-      ? Math.max(pdfPageCount, fileTextPages.length, summary?.pages || 1)
+      ? Math.max(pdfPageCount, fileTextPages.length, 1)
       : pages.length;
   const pageIndexes = useMemo(
     () => Array.from({ length: Math.max(totalPages, 1) }, (_, index) => index),
