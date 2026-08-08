@@ -20,6 +20,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { booksApi, type Book } from '@/services/api/booksApi';
+import { libraryApi } from '@/services/api/libraryApi';
 import type { PublicBookListItem } from '@/types/publicBook';
 import { generateBookSlug } from '@/utils/slugify';
 import { AccessChoicePanel } from '@/components/ui/details/AccessChoicePanel';
@@ -44,6 +45,8 @@ export default function BookDetailClient({
   const [savingFavorite, setSavingFavorite] = useState(false);
   const [savingRelatedId, setSavingRelatedId] = useState<string | null>(null);
   const [downloadingZip, setDownloadingZip] = useState(false);
+  const [libraryPurchasedAccess, setLibraryPurchasedAccess] = useState(false);
+  const [libraryAccessChecked, setLibraryAccessChecked] = useState(false);
   const [relatedSavedOverrides, setRelatedSavedOverrides] = useState<Record<string, boolean>>({});
 
   const parseCurrency = (value?: string | number | null) =>
@@ -85,17 +88,15 @@ export default function BookDetailClient({
   const purchasedCollections = [
     (user as any)?.purchasedBooks,
     (user as any)?.ownedBooks,
-    (user as any)?.libraryBooks,
-    (user as any)?.myLibrary,
-    (user as any)?.library,
     (user as any)?.purchases,
   ];
 
-  const hasKeepForeverAccess = purchasedCollections.some(
+  const hasLocalKeepForeverAccess = purchasedCollections.some(
     (collection) => Array.isArray(collection) && collection.some(matchesCurrentBook),
   );
+  const hasKeepForeverAccess = hasLocalKeepForeverAccess || libraryPurchasedAccess;
   const canReadCurrentBook = hasKeepForeverAccess || hasUniquePlusAccess;
-  const canDownloadCurrentBook = hasKeepForeverAccess || hasUniquePlusAccess;
+  const canDownloadCurrentBook = hasKeepForeverAccess;
   const ebookDownloadUrl = currentBook.files?.ebook?.url || '';
 
   const sanitizeFileName = (value: string) =>
@@ -147,6 +148,48 @@ export default function BookDetailClient({
     });
     setIsFavorited(Boolean(saved));
   }, [currentBook, user]);
+
+  useEffect(() => {
+    if (!user) {
+      setLibraryPurchasedAccess(false);
+      setLibraryAccessChecked(true);
+      return;
+    }
+
+    let ignore = false;
+    setLibraryAccessChecked(false);
+
+    libraryApi
+      .getMyLibrary()
+      .then((response) => {
+        if (ignore) return;
+
+        const isPurchasedInLibrary = (response.data || []).some((item) => {
+          const itemId = String(item.itemId || item.id || '');
+          const itemSlug = item.slug || (item.title ? generateBookSlug(item.title) : '');
+
+          return (
+            item.itemType === 'ebook' &&
+            item.accessMode === 'purchase' &&
+            item.status === 'active' &&
+            ((currentBookId && itemId === currentBookId) ||
+              (currentBookSlug && itemSlug === currentBookSlug))
+          );
+        });
+
+        setLibraryPurchasedAccess(isPurchasedInLibrary);
+      })
+      .catch(() => {
+        if (!ignore) setLibraryPurchasedAccess(false);
+      })
+      .finally(() => {
+        if (!ignore) setLibraryAccessChecked(true);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentBookId, currentBookSlug, user]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -498,7 +541,7 @@ export default function BookDetailClient({
                 Read Now
               </button>
             )}
-            {!isReadFreeSummary && !canReadCurrentBook && (
+            {!isReadFreeSummary && libraryAccessChecked && !hasKeepForeverAccess && (
               <AccessChoicePanel
                 itemLabel="book"
                 price={currentBook.price}

@@ -28,7 +28,7 @@ import { formatSubscriptionPlanLabel, hasActiveSubscription } from '@/lib/subscr
 export default function UserProfilePage() {
   const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'saved' | 'library' | 'orders'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'owned' | 'saved' | 'library' | 'orders'>('overview');
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [librarySearch, setLibrarySearch] = useState('');
@@ -96,7 +96,7 @@ export default function UserProfilePage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedTab = params.get('tab');
-    if (requestedTab === 'subscription' || requestedTab === 'orders' || requestedTab === 'saved' || requestedTab === 'library') {
+    if (requestedTab === 'subscription' || requestedTab === 'owned' || requestedTab === 'orders' || requestedTab === 'saved' || requestedTab === 'library') {
       setActiveTab(requestedTab);
     }
   }, []);
@@ -168,7 +168,7 @@ export default function UserProfilePage() {
   };
 
   useEffect(() => {
-    if (activeTab !== 'library' || !isAuthenticated) return;
+    if (!['overview', 'subscription', 'owned', 'library'].includes(activeTab) || !isAuthenticated) return;
 
     let ignore = false;
     setLibraryLoading(true);
@@ -429,10 +429,14 @@ export default function UserProfilePage() {
   const tabs = [
     { key: 'overview' as const, label: 'Overview' },
     { key: 'subscription' as const, label: 'Subscription' },
+    { key: 'owned' as const, label: 'Owned' },
     { key: 'orders' as const, label: 'My Orders' },
     { key: 'saved' as const, label: 'Saved Books' },
     { key: 'library' as const, label: 'My Library' },
   ];
+  const ownedLibraryItems = libraryItems.filter(
+    (item) => item.accessMode === 'purchase' && item.status === 'active'
+  );
   const filteredLibraryItems = libraryItems.filter((item) => {
     const query = librarySearch.trim().toLowerCase();
     if (!query) return true;
@@ -768,6 +772,117 @@ export default function UserProfilePage() {
                     >
                       View Plans
                     </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'owned' && (
+              <div>
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-base font-bold text-gray-900">Owned Books</h3>
+                    <p className="text-xs text-gray-500">Books you purchased permanently with lifetime access.</p>
+                  </div>
+                  <Link
+                    href="/books"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                  >
+                    Browse
+                  </Link>
+                </div>
+
+                {libraryLoading ? (
+                  <div className="py-12 flex justify-center">
+                    <div className="h-10 w-10 rounded-full border-2 border-blue-200 border-t-blue-600 animate-spin" />
+                  </div>
+                ) : ownedLibraryItems.length === 0 ? (
+                  <div className="rounded-xl border border-blue-100/70 bg-white/75 py-12 text-center">
+                    <BookOpenIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No permanently owned books yet</p>
+                    <p className="text-gray-500 text-sm mb-4">Books you buy with Keep Forever will appear here.</p>
+                    <Link
+                      href="/books"
+                      className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      Browse Books
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {ownedLibraryItems.map((item) => {
+                      const readTarget = getLibraryReadTarget(item);
+                      const detailsTarget = item.slug ? `/books/${item.slug}` : item.redirectTarget.replace(/\/read$/, '');
+
+                      return (
+                        <article
+                          key={item.id}
+                          className="overflow-hidden rounded-xl border border-blue-100/80 bg-white/85 shadow-sm"
+                        >
+                          <div className="flex gap-4 p-4">
+                            <div className="relative flex h-28 w-20 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                              {item.image ? (
+                                <Image
+                                  src={item.image}
+                                  alt={item.title}
+                                  fill
+                                  className="object-contain p-2"
+                                  sizes="80px"
+                                />
+                              ) : (
+                                <BookOpenIcon className="h-8 w-8 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="mb-2 flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+                                  Lifetime Access
+                                </span>
+                                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700">
+                                  ZIP Download
+                                </span>
+                              </div>
+                              <h4 className="line-clamp-2 text-sm font-bold text-slate-950">{item.title}</h4>
+                              <p className="mt-1 line-clamp-1 text-xs text-slate-500">{item.author || 'UniqueIIT Research Center'}</p>
+                              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                                <div>
+                                  <p className="font-semibold text-slate-400">Access</p>
+                                  <p className="font-bold text-slate-700">Owned</p>
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-slate-400">Purchased</p>
+                                  <p className="font-bold text-slate-700">
+                                    {item.createdAt
+                                      ? new Date(item.createdAt).toLocaleDateString('en-US', {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                        })
+                                      : 'Available'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 border-t border-blue-100 bg-blue-50/40 p-3">
+                            <button
+                              type="button"
+                              onClick={() => router.push(readTarget)}
+                              className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                            >
+                              Read Now
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => router.push(detailsTarget)}
+                              className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50"
+                            >
+                              Access Details
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </div>
