@@ -170,6 +170,25 @@ function pdfItemsToLines(items: PdfTextItem[]) {
     .filter(Boolean);
 }
 
+function getPageHeading(text: string, fallback: string) {
+  const ignored = [
+    /^the sixty-minute edge$/i,
+    /^free summary$/i,
+    /^contents$/i,
+    /^\d+$/,
+  ];
+  const lines = text
+    .split(/\n+/)
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .filter((line) => !ignored.some((pattern) => pattern.test(line)));
+
+  const chapterLine = lines.find((line) => /\b(chapter|contents|introduction|preface|conclusion|figure)\b/i.test(line));
+  const heading = chapterLine || lines.find((line) => line.length >= 4) || fallback;
+
+  return heading.length > 34 ? `${heading.slice(0, 31).trim()}...` : heading;
+}
+
 export default function PagedReadClient({ slug }: { slug: string }) {
   const router = useRouter();
   const [summary, setSummary] = useState<ReaderSummary | null>(null);
@@ -262,6 +281,10 @@ export default function PagedReadClient({ slug }: { slug: string }) {
   const pageIndexes = useMemo(
     () => Array.from({ length: Math.max(totalPages, 1) }, (_, index) => index),
     [totalPages]
+  );
+  const pageHeadings = useMemo(
+    () => pageIndexes.map((index) => getPageHeading(pages[index] || '', summary?.title || 'Section')),
+    [pageIndexes, pages, summary?.title]
   );
   const currentPage = pages[page] || '';
   const currentPageFooter = filePageFooters[page] || '';
@@ -652,6 +675,9 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                   }`}
                 >
                   Page {index + 1}
+                  <span className={`block truncate text-[10px] leading-4 ${page === index ? 'text-white/75' : activeTheme.muted}`}>
+                    {pageHeadings[index]}
+                  </span>
                 </button>
               ))}
             </div>
@@ -673,8 +699,8 @@ export default function PagedReadClient({ slug }: { slug: string }) {
                 }`}
               >
                 Page {index + 1}
-                <span className={`block text-[10px] leading-4 ${page === index ? 'text-white/75' : activeTheme.muted}`}>
-                  Section
+                <span className={`block truncate text-[10px] leading-4 ${page === index ? 'text-white/75' : activeTheme.muted}`}>
+                  {pageHeadings[index]}
                 </span>
               </button>
             ))}
