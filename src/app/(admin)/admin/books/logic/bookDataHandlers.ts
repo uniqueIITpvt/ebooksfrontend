@@ -165,7 +165,10 @@ export function createBookDataHandlers(ctx: BookDataHandlersContext) {
       // Try to load books
       let booksData: Book[] = [];
       try {
-        const booksResponse = await booksApi.getAllBooks({ adminView: true });
+        const booksResponse = await booksApi.getAllBooks({
+          adminView: true,
+          limit: 200,
+        });
         booksData = booksResponse.data;
         setBooks(booksData);
         setFilteredBooks(booksData);
