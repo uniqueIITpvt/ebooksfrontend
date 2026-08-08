@@ -45,6 +45,7 @@ interface SimpleLibraryDetailProps {
   meta?: DetailMeta;
   ratingId?: string;
   compactMedia?: boolean;
+  themed?: boolean;
 }
 
 export default function SimpleLibraryDetail({
@@ -64,6 +65,7 @@ export default function SimpleLibraryDetail({
   meta,
   ratingId,
   compactMedia = false,
+  themed = false,
 }: SimpleLibraryDetailProps) {
   const router = useRouter();
   const { openAuthModal, user } = useAuth();
@@ -124,13 +126,13 @@ export default function SimpleLibraryDetail({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b sticky top-0 z-10">
+    <div className={`min-h-screen ${themed ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50' : 'bg-gray-50'}`}>
+      <div className={`${themed ? 'border-b border-blue-100 bg-white/80 backdrop-blur-xl' : 'bg-white border-b'} sticky top-0 z-10`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             type="button"
             onClick={handleBackClick}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -143,7 +145,7 @@ export default function SimpleLibraryDetail({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className={`grid grid-cols-1 gap-8 ${compactMedia ? 'lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10' : 'lg:grid-cols-2 lg:gap-12'}`}>
           <div className="space-y-6">
-            <div className={`relative aspect-[2/3] overflow-hidden rounded-2xl bg-white shadow-xl ${compactMedia ? 'mx-auto w-full max-w-[260px]' : 'aspect-[3/4]'}`}>
+            <div className={`relative aspect-[2/3] overflow-hidden rounded-2xl bg-white shadow-xl ${themed ? 'ring-1 ring-blue-100' : ''} ${compactMedia ? 'mx-auto w-full max-w-[260px]' : 'aspect-[3/4]'}`}>
               {image ? (
                 <Image
                   src={image}
@@ -201,7 +203,7 @@ export default function SimpleLibraryDetail({
             </div>
 
             {meta && (
-              <div className="flex flex-wrap items-center gap-5 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-sm">
+              <div className={`flex flex-wrap items-center gap-5 rounded-2xl border p-4 shadow-sm ${themed ? 'border-blue-100 bg-white/85' : 'border-gray-100 bg-white/70'}`}>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, index) => (
                     <button
@@ -258,10 +260,19 @@ export default function SimpleLibraryDetail({
                     <div className="font-semibold">{publishDateLabel}</div>
                   </div>
                 </div>
+                {themed && actionHref && (
+                  <button
+                    type="button"
+                    onClick={handleActionClick}
+                    className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-[10px] bg-gradient-to-r from-blue-500 to-indigo-600 px-5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl sm:ml-auto sm:mt-0 sm:w-auto sm:min-w-[180px] sm:px-6"
+                  >
+                    {actionLabel}
+                  </button>
+                )}
               </div>
             )}
 
-            <div className="bg-white rounded-xl p-6 shadow-sm">
+            <div className={`rounded-xl p-6 shadow-sm ${themed ? 'border border-blue-100 bg-white/85' : 'bg-white'}`}>
               <h2 className="text-xl font-bold text-gray-900 mb-4">About This Item</h2>
               <p className="text-gray-600 leading-relaxed">
                 {description}
@@ -281,7 +292,7 @@ export default function SimpleLibraryDetail({
               </div>
             )}
 
-            <div className="flex gap-3 pt-4">
+            <div className={`flex gap-3 pt-4 ${themed && actionHref ? 'hidden' : ''}`}>
               {actionHref ? (
                 <button
                   type="button"

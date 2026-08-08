@@ -29,6 +29,7 @@ export default async function FreeSummaryDetailPage({ params }: { params: Promis
       actionHref={`/free-summaries/${slug}/read`}
       actionRequiresAuth
       compactMedia
+      themed
       ratingId={summary.slug || summary._id || slug}
       meta={{
         rating: summaryMeta.rating ?? 0,
