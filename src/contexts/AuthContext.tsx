@@ -53,10 +53,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
+        const hasStoredAccessToken = Boolean(authApi.getToken());
         const isStoredAdmin =
           storedUser.role === 'admin' || storedUser.role === 'superadmin';
 
-        if (isStoredAdmin) {
+        if (isStoredAdmin || hasStoredAccessToken) {
           setUser(storedUser);
           setIsLoading(false);
         }
@@ -65,6 +66,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (refreshResponse.success) {
           const response = await authApi.getProfile();
           setUser(response.success && response.data ? response.data : refreshResponse.data?.user || null);
+        } else if (hasStoredAccessToken) {
+          setUser(storedUser);
         } else {
           localStorage.removeItem('user_user');
           localStorage.removeItem('admin_user');

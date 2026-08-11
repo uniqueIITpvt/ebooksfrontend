@@ -43,6 +43,7 @@ export default function AuthCallbackClient() {
 
     const finishGoogleLogin = async () => {
       const user = parseUser(searchParams?.get('user') || null);
+      const token = searchParams?.get('token') || null;
       const returnUrl = searchParams?.get('returnUrl') || '/';
 
       if (!user) {
@@ -50,10 +51,13 @@ export default function AuthCallbackClient() {
         return;
       }
 
+      if (token) {
+        authApi.setToken(token, user);
+      }
       authApi.setUser(user);
 
-      const refreshResponse = await authApi.refreshToken();
-      const activeUser = refreshResponse.success && refreshResponse.data?.user
+      const refreshResponse = token ? null : await authApi.refreshToken();
+      const activeUser = refreshResponse?.success && refreshResponse.data?.user
         ? refreshResponse.data.user
         : user;
 
