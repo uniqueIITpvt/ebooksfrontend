@@ -28,6 +28,14 @@ const getPostLoginReturnUrl = (returnUrl: string, user: User) => {
   return returnTo && returnTo.startsWith('/') ? returnTo : '/';
 };
 
+const refreshWithTimeout = async () => {
+  const timeout = new Promise<null>((resolve) => {
+    window.setTimeout(() => resolve(null), 1500);
+  });
+
+  return Promise.race([authApi.refreshToken(), timeout]);
+};
+
 export const AuthCallbackLoading = () => (
   <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
     Signing you in...
@@ -53,16 +61,13 @@ export default function AuthCallbackClient() {
 
       if (token) {
         authApi.setToken(token, user);
+      } else {
+        await refreshWithTimeout();
       }
       authApi.setUser(user);
 
-      const refreshResponse = token ? null : await authApi.refreshToken();
-      const activeUser = refreshResponse?.success && refreshResponse.data?.user
-        ? refreshResponse.data.user
-        : user;
-
       if (!cancelled) {
-        window.location.replace(getPostLoginReturnUrl(returnUrl, activeUser));
+        window.location.replace(getPostLoginReturnUrl(returnUrl, user));
       }
     };
 
