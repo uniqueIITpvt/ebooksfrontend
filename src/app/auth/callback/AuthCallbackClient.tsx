@@ -39,16 +39,34 @@ export default function AuthCallbackClient() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const user = parseUser(searchParams?.get('user') || null);
-    const returnUrl = searchParams?.get('returnUrl') || '/';
+    let cancelled = false;
 
-    if (user) {
+    const finishGoogleLogin = async () => {
+      const user = parseUser(searchParams?.get('user') || null);
+      const returnUrl = searchParams?.get('returnUrl') || '/';
+
+      if (!user) {
+        router.replace('/user/auth?mode=signin');
+        return;
+      }
+
       authApi.setUser(user);
-      router.replace(getPostLoginReturnUrl(returnUrl, user));
-      return;
-    }
 
-    router.replace('signin');
+      const refreshResponse = await authApi.refreshToken();
+      const activeUser = refreshResponse.success && refreshResponse.data?.user
+        ? refreshResponse.data.user
+        : user;
+
+      if (!cancelled) {
+        window.location.replace(getPostLoginReturnUrl(returnUrl, activeUser));
+      }
+    };
+
+    void finishGoogleLogin();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router, searchParams]);
 
   return <AuthCallbackLoading />;
