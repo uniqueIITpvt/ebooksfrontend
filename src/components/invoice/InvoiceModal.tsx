@@ -361,15 +361,6 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
                   <p className="text-xs font-semibold text-blue-700">{emailMessage}</p>
                 )}
                 <div className="flex flex-wrap justify-end gap-2">
-                  {paymentId && (
-                    <button
-                      onClick={handleEmailInvoice}
-                      disabled={emailSending}
-                      className="rounded border border-blue-200 bg-white px-5 py-3 text-sm font-semibold text-blue-700 shadow-sm hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {emailSending ? 'Sending...' : 'Email Invoice'}
-                    </button>
-                  )}
                   <button
                     onClick={handlePrintInvoice}
                     className="rounded bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700"
