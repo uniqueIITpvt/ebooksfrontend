@@ -83,6 +83,7 @@ export default function PaymentsPage() {
   const [editStatus, setEditStatus] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
@@ -201,7 +202,7 @@ export default function PaymentsPage() {
 
   const handleViewInvoice = async (payment: Payment) => {
     setSelectedPayment(payment);
-    setDetailsOpen(true);
+    setInvoiceOpen(true);
     setDetailsLoading(true);
 
     try {
@@ -217,6 +218,9 @@ export default function PaymentsPage() {
       setDetailsLoading(false);
     }
   };
+
+  const getInvoiceData = (payment: Payment | null) =>
+    payment && typeof payment.invoiceId === 'object' ? payment.invoiceId : null;
 
   const handleEditSubmit = async () => {
     if (!selectedPayment) return;
@@ -705,6 +709,168 @@ export default function PaymentsPage() {
                       Download PDF
                     </Link>
                   )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {invoiceOpen && selectedPayment && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/55 px-4 pb-8 pt-24">
+          <div className="relative w-full max-w-4xl">
+            <button
+              onClick={() => setInvoiceOpen(false)}
+              className="absolute -top-11 right-0 rounded border border-white/40 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50"
+            >
+              Close
+            </button>
+
+            {detailsLoading ? (
+              <div className="flex min-h-[520px] items-center justify-center bg-white shadow-2xl">
+                <RefreshCw className="h-7 w-7 animate-spin text-[#8f3c24]" />
+              </div>
+            ) : (
+              <div className="bg-[#f4f5f7] p-3 shadow-2xl sm:p-5">
+                <div className="mx-auto max-h-[calc(100vh-152px)] max-w-[780px] overflow-y-auto bg-white px-8 py-7 text-black shadow-sm sm:px-10">
+                  <div className="mb-7 flex items-start justify-between gap-8">
+                    <div>
+                      <h2 className="text-2xl font-bold tracking-normal">Invoice</h2>
+                      <dl className="mt-4 grid grid-cols-[112px_1fr] gap-y-1.5 text-[11px]">
+                        <dt className="font-semibold">Invoice number</dt>
+                        <dd>{getInvoiceData(selectedPayment)?.invoiceNumber || '-'}</dd>
+                        <dt className="font-semibold">Date of issue</dt>
+                        <dd>
+                          {getInvoiceData(selectedPayment)?.invoiceDate
+                            ? new Date(getInvoiceData(selectedPayment)?.invoiceDate || '').toLocaleDateString()
+                            : selectedPayment.paidAt
+                              ? new Date(selectedPayment.paidAt).toLocaleDateString()
+                              : '-'}
+                        </dd>
+                        <dt className="font-semibold">Payment date</dt>
+                        <dd>{selectedPayment.paidAt ? new Date(selectedPayment.paidAt).toLocaleDateString() : '-'}</dd>
+                      </dl>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-3xl font-extrabold leading-none text-[#8f3c24]">UniqueIIT</div>
+                      <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-500">
+                        Research Center
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-6 grid grid-cols-2 gap-14 text-[11px] leading-5">
+                    <div>
+                      <h3 className="mb-3 font-bold">UniqueIIT Research Center</h3>
+                      <p>India</p>
+                      <p>{selectedPayment.customer?.phone || ''}</p>
+                      <p>support@uniqueiit.com</p>
+                    </div>
+
+                    <div>
+                      <h3 className="mb-3 font-bold">Bill to</h3>
+                      <p>{selectedPayment.customer?.name || '-'}</p>
+                      <p>{selectedPayment.customer?.address?.city || ''}</p>
+                      <p>{selectedPayment.customer?.address?.state || selectedPayment.customer?.address?.country || 'India'}</p>
+                      <p>{selectedPayment.customer?.email || '-'}</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-8">
+                    <div className="text-2xl font-extrabold">
+                      {formatCurrency(selectedPayment.totalAmount ?? selectedPayment.amount, selectedPayment.currency)} paid
+                    </div>
+                    <span className="mt-4 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                      {selectedPayment.status === 'completed' ? 'Payment confirmed' : selectedPayment.status}
+                    </span>
+                  </div>
+
+                  <table className="mb-4 w-full table-fixed text-[11px]">
+                    <thead>
+                      <tr className="border-b border-black">
+                        <th className="w-1/2 pb-2 text-left font-medium">Description</th>
+                        <th className="w-16 pb-2 text-right font-medium">Qty</th>
+                        <th className="w-28 pb-2 text-right font-medium">Unit price</th>
+                        <th className="w-24 pb-2 text-right font-medium">Tax</th>
+                        <th className="w-28 pb-2 text-right font-medium">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-3 align-top">
+                          <div className="font-bold">{selectedPayment.itemName}</div>
+                          <div className="mt-1 text-gray-600">
+                            {selectedPayment.itemType || selectedPayment.paymentType}
+                            {getPlanLabel(selectedPayment) ? ` - ${getPlanLabel(selectedPayment)}` : ''}
+                          </div>
+                          {selectedPayment.razorpay?.paymentId && (
+                            <div className="mt-1 text-gray-600">Razorpay: {selectedPayment.razorpay.paymentId}</div>
+                          )}
+                        </td>
+                        <td className="py-3 text-right align-top">{selectedPayment.quantity || 1}</td>
+                        <td className="py-3 text-right align-top">
+                          {formatCurrency(selectedPayment.subtotalAmount ?? selectedPayment.amount, selectedPayment.currency)}
+                        </td>
+                        <td className="py-3 text-right align-top">
+                          {selectedPayment.taxAmount ? formatCurrency(selectedPayment.taxAmount, selectedPayment.currency) : 'Included'}
+                        </td>
+                        <td className="py-3 text-right align-top">
+                          {formatCurrency(selectedPayment.totalAmount ?? selectedPayment.amount, selectedPayment.currency)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div className="mb-5 rounded-lg border border-gray-300 p-4 text-[11px]">
+                    <div className="grid grid-cols-2 gap-x-16 gap-y-5">
+                      <div>
+                        <h4 className="mb-2 font-bold">Customer</h4>
+                        <p>{selectedPayment.customer?.name || '-'}</p>
+                        <p>{selectedPayment.customer?.email || '-'}</p>
+                        <p>{selectedPayment.customer?.phone || '-'}</p>
+                      </div>
+                      <div>
+                        <h4 className="mb-2 font-bold">Payment</h4>
+                        <p className="capitalize">{selectedPayment.paymentDetails?.method || selectedPayment.paymentMethod}</p>
+                        <p>{selectedPayment.gateway || 'razorpay'} / {selectedPayment.gatewayEnvironment || '-'}</p>
+                        <p>{selectedPayment.razorpay?.orderId || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="ml-auto w-full max-w-sm text-[11px]">
+                    {[
+                      ['Subtotal', formatCurrency(selectedPayment.subtotalAmount ?? selectedPayment.amount, selectedPayment.currency)],
+                      ['Discount', formatCurrency(selectedPayment.discountAmount || 0, selectedPayment.currency)],
+                      ['CGST', formatCurrency(selectedPayment.cgstAmount || 0, selectedPayment.currency)],
+                      ['SGST', formatCurrency(selectedPayment.sgstAmount || 0, selectedPayment.currency)],
+                      ['IGST', formatCurrency(selectedPayment.igstAmount || 0, selectedPayment.currency)],
+                      ['Total', formatCurrency(selectedPayment.totalAmount ?? selectedPayment.amount, selectedPayment.currency)],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between border-b border-gray-300 py-2">
+                        <span className={label === 'Total' ? 'font-bold' : ''}>{label}</span>
+                        <span className={label === 'Total' ? 'font-bold' : ''}>{value}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between py-2.5 text-sm font-extrabold">
+                      <span>Amount paid</span>
+                      <span>{formatCurrency(selectedPayment.totalAmount ?? selectedPayment.amount, selectedPayment.currency)}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-7 border-t border-gray-300 pt-3 text-[10px] text-[#8f3c24]">
+                    Your payment has been confirmed. Thank you for choosing UniqueIIT Research Center.
+                  </div>
+
+                  <div className="mt-5 flex justify-end">
+                    <button
+                      onClick={() => window.print()}
+                      className="rounded bg-[#8f3c24] px-5 py-3 text-sm font-semibold text-white hover:bg-[#78311d]"
+                    >
+                      Print / Save as PDF
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
