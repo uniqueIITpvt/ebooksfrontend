@@ -3,24 +3,72 @@
 import React, { useEffect, useState } from 'react';
 import { API_CONFIG } from '@/config/api';
 import { tokenStore } from '@/services/api/tokenStore';
-import { CreditCard, RefreshCw, CheckCircle, XCircle, Clock, Search, Pencil, Trash2 } from 'lucide-react';
+import { CreditCard, RefreshCw, Search, Pencil, Trash2, Eye, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 interface Payment {
   _id: string;
+  paymentNumber?: string;
   paymentType: string;
+  itemType?: 'subscription' | 'ebook' | 'audiobook';
   itemName: string;
+  itemId?: string | null;
+  planType?: 'basic' | 'premium' | 'pro' | null;
+  quantity?: number;
   amount: number;
   totalAmount?: number;
   currency: string;
   paymentMethod: string;
   status: string;
+  razorpay?: {
+    customerId?: string | null;
+    orderId?: string | null;
+    paymentId?: string | null;
+    refundId?: string | null;
+  };
+  paymentDetails?: Record<string, string | number | boolean | null>;
+  refund?: {
+    status?: string;
+    amount?: number;
+    refundedAt?: string | null;
+  };
+  invoiceId?: {
+    _id: string;
+    invoiceNumber?: string;
+    invoiceStatus?: string;
+    invoiceDate?: string;
+    pdfPath?: string | null;
+  } | string | null;
+  orderId?: any;
+  subscriptionId?: any;
   metadata?: Record<string, string>;
   customer: {
     name: string;
     email: string;
+    phone?: string;
+    companyName?: string;
+    gstin?: string;
+    address?: {
+      line1?: string;
+      line2?: string;
+      city?: string;
+      state?: string;
+      pincode?: string;
+      country?: string;
+    };
   };
   createdAt: string;
+  paidAt?: string | null;
+  capturedAt?: string | null;
+  subtotalAmount?: number;
+  discountAmount?: number;
+  taxableAmount?: number;
+  cgstAmount?: number;
+  sgstAmount?: number;
+  igstAmount?: number;
+  taxAmount?: number;
+  gateway?: string;
+  gatewayEnvironment?: string;
 }
 
 export default function PaymentsPage() {
@@ -34,6 +82,8 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [editStatus, setEditStatus] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
     fetchPayments();
@@ -59,6 +109,8 @@ export default function PaymentsPage() {
   const filteredPayments = payments.filter(p => {
     const matchesSearch = p.itemName?.toLowerCase().includes(search.toLowerCase()) ||
                          p.customer?.email?.toLowerCase().includes(search.toLowerCase()) ||
+                         p.paymentNumber?.toLowerCase().includes(search.toLowerCase()) ||
+                         p.razorpay?.paymentId?.toLowerCase().includes(search.toLowerCase()) ||
                          p._id?.includes(search);
     const matchesFilter = filter === 'all' || p.status === filter;
     const matchesType = typeFilter === 'all' || p.paymentType === typeFilter;
@@ -66,7 +118,13 @@ export default function PaymentsPage() {
   });
 
   const formatCurrency = (amount: number, currency = 'INR') =>
-    `${currency} ${amount.toLocaleString('en-IN')}`;
+    `${currency} ${Number(amount || 0).toLocaleString('en-IN')}`;
+
+  const getInvoiceNumber = (payment: Payment) =>
+    typeof payment.invoiceId === 'object' && payment.invoiceId ? payment.invoiceId.invoiceNumber : '';
+
+  const getPlanLabel = (payment: Payment) =>
+    payment.planType || (payment.paymentType === 'subscription' ? payment.itemId || payment.metadata?.plan : '');
 
   const getPaymentFormat = (payment: Payment) => {
     const metadata = payment.metadata || {};
@@ -101,6 +159,63 @@ export default function PaymentsPage() {
   const handleDeleteClick = (payment: Payment) => {
     setSelectedPayment(payment);
     setDeleteModalOpen(true);
+  };
+
+  const handleDetailsClick = async (payment: Payment) => {
+    setSelectedPayment(payment);
+    setDetailsOpen(true);
+    setDetailsLoading(true);
+
+    try {
+      const token = tokenStore.getAccessToken();
+      const res = await fetch(`${API_CONFIG.API_BASE_URL}/payments/${payment._id}/details`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setSelectedPayment(data.data);
+    } catch (error) {
+      console.error('Error fetching payment details:', error);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleGenerateInvoice = async () => {
+    if (!selectedPayment) return;
+
+    try {
+      const token = tokenStore.getAccessToken();
+      const res = await fetch(`${API_CONFIG.API_BASE_URL}/payments/${selectedPayment._id}/invoice`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedPayment({ ...selectedPayment, invoiceId: data.data });
+        fetchPayments();
+      }
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+    }
+  };
+
+  const handleViewInvoice = async (payment: Payment) => {
+    setSelectedPayment(payment);
+    setDetailsOpen(true);
+    setDetailsLoading(true);
+
+    try {
+      const token = tokenStore.getAccessToken();
+      const res = await fetch(`${API_CONFIG.API_BASE_URL}/payments/${payment._id}/invoice`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setSelectedPayment({ ...payment, invoiceId: data.data });
+    } catch (error) {
+      console.error('Error fetching invoice:', error);
+    } finally {
+      setDetailsLoading(false);
+    }
   };
 
   const handleEditSubmit = async () => {
@@ -265,27 +380,42 @@ export default function PaymentsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table className="w-full">
+      <div className="overflow-x-auto rounded-lg bg-white shadow dark:bg-gray-800">
+        <table className="w-full min-w-[1320px] table-fixed">
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
               {/* <th className="px-4 py-3 text-left text-sm font-medium">ID</th> */}
-              <th className="px-4 py-3 text-left text-sm font-medium">Item</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Customer</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Method</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+              <th className="w-44 px-4 py-3 text-left text-sm font-medium">Payment ID</th>
+              <th className="w-64 px-4 py-3 text-left text-sm font-medium">Item</th>
+              <th className="w-36 px-4 py-3 text-left text-sm font-medium">Type</th>
+              <th className="w-24 px-4 py-3 text-left text-sm font-medium">Plan</th>
+              <th className="w-20 px-4 py-3 text-left text-sm font-medium">Qty</th>
+              <th className="w-64 px-4 py-3 text-left text-sm font-medium">Customer</th>
+              <th className="w-28 px-4 py-3 text-left text-sm font-medium">Amount</th>
+              <th className="w-32 px-4 py-3 text-left text-sm font-medium">Method</th>
+              <th className="w-32 px-4 py-3 text-left text-sm font-medium">Status</th>
+              <th className="w-28 px-4 py-3 text-left text-sm font-medium">Date</th>
+              <th className="w-44 px-4 py-3 text-left text-sm font-medium">Invoice</th>
+              <th className="w-32 px-4 py-3 text-left text-sm font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {filteredPayments.map((payment) => (
               <tr key={payment._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                 {/* <td className="px-4 py-3 text-sm font-mono">{payment._id?.slice(-8)}</td> */}
+                <td className="px-4 py-3 text-xs font-mono">
+                  <div>{payment.paymentNumber || payment._id?.slice(-8)}</div>
+                  {payment.razorpay?.paymentId && (
+                    <div className="mt-1 text-[11px] text-gray-500">{payment.razorpay.paymentId}</div>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-sm">
-                  <div className="font-medium">{payment.itemName}</div>
+                  <div
+                    className="max-h-11 overflow-hidden font-medium leading-5 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+                    title={payment.itemName}
+                  >
+                    {payment.itemName}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-col items-start gap-1.5">
@@ -297,12 +427,14 @@ export default function PaymentsPage() {
                     )}
                   </div>
                 </td>
+                <td className="px-4 py-3 text-sm capitalize">{getPlanLabel(payment) || '-'}</td>
+                <td className="px-4 py-3 text-sm">{payment.quantity || 1}</td>
                 <td className="px-4 py-3 text-sm">
                   <div>{payment.customer?.name}</div>
                   <div className="text-xs text-gray-500">{payment.customer?.email}</div>
                 </td>
                 <td className="px-4 py-3 text-sm font-medium">
-                  {payment.currency} {payment.amount}
+                  {formatCurrency(payment.totalAmount ?? payment.amount, payment.currency)}
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <div className="flex items-center gap-1">
@@ -314,8 +446,29 @@ export default function PaymentsPage() {
                 <td className="px-4 py-3 text-sm text-gray-500">
                   {new Date(payment.createdAt).toLocaleDateString()}
                 </td>
+                <td className="px-4 py-3 text-sm">
+                  {getInvoiceNumber(payment) ? (
+                    <button
+                      onClick={() => handleViewInvoice(payment)}
+                      className="inline-flex max-w-full items-center gap-1 text-left text-emerald-700 hover:text-emerald-900"
+                      title="View Invoice"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span className="truncate">{getInvoiceNumber(payment)}</span>
+                    </button>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDetailsClick(payment)}
+                      className="p-1.5 text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      title="View Details"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleEditClick(payment)}
                       className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors"
@@ -402,6 +555,159 @@ export default function PaymentsPage() {
                 {deleteLoading ? 'Deleting...' : 'Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {detailsOpen && selectedPayment && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50">
+          <div className="h-full w-full max-w-3xl overflow-y-auto bg-white p-6 shadow-xl dark:bg-gray-900">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Payment Details</h3>
+                <p className="text-sm text-gray-500">{selectedPayment.paymentNumber || selectedPayment._id}</p>
+              </div>
+              <button
+                onClick={() => setDetailsOpen(false)}
+                className="rounded border px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+              >
+                Close
+              </button>
+            </div>
+
+            {detailsLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
+              </div>
+            ) : (
+              <div className="space-y-6 text-sm">
+                {[
+                  {
+                    title: 'Customer',
+                    rows: [
+                      ['Name', selectedPayment.customer?.name],
+                      ['Email', selectedPayment.customer?.email],
+                      ['Phone', selectedPayment.customer?.phone],
+                      ['Company', selectedPayment.customer?.companyName],
+                      ['GSTIN', selectedPayment.customer?.gstin],
+                      [
+                        'Billing Address',
+                        [
+                          selectedPayment.customer?.address?.line1,
+                          selectedPayment.customer?.address?.line2,
+                          selectedPayment.customer?.address?.city,
+                          selectedPayment.customer?.address?.state,
+                          selectedPayment.customer?.address?.pincode,
+                          selectedPayment.customer?.address?.country,
+                        ].filter(Boolean).join(', '),
+                      ],
+                    ],
+                  },
+                  {
+                    title: 'Purchase',
+                    rows: [
+                      ['Internal Order', selectedPayment.orderId?.orderNumber || selectedPayment.orderId?._id],
+                      ['Type', selectedPayment.itemType || selectedPayment.paymentType],
+                      ['Item', selectedPayment.itemName],
+                      ['Plan', getPlanLabel(selectedPayment)],
+                      ['Quantity', selectedPayment.quantity],
+                    ],
+                  },
+                  {
+                    title: 'Amount',
+                    rows: [
+                      ['Subtotal', formatCurrency(selectedPayment.subtotalAmount ?? selectedPayment.amount, selectedPayment.currency)],
+                      ['Discount', formatCurrency(selectedPayment.discountAmount || 0, selectedPayment.currency)],
+                      ['Taxable', formatCurrency(selectedPayment.taxableAmount ?? selectedPayment.amount, selectedPayment.currency)],
+                      ['CGST', formatCurrency(selectedPayment.cgstAmount || 0, selectedPayment.currency)],
+                      ['SGST', formatCurrency(selectedPayment.sgstAmount || 0, selectedPayment.currency)],
+                      ['IGST', formatCurrency(selectedPayment.igstAmount || 0, selectedPayment.currency)],
+                      ['Tax', formatCurrency(selectedPayment.taxAmount || 0, selectedPayment.currency)],
+                      ['Grand Total', formatCurrency(selectedPayment.totalAmount ?? selectedPayment.amount, selectedPayment.currency)],
+                    ],
+                  },
+                  {
+                    title: 'Razorpay',
+                    rows: [
+                      ['Gateway', selectedPayment.gateway || 'razorpay'],
+                      ['Environment', selectedPayment.gatewayEnvironment],
+                      ['Customer ID', selectedPayment.razorpay?.customerId],
+                      ['Order ID', selectedPayment.razorpay?.orderId],
+                      ['Payment ID', selectedPayment.razorpay?.paymentId],
+                    ],
+                  },
+                  {
+                    title: 'Payment Method',
+                    rows: [
+                      ['Method', selectedPayment.paymentDetails?.method || selectedPayment.paymentMethod],
+                      ['Card Network', selectedPayment.paymentDetails?.cardNetwork],
+                      ['Debit/Credit', selectedPayment.paymentDetails?.cardType],
+                      ['Card Last 4', selectedPayment.paymentDetails?.cardLast4],
+                      ['Issuer', selectedPayment.paymentDetails?.cardIssuer],
+                      ['Domestic/International', selectedPayment.paymentDetails?.international === true ? 'International' : selectedPayment.paymentDetails?.international === false ? 'Domestic' : ''],
+                      ['UPI VPA', selectedPayment.paymentDetails?.upiVpa],
+                      ['Bank', selectedPayment.paymentDetails?.bankName],
+                      ['Wallet', selectedPayment.paymentDetails?.walletName],
+                    ],
+                  },
+                  {
+                    title: 'Status',
+                    rows: [
+                      ['Payment Status', selectedPayment.status],
+                      ['Paid At', selectedPayment.paidAt ? new Date(selectedPayment.paidAt).toLocaleString() : ''],
+                      ['Captured At', selectedPayment.capturedAt ? new Date(selectedPayment.capturedAt).toLocaleString() : ''],
+                    ],
+                  },
+                  {
+                    title: 'Refund',
+                    rows: [
+                      ['Refund Status', selectedPayment.refund?.status || 'none'],
+                      ['Refund Amount', formatCurrency(selectedPayment.refund?.amount || 0, selectedPayment.currency)],
+                      ['Razorpay Refund ID', selectedPayment.razorpay?.refundId],
+                      ['Refund Date', selectedPayment.refund?.refundedAt ? new Date(selectedPayment.refund.refundedAt).toLocaleString() : ''],
+                    ],
+                  },
+                  {
+                    title: 'Invoice',
+                    rows: [
+                      ['Invoice Number', typeof selectedPayment.invoiceId === 'object' ? selectedPayment.invoiceId?.invoiceNumber : ''],
+                      ['Invoice Status', typeof selectedPayment.invoiceId === 'object' ? selectedPayment.invoiceId?.invoiceStatus : ''],
+                      ['Invoice Date', typeof selectedPayment.invoiceId === 'object' && selectedPayment.invoiceId?.invoiceDate ? new Date(selectedPayment.invoiceId.invoiceDate).toLocaleDateString() : ''],
+                    ],
+                  },
+                ].map((section) => (
+                  <section key={section.title} className="border-b border-gray-100 pb-4 dark:border-gray-800">
+                    <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">{section.title}</h4>
+                    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {section.rows.map(([label, value]) => (
+                        <div key={String(label)}>
+                          <dt className="text-xs text-gray-500">{label}</dt>
+                          <dd className="mt-1 break-words font-medium text-gray-900 dark:text-gray-100">{value || '-'}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                ))}
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={handleGenerateInvoice}
+                    className="inline-flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Generate Invoice
+                  </button>
+                  {typeof selectedPayment.invoiceId === 'object' && selectedPayment.invoiceId?.pdfPath && (
+                    <Link
+                      href={selectedPayment.invoiceId.pdfPath}
+                      className="inline-flex items-center gap-2 rounded border px-4 py-2 hover:bg-gray-50"
+                    >
+                      Download PDF
+                    </Link>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
