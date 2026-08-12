@@ -26,47 +26,7 @@ import { API_CONFIG } from '@/config/api';
 import { tokenStore } from '@/services/api/tokenStore';
 import { generateBookSlug } from '@/utils/slugify';
 import { formatSubscriptionPlanLabel, hasActiveSubscription } from '@/lib/subscription';
-
-interface InvoiceData {
-  invoiceNumber?: string;
-  invoiceDate?: string;
-  customer?: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    address?: {
-      city?: string;
-      state?: string;
-      country?: string;
-    };
-  };
-  seller?: {
-    tradeName?: string;
-    legalName?: string;
-  };
-  subtotal?: number;
-  discountAmount?: number;
-  cgstAmount?: number;
-  sgstAmount?: number;
-  igstAmount?: number;
-  taxAmount?: number;
-  grandTotal?: number;
-  currency?: string;
-  payment?: {
-    method?: string;
-    status?: string;
-    razorpayPaymentId?: string;
-  };
-  items?: Array<{
-    itemName?: string;
-    itemType?: string;
-    planType?: string | null;
-    quantity?: number;
-    unitPrice?: number;
-    taxAmount?: number;
-    lineTotal?: number;
-  }>;
-}
+import InvoiceModal, { type InvoiceRecord } from '@/components/invoice/InvoiceModal';
 
 export default function UserProfilePage() {
   const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
@@ -94,7 +54,7 @@ export default function UserProfilePage() {
   const [otpSent, setOtpSent] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
 
   const fileToDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -413,9 +373,6 @@ export default function UserProfilePage() {
     router.push('/');
   };
 
-  const formatInvoiceCurrency = (amount?: number, currency = 'INR') =>
-    `${currency} ${Number(amount || 0).toLocaleString('en-IN')}`;
-
   const handleViewInvoice = async (paymentId?: string | null) => {
     if (!paymentId) return;
 
@@ -441,69 +398,6 @@ export default function UserProfilePage() {
     } finally {
       setInvoiceLoading(false);
     }
-  };
-
-  const handlePrintInvoice = () => {
-    const invoiceElement = document.querySelector('.invoice-print-area');
-    if (!invoiceElement) return;
-
-    const printWindow = window.open('', '_blank', 'width=900,height=1200');
-    if (!printWindow) {
-      window.print();
-      return;
-    }
-
-    const headAssets = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map((node) => node.outerHTML)
-      .join('');
-
-    printWindow.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <title>Invoice</title>
-          ${headAssets}
-          <style>
-            @page { size: A4 portrait; margin: 0; }
-            html, body {
-              width: 210mm;
-              height: 297mm;
-              margin: 0;
-              overflow: hidden;
-              background: white;
-            }
-            body {
-              display: flex;
-              align-items: flex-start;
-              justify-content: center;
-            }
-            .invoice-print-area {
-              width: 210mm !important;
-              height: 297mm !important;
-              max-width: none !important;
-              max-height: none !important;
-              overflow: hidden !important;
-              margin: 0 !important;
-              padding: 14mm !important;
-              box-sizing: border-box !important;
-              box-shadow: none !important;
-              background: white !important;
-              font-size: 10px !important;
-              print-color-adjust: exact;
-              -webkit-print-color-adjust: exact;
-            }
-            .no-print { display: none !important; }
-          </style>
-        </head>
-        <body>${invoiceElement.outerHTML}</body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
   };
 
   // Redirect if not authenticated
@@ -1344,203 +1238,12 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
-      {invoiceOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/55 px-4 pb-8 pt-24">
-          <div className="relative w-full max-w-4xl">
-            <button
-              onClick={() => setInvoiceOpen(false)}
-              className="no-print absolute -top-11 right-0 rounded border border-white/40 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50"
-            >
-              Close
-            </button>
-
-            {invoiceLoading || !selectedInvoice ? (
-              <div className="flex min-h-[520px] items-center justify-center bg-white shadow-2xl">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-              </div>
-            ) : (
-              <div className="shadow-2xl">
-                <div className="invoice-print-area mx-auto max-h-[calc(100vh-152px)] w-full max-w-[780px] overflow-y-auto bg-white px-8 py-7 text-black shadow-sm sm:px-10">
-                  <div className="mb-7 flex items-start justify-between gap-8">
-                    <div>
-                      <h2 className="text-2xl font-bold tracking-normal">Invoice</h2>
-                      <dl className="mt-4 grid grid-cols-[112px_1fr] gap-y-1.5 text-[11px]">
-                        <dt className="font-semibold">Invoice number</dt>
-                        <dd>{selectedInvoice.invoiceNumber || '-'}</dd>
-                        <dt className="font-semibold">Date of issue</dt>
-                        <dd>
-                          {selectedInvoice.invoiceDate
-                            ? new Date(selectedInvoice.invoiceDate).toLocaleDateString()
-                            : '-'}
-                        </dd>
-                      </dl>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-3xl font-extrabold leading-none text-[#2563eb]">TechUniqueIIT</div>
-                      <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-500">
-                        Research Center
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-6 grid grid-cols-2 gap-14 text-[11px] leading-5">
-                    <div>
-                      <h3 className="mb-3 font-bold">{selectedInvoice.seller?.tradeName || selectedInvoice.seller?.legalName || 'TechUniqueIIT Research Center'}</h3>
-                      <p>India</p>
-                      <p>support@uniqueiit.com</p>
-                    </div>
-
-                    <div>
-                      <h3 className="mb-3 font-bold">Bill to</h3>
-                      <p>{selectedInvoice.customer?.name || '-'}</p>
-                      <p>{selectedInvoice.customer?.address?.city || ''}</p>
-                      <p>{selectedInvoice.customer?.address?.state || selectedInvoice.customer?.address?.country || 'India'}</p>
-                      <p>{selectedInvoice.customer?.email || '-'}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-8">
-                    <div className="text-2xl font-extrabold">
-                      {formatInvoiceCurrency(selectedInvoice.grandTotal, selectedInvoice.currency)} paid
-                    </div>
-                    <span className="mt-4 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-                      Payment confirmed
-                    </span>
-                  </div>
-
-                  <table className="mb-4 w-full table-fixed text-[11px]">
-                    <thead>
-                      <tr className="border-b border-blue-900">
-                        <th className="w-1/2 pb-2 text-left font-medium">Description</th>
-                        <th className="w-16 pb-2 text-right font-medium">Qty</th>
-                        <th className="w-28 pb-2 text-right font-medium">Unit price</th>
-                        <th className="w-24 pb-2 text-right font-medium">Tax</th>
-                        <th className="w-28 pb-2 text-right font-medium">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(selectedInvoice.items || []).map((item, index) => (
-                        <tr key={`${item.itemName}-${index}`}>
-                          <td className="py-3 align-top">
-                            <div className="font-bold">{item.itemName || '-'}</div>
-                            <div className="mt-1 text-slate-600">
-                              {item.itemType || ''}
-                              {item.planType ? ` - ${item.planType}` : ''}
-                            </div>
-                            {selectedInvoice.payment?.razorpayPaymentId && (
-                              <div className="mt-1 text-slate-600">Razorpay: {selectedInvoice.payment.razorpayPaymentId}</div>
-                            )}
-                          </td>
-                          <td className="py-3 text-right align-top">{item.quantity || 1}</td>
-                          <td className="py-3 text-right align-top">
-                            {formatInvoiceCurrency(item.unitPrice, selectedInvoice.currency)}
-                          </td>
-                          <td className="py-3 text-right align-top">
-                            {item.taxAmount ? formatInvoiceCurrency(item.taxAmount, selectedInvoice.currency) : 'Included'}
-                          </td>
-                          <td className="py-3 text-right align-top">
-                            {formatInvoiceCurrency(item.lineTotal, selectedInvoice.currency)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <div className="mb-5 rounded-lg border border-blue-200 bg-white/70 p-4 text-[11px]">
-                    <div className="grid grid-cols-2 gap-x-16 gap-y-5">
-                      <div>
-                        <h4 className="mb-2 font-bold">Customer</h4>
-                        <p>{selectedInvoice.customer?.name || '-'}</p>
-                        <p>{selectedInvoice.customer?.email || '-'}</p>
-                        <p>{selectedInvoice.customer?.phone || '-'}</p>
-                      </div>
-                      <div>
-                        <h4 className="mb-2 font-bold">Payment</h4>
-                        <p className="capitalize">{selectedInvoice.payment?.method || '-'}</p>
-                        <p>{selectedInvoice.payment?.status || '-'}</p>
-                        <p>{selectedInvoice.payment?.razorpayPaymentId || '-'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="ml-auto w-full max-w-sm text-[11px]">
-                    {[
-                      ['Subtotal', formatInvoiceCurrency(selectedInvoice.subtotal, selectedInvoice.currency)],
-                      ['Discount', formatInvoiceCurrency(selectedInvoice.discountAmount || 0, selectedInvoice.currency)],
-                      ['CGST', formatInvoiceCurrency(selectedInvoice.cgstAmount || 0, selectedInvoice.currency)],
-                      ['SGST', formatInvoiceCurrency(selectedInvoice.sgstAmount || 0, selectedInvoice.currency)],
-                      ['IGST', formatInvoiceCurrency(selectedInvoice.igstAmount || 0, selectedInvoice.currency)],
-                      ['Total', formatInvoiceCurrency(selectedInvoice.grandTotal, selectedInvoice.currency)],
-                    ].map(([label, value]) => (
-                      <div key={label} className="flex justify-between border-b border-blue-200 py-2">
-                        <span className={label === 'Total' ? 'font-bold' : ''}>{label}</span>
-                        <span className={label === 'Total' ? 'font-bold' : ''}>{value}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between py-2.5 text-sm font-extrabold">
-                      <span>Amount paid</span>
-                      <span>{formatInvoiceCurrency(selectedInvoice.grandTotal, selectedInvoice.currency)}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-7 border-t border-blue-200 pt-3 text-[10px] text-blue-700">
-                    Your payment has been confirmed. Thank you for choosing TechUniqueIIT Research Center.
-                  </div>
-
-                  <div className="no-print mt-5 flex justify-end">
-                    <button
-                      onClick={handlePrintInvoice}
-                      className="rounded bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700"
-                    >
-                      Print / Save as PDF
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      <style jsx global>{`
-        @page {
-          size: A4 portrait;
-          margin: 0;
-        }
-
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-
-          .invoice-print-area,
-          .invoice-print-area * {
-            visibility: visible !important;
-          }
-
-          .invoice-print-area {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            max-width: none !important;
-            max-height: none !important;
-            overflow: hidden !important;
-            margin: 0 !important;
-            padding: 14mm !important;
-            box-sizing: border-box !important;
-            box-shadow: none !important;
-            background: white !important;
-            font-size: 10px !important;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
-          }
-
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
+      <InvoiceModal
+        open={invoiceOpen}
+        loading={invoiceLoading}
+        invoice={selectedInvoice}
+        onClose={() => setInvoiceOpen(false)}
+      />
     </div>
   );
 }
