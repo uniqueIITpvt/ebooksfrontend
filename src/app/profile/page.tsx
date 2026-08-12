@@ -443,6 +443,69 @@ export default function UserProfilePage() {
     }
   };
 
+  const handlePrintInvoice = () => {
+    const invoiceElement = document.querySelector('.invoice-print-area');
+    if (!invoiceElement) return;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=1200');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    const headAssets = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((node) => node.outerHTML)
+      .join('');
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <title>Invoice</title>
+          ${headAssets}
+          <style>
+            @page { size: A4 portrait; margin: 0; }
+            html, body {
+              width: 210mm;
+              height: 297mm;
+              margin: 0;
+              overflow: hidden;
+              background: white;
+            }
+            body {
+              display: flex;
+              align-items: flex-start;
+              justify-content: center;
+            }
+            .invoice-print-area {
+              width: 210mm !important;
+              height: 297mm !important;
+              max-width: none !important;
+              max-height: none !important;
+              overflow: hidden !important;
+              margin: 0 !important;
+              padding: 14mm !important;
+              box-sizing: border-box !important;
+              box-shadow: none !important;
+              background: white !important;
+              font-size: 10px !important;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+            .no-print { display: none !important; }
+          </style>
+        </head>
+        <body>${invoiceElement.outerHTML}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
     return null;
@@ -1427,7 +1490,7 @@ export default function UserProfilePage() {
 
                   <div className="no-print mt-5 flex justify-end">
                     <button
-                      onClick={() => window.print()}
+                      onClick={handlePrintInvoice}
                       className="rounded bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700"
                     >
                       Print / Save as PDF
