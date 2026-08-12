@@ -731,7 +731,7 @@ export default function PaymentsPage() {
                 <RefreshCw className="h-7 w-7 animate-spin text-[#8f3c24]" />
               </div>
             ) : (
-              <div className="bg-[#f4f5f7] p-3 shadow-2xl sm:p-5">
+              <div className="shadow-2xl">
                 <div className="mx-auto max-h-[calc(100vh-152px)] max-w-[780px] overflow-y-auto bg-white px-8 py-7 text-black shadow-sm sm:px-10">
                   <div className="mb-7 flex items-start justify-between gap-8">
                     <div>
