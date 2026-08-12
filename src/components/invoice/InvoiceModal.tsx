@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { API_CONFIG } from '@/config/api';
+import { tokenStore } from '@/services/api/tokenStore';
 
 type InvoiceItem = {
   itemName?: string;
@@ -78,6 +80,7 @@ interface InvoiceModalProps {
   loading?: boolean;
   invoice?: InvoiceRecord | null;
   payment?: InvoicePayment | null;
+  paymentId?: string | null;
   onClose: () => void;
 }
 
@@ -152,7 +155,10 @@ const handlePrintInvoice = () => {
   }, 250);
 };
 
-export default function InvoiceModal({ open, loading, invoice, payment, onClose }: InvoiceModalProps) {
+export default function InvoiceModal({ open, loading, invoice, payment, paymentId, onClose }: InvoiceModalProps) {
+  const [emailSending, setEmailSending] = React.useState(false);
+  const [emailMessage, setEmailMessage] = React.useState<string | null>(null);
+
   if (!open) return null;
 
   const currency = invoice?.currency || payment?.currency || 'INR';
@@ -180,6 +186,35 @@ export default function InvoiceModal({ open, loading, invoice, payment, onClose 
             lineTotal: payment?.totalAmount ?? payment?.amount ?? 0,
           },
         ];
+
+  const handleEmailInvoice = async () => {
+    if (!paymentId || emailSending) return;
+
+    setEmailSending(true);
+    setEmailMessage(null);
+
+    try {
+      const token = tokenStore.getAccessToken();
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}/payments/${paymentId}/invoice/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error?.message || 'Unable to email invoice');
+      }
+
+      setEmailMessage('Invoice emailed successfully');
+    } catch (error) {
+      setEmailMessage(error instanceof Error ? error.message : 'Unable to email invoice');
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/55 px-4 pb-8 pt-24">
@@ -321,13 +356,27 @@ export default function InvoiceModal({ open, loading, invoice, payment, onClose 
                 Your payment has been confirmed. Thank you for choosing TechUniqueIIT Research Center.
               </div>
 
-              <div className="no-print mt-5 flex justify-end">
-                <button
-                  onClick={handlePrintInvoice}
-                  className="rounded bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700"
-                >
-                  Print / Save as PDF
-                </button>
+              <div className="no-print mt-5 flex flex-col items-end gap-2">
+                {emailMessage && (
+                  <p className="text-xs font-semibold text-blue-700">{emailMessage}</p>
+                )}
+                <div className="flex flex-wrap justify-end gap-2">
+                  {paymentId && (
+                    <button
+                      onClick={handleEmailInvoice}
+                      disabled={emailSending}
+                      className="rounded border border-blue-200 bg-white px-5 py-3 text-sm font-semibold text-blue-700 shadow-sm hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {emailSending ? 'Sending...' : 'Email Invoice'}
+                    </button>
+                  )}
+                  <button
+                    onClick={handlePrintInvoice}
+                    className="rounded bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    Print / Save as PDF
+                  </button>
+                </div>
               </div>
             </div>
           </div>

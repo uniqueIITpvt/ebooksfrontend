@@ -722,6 +722,7 @@ export default function PaymentsPage() {
         loading={detailsLoading}
         invoice={getInvoiceData(selectedPayment) as any}
         payment={selectedPayment as any}
+        paymentId={selectedPayment?._id}
         onClose={() => setInvoiceOpen(false)}
       />
     </div>

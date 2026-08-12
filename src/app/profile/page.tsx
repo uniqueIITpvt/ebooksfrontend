@@ -28,6 +28,17 @@ import { generateBookSlug } from '@/utils/slugify';
 import { formatSubscriptionPlanLabel, hasActiveSubscription } from '@/lib/subscription';
 import InvoiceModal, { type InvoiceRecord } from '@/components/invoice/InvoiceModal';
 
+type ProfilePayment = {
+  _id: string;
+  paymentType?: string;
+  itemType?: string;
+  itemName?: string;
+  status?: string;
+  totalAmount?: number;
+  paidAt?: string;
+  createdAt?: string;
+};
+
 export default function UserProfilePage() {
   const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
   const router = useRouter();
@@ -43,6 +54,8 @@ export default function UserProfilePage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
+  const [profilePayments, setProfilePayments] = useState<ProfilePayment[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false);
   const [subscriptionMessage, setSubscriptionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -55,6 +68,7 @@ export default function UserProfilePage() {
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null);
+  const [selectedInvoicePaymentId, setSelectedInvoicePaymentId] = useState<string | null>(null);
 
   const fileToDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -284,6 +298,36 @@ export default function UserProfilePage() {
   }, [activeTab, isAuthenticated, hasUserActiveSubscription]);
 
   useEffect(() => {
+    if (activeTab !== 'subscription' || !isAuthenticated) return;
+
+    let ignore = false;
+    setPaymentsLoading(true);
+
+    const token = tokenStore.getAccessToken();
+    fetch(`${API_CONFIG.API_BASE_URL}/payments/my-payments`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!ignore && data.success) {
+          setProfilePayments(data.data || []);
+        }
+      })
+      .catch(() => {
+        if (!ignore) setProfilePayments([]);
+      })
+      .finally(() => {
+        if (!ignore) setPaymentsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, isAuthenticated]);
+
+  useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/');
     }
@@ -379,6 +423,7 @@ export default function UserProfilePage() {
     setInvoiceOpen(true);
     setInvoiceLoading(true);
     setSelectedInvoice(null);
+    setSelectedInvoicePaymentId(paymentId);
 
     try {
       const token = tokenStore.getAccessToken();
@@ -421,6 +466,9 @@ export default function UserProfilePage() {
     year: 'numeric',
   });
   const planLabel = hasUserActiveSubscription ? `${user.subscriptionPlan} Plan` : 'Free Plan';
+  const latestSubscriptionPayment = profilePayments.find(
+    (payment) => payment.paymentType === 'subscription' && (payment.status === 'completed' || payment.status === 'refunded')
+  );
   const booksAccessLabel =
     hasUserActiveSubscription && user.subscriptionPlan === 'pro' ? 'Unlimited' :
     hasUserActiveSubscription && user.subscriptionPlan === 'premium' ? 'Premium + Standard' :
@@ -785,6 +833,16 @@ export default function UserProfilePage() {
                         >
                           Upgrade/Manage
                         </Link>
+                        {latestSubscriptionPayment && (
+                          <button
+                            type="button"
+                            onClick={() => handleViewInvoice(latestSubscriptionPayment._id)}
+                            disabled={paymentsLoading}
+                            className="px-6 py-2.5 border border-blue-300 text-blue-700 rounded-xl font-semibold hover:bg-blue-50 transition-colors disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-transparent"
+                          >
+                            Invoice
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={handleCancelSubscription}
@@ -1242,6 +1300,7 @@ export default function UserProfilePage() {
         open={invoiceOpen}
         loading={invoiceLoading}
         invoice={selectedInvoice}
+        paymentId={selectedInvoicePaymentId}
         onClose={() => setInvoiceOpen(false)}
       />
     </div>
