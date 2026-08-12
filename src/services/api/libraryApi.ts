@@ -10,6 +10,7 @@ export interface LibraryItem {
   format?: string | null;
   accessMode: 'claim' | 'purchase';
   status: 'active' | 'refunded' | 'revoked';
+  paymentId?: string | null;
   slug?: string;
   title: string;
   author?: string;
