@@ -132,7 +132,7 @@ function LoginButton() {
       <button
         type="button"
         onClick={() => openAuthModal('signin')}
-        className="px-2 py-2 text-sm font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3"
+        className="px-0.5 py-2 text-[11px] font-semibold text-blue-950 transition-colors duration-300 hover:text-blue-600 sm:px-3 sm:text-sm"
       >
         Login/SignUp
       </button>
@@ -343,10 +343,10 @@ export default function Navbar({ siteLogo }: NavbarProps) {
             : 'bg-gradient-to-r from-blue-100/80 via-indigo-100/70 to-purple-100/60 backdrop-blur-sm'
         }`}
       >
-        <div className='mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8'>
+        <div className='mx-auto max-w-[1400px] px-2 sm:px-6 lg:px-8'>
           <div className='flex items-center h-20'>
             {/* Logo - Far Left Corner */}
-            <div className='flex w-[180px] flex-shrink-0 items-center sm:w-[220px]'>
+            <div className='flex w-[128px] flex-shrink-0 items-center sm:w-[220px]'>
               <Link href='/' className='flex h-16 w-full items-center'>
                 <Image
                   src={logoSrc}
@@ -484,12 +484,12 @@ export default function Navbar({ siteLogo }: NavbarProps) {
             </div>
 
             {/* Search and Mobile Menu - Far Right */}
-            <div className='flex items-center space-x-2 sm:space-x-3 ml-auto pr-4 sm:pr-6 lg:pr-8'>
+            <div className='ml-auto flex min-w-0 items-center space-x-1 sm:space-x-3 sm:pr-6 lg:pr-8'>
               {/* Mobile Search Button (visible only on mobile) */}
               <div className='sm:hidden'>
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className='text-slate-600 hover:text-blue-700 p-2 rounded-xl hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                  className='text-slate-600 hover:text-blue-700 p-1.5 sm:p-2 rounded-xl hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
                 >
                   <MagnifyingGlassIcon className='w-5 h-5' />
                 </button>
@@ -520,7 +520,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
 
                   router.push('/profile?tab=saved');
                 }}
-                className='relative p-2 sm:p-3 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                className='relative p-1.5 sm:p-3 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
                 aria-label='Saved books'
               >
                 <SavedBooksIcon
@@ -538,7 +538,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
               {/* Cart Icon with Badge */}
               <Link
                 href='/cart'
-                className='relative p-2 sm:p-3 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                className='relative p-1.5 sm:p-3 rounded-xl text-slate-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
                 aria-label='Shopping cart'
               >
                 <ShoppingCartIcon className='w-5 h-5' />
@@ -563,7 +563,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
               <div className='lg:hidden'>
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className='text-slate-600 hover:text-blue-700 p-2 sm:p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
+                  className='text-slate-600 hover:text-blue-700 p-1.5 sm:p-3 rounded-xl hover:bg-blue-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100'
                 >
                   <Bars3Icon className='w-5 h-5 sm:w-6 sm:h-6' />
                 </button>

@@ -13,6 +13,7 @@ const fontVariables = {
   '--font-dm-sans': 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   '--font-devanagari': '"Nirmala UI", "Mangal", "Kokila", sans-serif',
 } as React.CSSProperties;
+const FAVICON_PATH = '/assests/favicon.jpg';
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteLogo = await getSiteLogo();
@@ -67,15 +68,11 @@ export async function generateMetadata(): Promise<Metadata> {
         'max-video-preview': -1,
       },
     },
-    ...(siteLogo
-      ? {
-          icons: {
-            icon: siteLogo,
-            shortcut: siteLogo,
-            apple: siteLogo,
-          },
-        }
-      : {}),
+    icons: {
+      icon: FAVICON_PATH,
+      shortcut: FAVICON_PATH,
+      apple: FAVICON_PATH,
+    },
   };
 }
 
