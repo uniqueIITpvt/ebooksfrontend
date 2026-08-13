@@ -484,7 +484,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
             </div>
 
             {/* Search and Mobile Menu - Far Right */}
-            <div className='flex items-center space-x-2 sm:space-x-3 ml-auto'>
+            <div className='flex items-center space-x-2 sm:space-x-3 ml-auto pr-4 sm:pr-6 lg:pr-8'>
               {/* Mobile Search Button (visible only on mobile) */}
               <div className='sm:hidden'>
                 <button
@@ -499,7 +499,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
               <div className='hidden sm:block relative'>
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className='flex h-11 w-72 xl:w-80 items-center gap-3 rounded-xl border border-blue-100 bg-white/80 px-4 text-left text-slate-500 shadow-sm transition-all duration-300 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md'
+                  className='flex h-11 w-40 xl:w-65 items-center gap-3 rounded-xl border border-blue-100 bg-white/80 px-4 text-left text-slate-500 shadow-sm transition-all duration-300 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md'
                 >
                   <MagnifyingGlassIcon className='w-5 h-5 flex-shrink-0' />
                   <span className='text-sm'>Search here..</span>
