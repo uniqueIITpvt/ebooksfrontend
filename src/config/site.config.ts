@@ -24,6 +24,8 @@ export const SITE_URL = (
   'https://uniquebooksplus.com'
 ).replace(/^([^h])/, 'https://$1').replace(/\/+$/, '');
 
+export const SITE_ALTERNATE_URLS = ['https://uniquebooksplus.in'];
+
 export const siteUrl = (path = '/') => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return new URL(normalizedPath, `${SITE_URL}/`).toString();
