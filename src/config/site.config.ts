@@ -21,7 +21,7 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.VERCEL_PROJECT_PRODUCTION_URL ||
   process.env.VERCEL_URL ||
-  'https://techuniqueiit.com'
+  'https://uniquebooksplus.com'
 ).replace(/^([^h])/, 'https://$1').replace(/\/+$/, '');
 
 export const siteUrl = (path = '/') => {
