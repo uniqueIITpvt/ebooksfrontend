@@ -97,17 +97,17 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
     <footer className='bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-slate-900 border-t border-blue-100'>
       <div className='mx-auto max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8'>
         {/* Main Content */}
-        <div className='pt-8 pb-4 sm:pt-12 sm:pb-5 lg:pt-16 lg:pb-6'>
+        <div className='pt-5 pb-4 sm:pt-12 sm:pb-5 lg:pt-16 lg:pb-6'>
           <div className='grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12'>
             {/* Brand Section */}
             <div className='md:col-span-1'>
               <div className='flex flex-col items-start gap-3'>
-                <div className='relative h-16 w-[220px] flex-shrink-0'>
+                <div className='relative h-12 w-[128px] flex-shrink-0 sm:h-16 sm:w-[220px]'>
                   <Image
                     src={siteLogo || '/file.svg'}
                     alt='Unique Books Plus Research Center'
                     fill
-                    sizes='220px'
+                    sizes='(max-width: 640px) 128px, 220px'
                     className='object-contain object-left mix-blend-multiply'
                   />
                 </div>
