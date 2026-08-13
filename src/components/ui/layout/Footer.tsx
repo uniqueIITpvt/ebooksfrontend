@@ -124,7 +124,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
             </div>
 
             {/* About Us */}
-            <div>
+            <div className='pl-3 md:pl-0'>
               <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 About Us
               </h4>
@@ -134,7 +134,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
             </div>
 
             {/* Get To Know Us */}
-            <div>
+            <div className='pl-3 md:pl-0'>
               <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 Get To Know Us
               </h4>
@@ -153,7 +153,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
             </div>
 
             {/* Contact Us */}
-            <div>
+            <div className='pl-3 md:pl-0'>
               <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
                 Contact Us
               </h4>
