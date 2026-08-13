@@ -37,6 +37,7 @@ import {
 
 const API_URL = API_CONFIG.API_BASE_URL;
 const NAVBAR_LOGO_FALLBACK = '/file.svg';
+const PREMIUM_BADGE_IMAGE = '/assests/uniquepluse.jpg';
 
 // Login Button Component
 function LoginButton() {
@@ -64,14 +65,24 @@ function LoginButton() {
   // Only show user menu for regular users, not admins (admins should use admin dashboard)
   if (isAuthenticated && user && user.role === 'user') {
     const activePlan = getActiveSubscriptionPlan(user);
+    const isSubscribed = Boolean(activePlan);
 
     return (
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
         >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+          {isSubscribed && (
+            <Image
+              src={PREMIUM_BADGE_IMAGE}
+              alt=""
+              width={22}
+              height={22}
+              className="absolute -top-2 left-5 h-4 w-4 object-contain"
+            />
+          )}
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
             {user.avatar ? (
               <Image
                 src={user.avatar}
