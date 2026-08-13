@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { XMarkIcon, MinusIcon, ChevronUpIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 
 interface Message {
   id: string;
@@ -155,6 +156,7 @@ function getBotResponse(input: string): Omit<Message, 'id' | 'time' | 'role'> {
 }
 
 export default function AutomaticChatEmbed() {
+  const siteLogo = useSiteLogo();
   const { openAuthModal } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -218,7 +220,7 @@ export default function AutomaticChatEmbed() {
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(37,99,235,.38)'; }}
         >
           <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,.1)', animation: 'chatBob 2s ease-in-out infinite' }}>
-            <img src="/TechIITlogo.png" alt="UniqueIIT" width={38} height={38} style={{ width: 38, height: 38, objectFit: 'contain' }} />
+            <img src={siteLogo} alt="UniqueIIT" width={38} height={38} style={{ width: 38, height: 38, objectFit: 'contain' }} />
           </div>
           <span style={{ position: 'absolute', top: 6, right: 6, width: 10, height: 10, background: '#22c55e', borderRadius: '50%', border: '2px solid #4f46e5' }} />
         </button>
@@ -249,7 +251,7 @@ export default function AutomaticChatEmbed() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#fff', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-                  <img src="/TechIITlogo.png" alt="UniqueIIT" width={36} height={36} style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                  <img src={siteLogo} alt="UniqueIIT" width={36} height={36} style={{ width: 36, height: 36, objectFit: 'contain' }} />
                 </div>
                 <span style={{ position: 'absolute', bottom: -1, right: -1, width: 12, height: 12, background: '#22c55e', borderRadius: '50%', border: '2px solid #4f46e5' }} />
               </div>
@@ -283,7 +285,7 @@ export default function AutomaticChatEmbed() {
                     {/* Avatar */}
                     {msg.role === 'bot' && (
                       <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#eff6ff', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #bfdbfe' }}>
-                        <img src="/TechIITlogo.png" alt="bot" width={26} height={26} style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                        <img src={siteLogo} alt="bot" width={26} height={26} style={{ width: 26, height: 26, objectFit: 'contain' }} />
                       </div>
                     )}
 
@@ -358,7 +360,7 @@ export default function AutomaticChatEmbed() {
                 {isTyping && (
                   <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
                     <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#eff6ff', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #bfdbfe' }}>
-                      <img src="/TechIITlogo.png" alt="bot" width={26} height={26} style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                      <img src={siteLogo} alt="bot" width={26} height={26} style={{ width: 26, height: 26, objectFit: 'contain' }} />
                     </div>
                     <div style={{ background: '#fff', borderRadius: '4px 14px 14px 14px', padding: '12px 16px', boxShadow: '0 1px 4px rgba(0,0,0,.06)', display: 'flex', gap: 4, alignItems: 'center' }}>
                       {[0, 1, 2].map(i => (

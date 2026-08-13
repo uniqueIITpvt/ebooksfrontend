@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/services/api/authApi';
 import { API_CONFIG } from '@/config/api';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -33,6 +34,7 @@ function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoginModalOpen, authModalMode, authModalReturnUrl, setIsLoginModalOpen } = useAuth();
+  const siteLogo = useSiteLogo();
   const isModal = isLoginModalOpen;
   const onClose = () => setIsLoginModalOpen(false);
   const initialMode = isModal ? authModalMode : (searchParams?.get('mode') === 'signup' ? 'signup' : 'signin');
@@ -607,7 +609,7 @@ function AuthContent() {
         <div className={`hidden md:flex absolute top-0 h-full w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col items-center justify-center p-8 md:p-12 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-0 rounded-r-[80px] md:rounded-r-[150px]' : 'translate-x-full md:translate-x-full rounded-l-[80px] md:rounded-l-[150px]'}`}>
           <div className="absolute top-8 flex h-24 w-44 items-center justify-center">
             <Image
-              src="/TechIITlogo-transparent.png"
+              src={siteLogo}
               alt="Unique Books Plus Research Center"
               width={152}
               height={72}

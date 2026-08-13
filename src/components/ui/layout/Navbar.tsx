@@ -36,7 +36,7 @@ import {
 } from '@/lib/subscription';
 
 const API_URL = API_CONFIG.API_BASE_URL;
-const NAVBAR_LOGO_FALLBACK = '/TechIITlogo-transparent.png';
+const NAVBAR_LOGO_FALLBACK = '/file.svg';
 
 // Login Button Component
 function LoginButton() {

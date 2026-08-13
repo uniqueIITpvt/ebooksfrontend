@@ -17,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 import { blogsApi } from '@/services/api/blogsApi';
 import type { BlogPost } from '@/lib/server/public-data';
 
@@ -31,6 +32,7 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
   const [isSavingAction, setIsSavingAction] = useState(false);
   const router = useRouter();
   const { isAuthenticated, isLoading, openAuthModal } = useAuth();
+  const siteLogo = useSiteLogo();
   const blogIdentifier = post.slug || post._id;
 
   const articleTags = useMemo(() => {
@@ -394,7 +396,7 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
         <div className="blog-print-header hidden items-center justify-between border-b border-slate-200 pb-4 mb-8">
           <div className="flex items-center gap-3">
             <Image
-              src="/file.svg"
+              src={siteLogo}
               alt="Unique Books Plus Research Center"
               width={72}
               height={72}

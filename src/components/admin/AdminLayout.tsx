@@ -161,15 +161,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           return;
         }
 
-        const valueRes = await fetch(
-          `${API_CONFIG.API_BASE_URL}/settings/value/site_logo`
-        );
-        const valueData = await valueRes.json();
-        if (valueData?.success && valueData?.value) {
-          setSiteLogo(String(valueData.value));
-        } else {
-          setSiteLogo('');
-        }
+        setSiteLogo('');
       } catch (err) {
         setSiteLogo('');
       }

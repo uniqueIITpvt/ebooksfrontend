@@ -61,13 +61,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
           return;
         }
 
-        const valueRes = await fetch(`${API_URL}/settings/value/site_logo`);
-        const valueData = await valueRes.json();
-        if (valueData?.success && valueData?.value) {
-          setSiteLogo(String(valueData.value));
-        } else {
-          setSiteLogo('');
-        }
+        setSiteLogo('');
       } catch {
         setSiteLogo('');
       }
@@ -118,9 +112,9 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                   />
                 </div>
                 <div>
-                  <div className='text-lg font-extrabold leading-tight'>
-                    <span className='text-[#2f8fd3]'>TechUnique</span>
-                    <span className='text-[#f59a32]'>IIT</span>
+                  <div className='text-lg font-extrabold leading-tight uppercase tracking-wider text-slate-950'>
+                    <span className='text-[#2f8fd3]'>Unique Books</span>
+                    <span className='text-[#f59a32]'> Plus</span>
                   </div>
                   <div className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>
                     Research Center
@@ -139,10 +133,10 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
               </p>
             </div>
 
-            {/* Get Know To Us */}
+            {/* Get To Know Us */}
             <div>
               <h4 className='text-sm font-bold text-slate-950 uppercase tracking-wider mb-4'>
-                Get Know To Us
+                Get To Know Us
               </h4>
               <ul className='space-y-2'>
                 {quickLinks.map((link) => (
@@ -197,7 +191,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
           {/* Bottom Bar */}
           <div className='border-t border-blue-100 mt-10 pt-5'>
             <p className='text-slate-500 text-xs sm:text-sm text-center'>
-              Copyright {'\u00A9'} {currentYear} uniqueIIT Research Center. All Rights Reserved.
+              Copyright {'\u00A9'} {currentYear} Unique Books Plus Research Center. All Rights Reserved.
             </p>
           </div>
         </div>

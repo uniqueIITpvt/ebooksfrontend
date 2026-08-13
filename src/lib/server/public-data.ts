@@ -184,14 +184,6 @@ export const getSiteLogo = cache(async (): Promise<string | null> => {
     return settings.site_logo;
   }
 
-  const fallback = await fetchApiJson<ApiEnvelope<never>>('/settings/value/site_logo', {
-    revalidate: SHELL_REVALIDATE_SECONDS,
-  });
-
-  if (typeof fallback?.value === 'string' && fallback.value) {
-    return fallback.value;
-  }
-
   return null;
 });
 
