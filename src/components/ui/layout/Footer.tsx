@@ -101,17 +101,17 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
           <div className='grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12'>
             {/* Brand Section */}
             <div className='md:col-span-1'>
-              <div className='flex flex-col items-start gap-2'>
-                <div className='w-20 h-20 rounded-xl bg-white/80 border border-blue-100 overflow-hidden relative flex-shrink-0 shadow-sm'>
+              <div className='flex flex-col items-start gap-3'>
+                <div className='relative h-16 w-[220px] flex-shrink-0'>
                   <Image
                     src={siteLogo || '/file.svg'}
                     alt='Unique Books Plus Research Center'
                     fill
-                    sizes='80px'
-                    className='object-contain p-1'
+                    sizes='220px'
+                    className='object-contain object-left'
                   />
                 </div>
-                <div>
+                 <div>
                   <div className='text-lg font-extrabold leading-tight uppercase tracking-wider text-slate-950'>
                     <span className='text-[#2f8fd3]'>Unique Books</span>
                     <span className='text-[#f59a32]'> Plus</span>

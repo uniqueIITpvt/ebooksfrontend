@@ -346,15 +346,15 @@ export default function Navbar({ siteLogo }: NavbarProps) {
         <div className='mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8'>
           <div className='flex items-center h-20'>
             {/* Logo - Far Left Corner */}
-            <div className='flex-shrink-0 flex items-center'>
-              <Link href='/'>
+            <div className='flex w-[180px] flex-shrink-0 items-center sm:w-[220px]'>
+              <Link href='/' className='flex h-16 w-full items-center'>
                 <Image
                   src={logoSrc}
                   alt='Unique Books Plus Research Center'
-                  width={240}
-                  height={120}
+                  width={220}
+                  height={80}
                   loading='eager'
-                  className='h-16 sm:h-20 w-auto object-contain'
+                  className='max-h-14 w-auto max-w-full object-contain sm:max-h-16'
                   onError={() => setLogoSrc(NAVBAR_LOGO_FALLBACK)}
                 />
               </Link>
@@ -362,7 +362,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
 
             {/* Desktop Navigation - Center-Right Area */}
             <div className='hidden lg:block flex-1'>
-              <div className='flex items-center space-x-2 justify-center ml-8'>
+              <div className='flex items-center space-x-2 justify-center ml-4'>
                 {navItems.map((item) => (
                   <div
                     key={item.name}
