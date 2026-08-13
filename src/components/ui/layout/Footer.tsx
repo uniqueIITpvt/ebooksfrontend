@@ -111,7 +111,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                 <div className='w-20 h-20 rounded-xl bg-white/80 border border-blue-100 overflow-hidden relative flex-shrink-0 shadow-sm'>
                   <Image
                     src={siteLogo || '/file.svg'}
-                    alt='TechUniqueIIT Research Center'
+                    alt='Unique Books Plus Research Center'
                     fill
                     sizes='80px'
                     className='object-contain p-1'
@@ -135,7 +135,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                 About Us
               </h4>
               <p className='text-slate-600 text-sm leading-relaxed max-w-xs'>
-                TechUniqueIIT Research Center provides books, audiobooks, and research-driven content to support continuous learning.
+                Unique Books Plus Research Center provides books, audiobooks, and research-driven content to support continuous learning.
               </p>
             </div>
 

@@ -608,7 +608,7 @@ function AuthContent() {
           <div className="absolute top-8 flex h-24 w-44 items-center justify-center">
             <Image
               src="/TechIITlogo-transparent.png"
-              alt="TechUniqueIIT Research Center"
+              alt="Unique Books Plus Research Center"
               width={152}
               height={72}
               className="h-full w-full object-contain"

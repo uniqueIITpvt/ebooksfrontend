@@ -112,7 +112,7 @@ const About = () => {
         <div className='text-center mb-12'>
           <div className='inline-flex items-center bg-white/70 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-5'>
             <CheckCircleIcon className='w-4 h-4 mr-2' />
-            About TechUniqueIIT Research Center
+            About Unique Books Plus Research Center
           </div>
           <h2 className='font-syne text-4xl font-bold leading-tight text-[#1E1B4B] mb-5 md:text-5xl'>
             Learn, Listen, Read, and{' '}
@@ -121,7 +121,7 @@ const About = () => {
             </span>
           </h2>
           <p className='mx-auto max-w-3xl text-lg leading-8 text-slate-600'>
-            TechUniqueIIT Research Center is a digital learning platform created to make powerful knowledge easy to access, easy to understand, and easy to experience.
+            Unique Books Plus Research Center is a digital learning platform created to make powerful knowledge easy to access, easy to understand, and easy to experience.
           </p>
         </div>
 
@@ -193,7 +193,7 @@ const About = () => {
                   .
                 </p>
                 <p>
-                  At TechUniqueIIT Research Center, our goal is simple: to bring{' '}
+                  At Unique Books Plus Research Center, our goal is simple: to bring{' '}
                   <span className='font-semibold text-slate-900'>
                     meaningful books, audiobooks, and research-based learning content into one place
                   </span>{' '}
@@ -207,7 +207,7 @@ const About = () => {
                   . That is why we combine reading, listening, and digital technology to create a better learning experience for everyone.
                 </p>
                 <p className='pt-2 font-syne text-lg font-bold leading-8 text-slate-900'>
-                  TechUniqueIIT Research Center{' '}
+                  Unique Books Plus Research Center{' '}
                   <span className='text-blue-700'>- learn, listen, read, and grow every day.</span>
                 </p>
                 </div>

@@ -1,12 +1,12 @@
-export const SITE_NAME = 'TechUniqueIIT Ebook Store';
+export const SITE_NAME = 'Unique Books Plus Ebook Store';
 
 export const SITE_DESCRIPTION =
-  'Discover ebooks, audiobooks, free book summaries, premium summaries and learning resources at TechUniqueIIT.';
+  'Discover ebooks, audiobooks, free book summaries, premium summaries and learning resources at Unique Books Plus.';
 
 export const SITE_KEYWORDS = [
-  'TechUniqueIIT',
+  'Unique Books Plus',
   'UniqueIIT ebook store',
-  'TechUniqueIIT ebook store',
+  'Unique Books Plus ebook store',
   'ebooks',
   'audiobooks',
   'book summaries',

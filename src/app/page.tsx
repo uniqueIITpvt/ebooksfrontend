@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     canonical: siteUrl("/"),
   },
   openGraph: {
-    title: "TechUniqueIIT Ebook Store",
+    title: "Unique Books Plus Ebook Store",
     description: SITE_DESCRIPTION,
     url: siteUrl("/"),
     type: "website",
@@ -32,7 +32,7 @@ export default async function Home() {
   return (
     <div className='min-h-screen'>
       <h1 className='sr-only'>
-        TechUniqueIIT Ebook Store for ebooks, audiobooks and book summaries
+        Unique Books Plus Ebook Store for ebooks, audiobooks and book summaries
       </h1>
       <div id='hero'>
         <Hero banners={homeData.banners} bannerEnabled={homeData.bannerEnabled} />

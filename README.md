@@ -1,4 +1,4 @@
-# TechUniqueIIT Ebook Store - Architecture Documentation
+# Unique Books Plus Ebook Store - Architecture Documentation
 
 ## Project Overview
 

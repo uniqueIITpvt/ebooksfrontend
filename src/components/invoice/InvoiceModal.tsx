@@ -251,7 +251,7 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
                 </div>
 
                 <div className="text-right">
-                  <div className="text-3xl font-extrabold leading-none text-[#2563eb]">TechUniqueIIT</div>
+                  <div className="text-3xl font-extrabold leading-none text-[#2563eb]">Unique Books Plus</div>
                   <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-indigo-500">
                     Research Center
                   </div>
@@ -261,7 +261,7 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
               <div className="mb-6 grid grid-cols-2 gap-14 text-[11px] leading-5">
                 <div>
                   <h3 className="mb-3 font-bold">
-                    {invoice?.seller?.tradeName || invoice?.seller?.legalName || 'TechUniqueIIT Research Center'}
+                    {invoice?.seller?.tradeName || invoice?.seller?.legalName || 'Unique Books Plus Research Center'}
                   </h3>
                   <p>India</p>
                   <p>support@uniqueiit.com</p>
@@ -353,7 +353,7 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
               </div>
 
               <div className="mt-7 border-t border-blue-200 pt-3 text-[10px] text-blue-700">
-                Your payment has been confirmed. Thank you for choosing TechUniqueIIT Research Center.
+                Your payment has been confirmed. Thank you for choosing Unique Books Plus Research Center.
               </div>
 
               <div className="no-print mt-5 flex flex-col items-end gap-2">

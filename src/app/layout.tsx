@@ -26,9 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: SITE_DESCRIPTION,
     keywords: SITE_KEYWORDS,
     applicationName: SITE_NAME,
-    authors: [{ name: 'TechUniqueIIT' }],
-    creator: 'TechUniqueIIT',
-    publisher: 'TechUniqueIIT',
+    authors: [{ name: 'Unique Books Plus' }],
+    creator: 'Unique Books Plus',
+    publisher: 'Unique Books Plus',
     alternates: {
       canonical: siteUrl('/'),
     },

@@ -27,7 +27,7 @@ export default function NotFound() {
       name: 'About',
       href: '/about',
       icon: UserIcon,
-      description: 'Learn about TechUniqueIIT',
+      description: 'Learn about Unique Books Plus',
       color: 'from-purple-500 to-pink-500',
     },
     {

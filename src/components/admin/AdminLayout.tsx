@@ -225,14 +225,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <Image
               src={siteLogo || '/file.svg'}
-              alt='TechUniqueIIT Research Center'
+              alt='Unique Books Plus Research Center'
               fill
               sizes='60px'
               style={{ objectFit: 'contain' }}
             />
           </Box>
           <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', color: '#F9FAFB' }}>
-            TechUniqueIIT
+            Unique Books Plus
           </Typography>
         </Box>
       </Toolbar>

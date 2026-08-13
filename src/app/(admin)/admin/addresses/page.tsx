@@ -131,7 +131,7 @@ export default function AddressesPage() {
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-bold text-slate-900">Addresses</h1>
             <p className="truncate text-sm text-slate-500">
-              TechUniqueIIT Research Center customer delivery locations
+              Unique Books Plus Research Center customer delivery locations
             </p>
           </div>
         </div>

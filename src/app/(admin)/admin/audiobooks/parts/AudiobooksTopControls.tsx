@@ -67,7 +67,7 @@ export default function AudiobooksTopControls(props: AudiobooksTopControlsProps)
           >
             <Image
               src={siteLogo || '/file.svg'}
-              alt="TechUniqueIIT Research Center"
+              alt="Unique Books Plus Research Center"
               width={48}
               height={48}
               style={{ objectFit: 'contain' }}
@@ -78,7 +78,7 @@ export default function AudiobooksTopControls(props: AudiobooksTopControlsProps)
               Audiobooks Management
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              TechUniqueIIT Research Center audiobook catalog
+              Unique Books Plus Research Center audiobook catalog
             </Typography>
           </Box>
         </Box>

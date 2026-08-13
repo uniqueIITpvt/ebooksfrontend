@@ -157,7 +157,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
           <p className='text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed'>
             Find answers about our books, audiobooks, and learning resources from{' '}
             <span className='text-blue-600 font-semibold'>
-              TechUniqueIIT Research Center
+              Unique Books Plus Research Center
             </span>
           </p>
         </div>
@@ -401,7 +401,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
               </h3>
               <p className='mx-auto mb-8 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl'>
                 Need help choosing the right book or audiobook? Contact
-                TechUniqueIIT Research Center and we&apos;ll guide you.
+                Unique Books Plus Research Center and we&apos;ll guide you.
               </p>
 
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
@@ -417,7 +417,7 @@ export default function FAQ({ faqs, categories }: FAQProps) {
                   href='/about'
                   className='inline-flex items-center justify-center rounded-2xl bg-white/70 px-8 py-4 text-lg font-semibold text-slate-700 transition-all duration-300 hover:bg-white'
                 >
-                  Learn About TechUniqueIIT Research Center
+                  Learn About Unique Books Plus Research Center
                 </a>
               </div>
 

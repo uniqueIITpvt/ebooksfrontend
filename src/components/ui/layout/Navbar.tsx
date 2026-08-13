@@ -350,7 +350,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
               <Link href='/'>
                 <Image
                   src={logoSrc}
-                  alt='TechUniqueIIT Research Center'
+                  alt='Unique Books Plus Research Center'
                   width={240}
                   height={120}
                   loading='eager'

@@ -105,7 +105,7 @@ export default function Testimonials({ testimonials, stats }: TestimonialsProps)
             </span>
           </h2>
           <p className='mx-auto max-w-4xl text-xl leading-relaxed text-slate-600 md:text-2xl'>
-            Verified feedback from readers using TechUniqueIIT Research Center
+            Verified feedback from readers using Unique Books Plus Research Center
             books, audiobooks, and learning resources.
           </p>
         </div>

@@ -62,7 +62,7 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
     });
   }, [post.publishDate]);
 
-  const authorName = post.author?.trim() || 'TechUniqueIIT Research Center';
+  const authorName = post.author?.trim() || 'Unique Books Plus Research Center';
   const authorInitials =
     authorName
       .split(/\s+/)
@@ -395,13 +395,13 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
           <div className="flex items-center gap-3">
             <Image
               src="/file.svg"
-              alt="TechUniqueIIT Research Center"
+              alt="Unique Books Plus Research Center"
               width={72}
               height={72}
               className="object-contain"
             />
             <div>
-              <p className="text-base font-bold text-slate-900">TechUniqueIIT Research Center</p>
+              <p className="text-base font-bold text-slate-900">Unique Books Plus Research Center</p>
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Blog Article</p>
             </div>
           </div>
@@ -604,14 +604,14 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
                 {authorName}
               </h3>
               <p className="text-slate-600 leading-relaxed">
-                TechUniqueIIT Research Center publishes research-driven learning resources and evidence-based content.
+                Unique Books Plus Research Center publishes research-driven learning resources and evidence-based content.
               </p>
               <div className="mt-4">
                 <Link
                   href="/about"
                   className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Learn more about TechUniqueIIT Research Center
+                  Learn more about Unique Books Plus Research Center
                   <ArrowLeftIcon className="w-4 h-4 ml-2 rotate-180" />
                 </Link>
               </div>

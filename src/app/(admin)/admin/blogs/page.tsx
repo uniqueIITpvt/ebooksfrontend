@@ -338,7 +338,7 @@ export default function BlogsPage() {
           >
             <Image
               src={siteLogo || '/file.svg'}
-              alt="TechUniqueIIT Research Center"
+              alt="Unique Books Plus Research Center"
               width={48}
               height={48}
               style={{ objectFit: 'contain' }}
@@ -349,7 +349,7 @@ export default function BlogsPage() {
               Blog Management
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              TechUniqueIIT Research Center blog catalog
+              Unique Books Plus Research Center blog catalog
             </Typography>
           </Box>
         </Box>
