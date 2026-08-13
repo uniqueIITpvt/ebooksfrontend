@@ -354,7 +354,7 @@ export default function Navbar({ siteLogo }: NavbarProps) {
                   width={220}
                   height={80}
                   loading='eager'
-                  className='max-h-14 w-auto max-w-full object-contain sm:max-h-16'
+                  className='max-h-14 w-auto max-w-full object-contain mix-blend-multiply sm:max-h-16'
                   onError={() => setLogoSrc(NAVBAR_LOGO_FALLBACK)}
                 />
               </Link>

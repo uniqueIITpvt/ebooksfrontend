@@ -108,7 +108,7 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                     alt='Unique Books Plus Research Center'
                     fill
                     sizes='220px'
-                    className='object-contain object-left'
+                    className='object-contain object-left mix-blend-multiply'
                   />
                 </div>
                  <div>
