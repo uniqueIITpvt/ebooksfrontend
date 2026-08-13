@@ -79,7 +79,7 @@ function LoginButton() {
               alt=""
               width={22}
               height={22}
-              className="absolute -top-2 left-5 h-4 w-4 object-contain"
+              className="absolute top-0 left-10 h-4 w-4 object-contain"
             />
           )}
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
