@@ -111,15 +111,15 @@ export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
                     className='object-contain object-left mix-blend-multiply'
                   />
                 </div>
-                 <div>
-                  <div className='text-lg font-extrabold leading-tight uppercase tracking-wider text-slate-950'>
-                    <span className='text-[#2f8fd3]'>Unique Books</span>
+                {/* <div className='w-[220px] text-center'>
+                  <div className='whitespace-nowrap text-sm font-extrabold leading-tight uppercase tracking-wide text-slate-950'>
+                    <span className='text-[#2563eb]'>Unique Books</span>
                     <span className='text-[#f59a32]'> Plus</span>
                   </div>
-                  <div className='text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'>
+                  <div className='text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500'>
                     Research Center
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 

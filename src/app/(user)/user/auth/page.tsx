@@ -606,26 +606,26 @@ function AuthContent() {
         </div>
 
         {/* Sliding Overlay Panel */}
-        <div className={`hidden md:flex absolute top-0 h-full w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex-col items-center justify-center p-8 md:p-12 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-0 rounded-r-[80px] md:rounded-r-[150px]' : 'translate-x-full md:translate-x-full rounded-l-[80px] md:rounded-l-[150px]'}`}>
+        <div className={`hidden md:flex absolute top-0 h-full w-1/2 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-blue-950 flex-col items-center justify-center p-8 md:p-12 transition-all duration-500 ease-in-out ${isSignUp ? 'translate-x-0 rounded-r-[80px] md:rounded-r-[150px]' : 'translate-x-full md:translate-x-full rounded-l-[80px] md:rounded-l-[150px]'}`}>
           <div className="absolute top-8 flex h-24 w-44 items-center justify-center">
             <Image
               src={siteLogo}
               alt="Unique Books Plus Research Center"
               width={152}
               height={72}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain mix-blend-multiply"
             />
           </div>
           
           {/* Sign In Overlay Content (shown when in sign up mode) */}
           <div className={`text-center transition-all duration-500 ${isSignUp ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20 pointer-events-none absolute'}`}>
             <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-            <p className="text-blue-100 mb-8 max-w-xs">
+            <p className="text-slate-600 mb-8 max-w-xs">
               Enter your personal details to use all of site features
             </p>
             <button
               onClick={toggleMode}
-              className="px-8 py-3 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-300"
+              className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300"
             >
               SIGN IN
             </button>
@@ -634,12 +634,12 @@ function AuthContent() {
           {/* Sign Up Overlay Content (shown when in sign in mode) */}
           <div className={`text-center transition-all duration-500 ${!isSignUp ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-20 pointer-events-none absolute'}`}>
             <h2 className="text-3xl font-bold mb-4">Hello, Friend!</h2>
-            <p className="text-blue-100 mb-8 max-w-xs">
+            <p className="text-slate-600 mb-8 max-w-xs">
               Register with your personal details to use all of site features
             </p>
             <button
               onClick={toggleMode}
-              className="px-8 py-3 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-300"
+              className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300"
             >
               SIGN UP
             </button>
