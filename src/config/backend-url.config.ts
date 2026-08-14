@@ -5,12 +5,17 @@
  */
 
 const DEPLOYED_BACKEND_URL = 'https://ebooksbackend-production.up.railway.app';
-const LOCAL_BACKEND_URL = 'http://localhost:5000';
+const getLocalBackendUrl = () => {
+  if (typeof window === 'undefined') return 'http://localhost:5000';
+
+  const { protocol, hostname } = window.location;
+  return `${protocol}//${hostname}:5000`;
+};
 
 export const USE_LOCAL_BACKEND = process.env.NODE_ENV !== 'production';
 
 export const BACKEND_URL = (
   USE_LOCAL_BACKEND
-    ? LOCAL_BACKEND_URL
+    ? process.env.NEXT_PUBLIC_API_URL || getLocalBackendUrl()
     : process.env.NEXT_PUBLIC_API_URL || DEPLOYED_BACKEND_URL
 ).replace(/\/+$/, '');
