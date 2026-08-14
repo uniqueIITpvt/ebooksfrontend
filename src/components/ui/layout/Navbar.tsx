@@ -37,7 +37,7 @@ import {
 
 const API_URL = API_CONFIG.API_BASE_URL;
 const NAVBAR_LOGO_FALLBACK = '/file.svg';
-const PREMIUM_BADGE_IMAGE = '/assests/uniquepluse.jpg';
+const PREMIUM_BADGE_IMAGE = '/assests/uniquepluse-transparent.png';
 
 // Login Button Component
 function LoginButton() {
@@ -79,7 +79,7 @@ function LoginButton() {
               alt=""
               width={22}
               height={22}
-              className="absolute top-0 left-10 h-4 w-4 object-contain"
+              className="absolute top-0 left-8 h-4 w-4 object-contain"
             />
           )}
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
