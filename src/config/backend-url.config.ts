@@ -13,9 +13,10 @@ const getLocalBackendUrl = () => {
 };
 
 export const USE_LOCAL_BACKEND = process.env.NODE_ENV !== 'production';
+const EXPLICIT_LOCAL_BACKEND = process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND === 'true';
 
 export const BACKEND_URL = (
-  USE_LOCAL_BACKEND
+  EXPLICIT_LOCAL_BACKEND
     ? process.env.NEXT_PUBLIC_API_URL || getLocalBackendUrl()
     : process.env.NEXT_PUBLIC_API_URL || DEPLOYED_BACKEND_URL
 ).replace(/\/+$/, '');
