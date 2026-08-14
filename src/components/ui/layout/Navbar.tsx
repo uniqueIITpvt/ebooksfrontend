@@ -71,7 +71,7 @@ function LoginButton() {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          className="relative flex items-center gap-2 rounded-xl bg-transparent px-4 py-2 text-sm font-semibold text-blue-950 transition-all duration-300 hover:bg-white/40 hover:text-blue-700"
         >
           {isSubscribed && (
             <Image
@@ -82,7 +82,7 @@ function LoginButton() {
               className="absolute top-0 left-8 h-4 w-4 object-contain"
             />
           )}
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
             {user.avatar ? (
               <Image
                 src={user.avatar}
