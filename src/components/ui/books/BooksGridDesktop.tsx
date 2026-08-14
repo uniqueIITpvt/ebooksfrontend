@@ -174,7 +174,6 @@ export default function BooksGridDesktop({
           const href = isAudiobook ? getAudiobookHref(item) : getBookHref(item);
           const free = isFreeItem(item);
           const hasKeepForeverAccess = !isAudiobook && isOwned(item, 'ebook');
-          const ownedReadTarget = `/read/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
           const priceLine = free ? null : hasKeepForeverAccess ? (
             <span className='font-semibold text-[#16A34A]'>Owned</span>
           ) : (
@@ -208,7 +207,7 @@ export default function BooksGridDesktop({
                 priceLine={priceLine}
                 primaryLabel={hasKeepForeverAccess ? 'Read Now' : free ? 'Read Free' : hasUniquePlus ? `${formatPrice(item.price) || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
                 primaryVariant={hasKeepForeverAccess ? 'free' : free ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-                onPrimaryClick={() => handleUniquePlusAction(hasKeepForeverAccess ? ownedReadTarget : href)}
+                onPrimaryClick={() => handleUniquePlusAction(href)}
                 onCoverClick={() => router.push(href)}
                 isSaved={isItemSaved(item)}
                 onSaveClick={() => void handleSaveBook(item, href)}

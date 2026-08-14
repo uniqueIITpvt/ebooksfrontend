@@ -85,7 +85,6 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       ? `/audiobooks/${book.slug || book.id || book._id}/listen`
       : `/books/${book.slug || book.id || book._id}/read`;
   const hasKeepForeverAccess = !isAudiobook && libraryItems.some((item) => isPurchasedLibraryItem(item, book, 'ebook'));
-  const ownedReadTarget = `/read/${book.slug || book.id || book._id || generateBookSlug(book.title)}`;
   const hasUniquePlus = hasActiveSubscription(user);
   const displayPrice = book.price
     ? `${'\u20B9'}${book.price.replace(/^[^0-9.]*/, '').replace(/\.00$/, '')}`
@@ -221,7 +220,7 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
       }
       primaryLabel={hasKeepForeverAccess ? 'Read Now' : isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
       primaryVariant={hasKeepForeverAccess ? 'free' : isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={() => router.push(hasKeepForeverAccess ? ownedReadTarget : href)}
+      onPrimaryClick={() => router.push(href)}
       onCoverClick={() => router.push(href)}
       isSaved={isSaved}
       onSaveClick={() => void handleSaveBook()}
