@@ -257,22 +257,24 @@ export const getHomePageData = cache(async (): Promise<PublicHomeData> => {
 });
 
 export const getBlogListingData = cache(async (): Promise<BlogListingData> => {
-  const [settings, blogs, categoryRows] = await Promise.all([
+  const [settings, blogs] = await Promise.all([
     getPublicSettings(),
     fetchApiData<BlogPost[]>('/blogs', {
-      query: { limit: 100 },
+      query: { limit: 100, view: 'listing' },
     }),
-    fetchApiData<Array<{ category: string }>>('/blogs/categories'),
   ]);
+  const categoryNames = Array.from(
+    new Set((blogs ?? []).map((blog) => blog.category).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
 
   return {
     blogs: blogs ?? [],
     categories: [
       { name: 'All', value: 'all' },
-      ...((categoryRows ?? []).map((category) => ({
-        name: category.category,
-        value: category.category,
-      }))),
+      ...categoryNames.map((category) => ({
+        name: category,
+        value: category,
+      })),
     ],
     blogSettings: {
       title: typeof settings.blog_title === 'string' && settings.blog_title
