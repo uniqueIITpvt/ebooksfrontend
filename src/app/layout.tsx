@@ -6,6 +6,7 @@ import { PersistentAudioPlayerProvider } from '@/contexts/PersistentAudioPlayerC
 import AuthModal from '@/components/ui/auth/AuthModal';
 import { getSiteLogo } from '@/lib/server/public-data';
 import ConditionalLayout from '@/components/ui/layout/ConditionalLayout';
+import GlobalLoadingIndicator from '@/components/ui/primitives/GlobalLoadingIndicator';
 import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL, siteUrl } from '@/config/site.config';
 
 const fontVariables = {
@@ -93,6 +94,7 @@ export default async function RootLayout({
                 {children}
               </ConditionalLayout>
               <AuthModal />
+              <GlobalLoadingIndicator />
             </PersistentAudioPlayerProvider>
           </CartProvider>
         </AuthProvider>

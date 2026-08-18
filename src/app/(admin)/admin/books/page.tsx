@@ -744,6 +744,8 @@ export default function BooksPage() {
     loadInitialData,
     handleDialogClose,
     setBooks,
+    setFilteredBooks,
+    setStats,
   });
 
   const handleDeleteBook = (bookId: string) => {
