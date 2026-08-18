@@ -55,6 +55,11 @@ type BooksDialogsProps = {
   setNewLanguageData: AnySetter;
 };
 
+const getAutoSubtitle = (title: string) => {
+  const trimmedTitle = title.trim();
+  return trimmedTitle ? `A comprehensive guide to ${trimmedTitle}` : '';
+};
+
 export default function BooksDialogs(props: BooksDialogsProps) {
   const {
   dialogOpen,
@@ -187,13 +192,19 @@ export default function BooksDialogs(props: BooksDialogsProps) {
                 value={selectedBook?.title || ''}
                 onChange={(e) => {
                   const newTitle = e.target.value;
-                  setSelectedBook({ ...selectedBook, title: newTitle });
+                  setSelectedBook((prev: any) => {
+                    const previousTitle = prev?.title || '';
+                    const previousSubtitle = prev?.subtitle || '';
+                    const previousAutoSubtitle = getAutoSubtitle(previousTitle);
+                    const shouldSyncSubtitle =
+                      !previousSubtitle.trim() || previousSubtitle === previousAutoSubtitle;
 
-                  // Auto-generate subtitle if subtitle is empty and title has content
-                  if (newTitle.trim() && !selectedBook?.subtitle?.trim()) {
-                    const generatedSubtitle = `A comprehensive guide to ${newTitle.trim()}`;
-                    setSelectedBook((prev: any) => ({ ...prev, title: newTitle, subtitle: generatedSubtitle }));
-                  }
+                    return {
+                      ...prev,
+                      title: newTitle,
+                      ...(shouldSyncSubtitle ? { subtitle: getAutoSubtitle(newTitle) } : {}),
+                    };
+                  });
 
                   // Clear validation error when user starts typing
                   if (validationErrors.title) {

@@ -17,10 +17,45 @@ export function createHandleSaveBook(ctx: BookSaveHandlerContext) {
     showErrorAlert,
     showSuccessAlert,
     showWarningAlert,
-    loadInitialData,
     handleDialogClose,
     setBooks,
+    setFilteredBooks,
+    setStats,
   } = ctx;
+
+  const getBookId = (book: Book) => (book as any)._id || book.id;
+
+  const calculateStats = (nextBooks: Book[]) => ({
+    total: nextBooks.length,
+    published: nextBooks.filter((book) => book.status === "published").length,
+    featured: nextBooks.filter((book) => book.featured).length,
+    bestsellers: nextBooks.filter((book) => book.bestseller).length,
+    totalSales: nextBooks.reduce((sum, book) => sum + (book.sales || 0), 0),
+  });
+
+  const appendSavedBook = (savedBook: Book) => {
+    setBooks((currentBooks: Book[]) => {
+      const nextBooks = [savedBook, ...currentBooks];
+      setStats?.(calculateStats(nextBooks));
+      return nextBooks;
+    });
+    setFilteredBooks?.((currentBooks: Book[]) => [savedBook, ...currentBooks]);
+  };
+
+  const replaceSavedBook = (savedBook: Book) => {
+    const savedBookId = getBookId(savedBook);
+    const replaceBook = (book: Book) => {
+      return getBookId(book) === savedBookId ? savedBook : book;
+    };
+
+    setBooks((currentBooks: Book[]) => {
+      const nextBooks = currentBooks.map(replaceBook);
+      setStats?.(calculateStats(nextBooks));
+      return nextBooks;
+    });
+    setFilteredBooks?.((currentBooks: Book[]) => currentBooks.map(replaceBook));
+  };
+
   const handleSaveBook = async () => {
     if (!selectedBook) return;
 
@@ -122,8 +157,8 @@ export function createHandleSaveBook(ctx: BookSaveHandlerContext) {
           }
 
           if (response.success) {
+            appendSavedBook(response.data);
             showSuccessAlert("Book added successfully!");
-            await loadInitialData(); // Refresh data
             handleDialogClose();
             const slug = response.data?.slug;
             if (slug) {
@@ -224,8 +259,8 @@ export function createHandleSaveBook(ctx: BookSaveHandlerContext) {
           }
 
           if (response.success) {
+            replaceSavedBook(response.data);
             showSuccessAlert("Book updated successfully!");
-            await loadInitialData(); // Refresh data
             handleDialogClose();
             const slug = response.data?.slug;
             if (slug) {
