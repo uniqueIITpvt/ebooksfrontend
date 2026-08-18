@@ -1,13 +1,16 @@
 import type { MetadataRoute } from 'next';
-import {
-  getBlogListingData,
-  getBooksPageData,
-  getFreeSummariesPageData,
-  getPremiumSummariesPageData,
-  getTrendingBooksPageData,
-} from '@/lib/server/public-data';
 import { siteUrl } from '@/config/site.config';
 import type { PublicBookListItem } from '@/types/publicBook';
+
+export const revalidate = 3600;
+
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  'https://ebooksbackend-production.up.railway.app'
+)
+  .replace(/\/+$/, '')
+  .replace(/\/api\/v\d+$/, '');
+const API_BASE_URL = `${API_ORIGIN}/api/v1`;
 
 const staticRoutes = [
   '/',
@@ -52,17 +55,49 @@ const itemSlug = (item: PublicBookListItem | { slug?: string; title?: string }) 
     .replace(/^-+|-+$/g, '');
 };
 
+const fetchSitemapItems = async <T>(
+  path: string,
+  query?: Record<string, string | number | boolean>
+): Promise<T[]> => {
+  try {
+    const params = new URLSearchParams();
+    Object.entries(query || {}).forEach(([key, value]) => {
+      params.set(key, String(value));
+    });
+
+    const url = `${API_BASE_URL}${path}${params.size ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      next: { revalidate },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    return Array.isArray(payload?.data) ? payload.data : [];
+  } catch {
+    return [];
+  }
+};
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [booksData, blogsData, trendingBooks, freeSummaries, premiumSummaries] =
+  const [books, blogs, trendingBooks, freeSummaries, premiumSummaries] =
     await Promise.all([
-      getBooksPageData(),
-      getBlogListingData(),
-      getTrendingBooksPageData(),
-      getFreeSummariesPageData(),
-      getPremiumSummariesPageData(),
+      fetchSitemapItems<PublicBookListItem>('/books', {
+        view: 'listing',
+        type: 'Books',
+        excludeComponentType: 'free-summaries',
+        limit: 100,
+      }),
+      fetchSitemapItems<{ slug?: string }>('/blogs', { limit: 100 }),
+      fetchSitemapItems<{ slug?: string }>('/trending-books', { limit: 100 }),
+      fetchSitemapItems<{ slug?: string }>('/free-summaries', { limit: 100 }),
+      fetchSitemapItems<{ slug?: string }>('/premium-summaries', { limit: 100 }),
     ]);
 
-  const productRoutes = booksData.allBooks.flatMap((item) => {
+  const productRoutes = books.flatMap((item) => {
     const slug = itemSlug(item);
 
     if (!slug) {
@@ -73,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [route(`${basePath}/${slug}`, 'weekly', 0.8)];
   });
 
-  const blogRoutes = blogsData.blogs.flatMap((blog) =>
+  const blogRoutes = blogs.flatMap((blog) =>
     blog.slug ? [route(`/blog/${blog.slug}`, 'monthly', 0.6)] : []
   );
 
