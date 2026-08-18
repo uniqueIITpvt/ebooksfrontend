@@ -527,13 +527,13 @@ export default function UserProfilePage() {
       .some((value) => String(value).toLowerCase().includes(query));
   });
 
-  const getLibraryReadTarget = (item: LibraryItem) => {
+  const getLibraryReadTarget = (item: LibraryItem, returnTo = '/profile?tab=library') => {
     if (item.itemType === 'audiobook') {
       return item.redirectTarget;
     }
 
     const slug = item.slug || item.redirectTarget.match(/\/books\/([^/]+)\/read/)?.[1] || item.itemId;
-    return `/read/${slug}`;
+    return `/read/${slug}?returnTo=${encodeURIComponent(returnTo)}`;
   };
 
   return (
@@ -902,7 +902,7 @@ export default function UserProfilePage() {
                 ) : (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {ownedLibraryItems.map((item) => {
-                      const readTarget = getLibraryReadTarget(item);
+                      const readTarget = getLibraryReadTarget(item, '/profile?tab=owned');
                       const detailsTarget = item.slug ? `/books/${item.slug}` : item.redirectTarget.replace(/\/read$/, '');
 
                       return (

@@ -382,7 +382,7 @@ export default function BookDetailClient({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
         <div className="mb-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/books')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2.5 rounded-lg shadow-sm"
           >
             <ArrowLeftIcon className="w-5 h-5" />

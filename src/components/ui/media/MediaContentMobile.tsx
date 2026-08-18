@@ -72,7 +72,6 @@ function MobileShowcaseCard({ item, index, meta, href, libraryItems = [] }: Mobi
   const hasUniquePlus = hasActiveSubscription(user);
   const isAudiobook = item.type === 'Audiobook';
   const hasKeepForeverAccess = !isAudiobook && libraryItems.some((libraryItem) => isPurchasedLibraryItem(libraryItem, item, 'ebook'));
-  const ownedReadTarget = `/read/${item.slug || item.id || item._id || generateBookSlug(item.title)}`;
   const isFreeSummaryDetail = item.componentType === 'free-summaries' || href.startsWith('/free-summaries/');
   const navigateFromHomeFreeSummary = () => {
     window.sessionStorage.setItem('freeSummaryDetailBackHref', '/');
@@ -124,7 +123,7 @@ function MobileShowcaseCard({ item, index, meta, href, libraryItems = [] }: Mobi
       }
       primaryLabel={hasKeepForeverAccess ? 'Read Now' : isFreeItem ? 'Read Free' : hasUniquePlus ? `${displayPrice || ''} Keep Forever`.trim() : 'Read with Unique Plus'}
       primaryVariant={hasKeepForeverAccess ? 'free' : isFreeItem ? 'free' : hasUniquePlus ? 'keep-forever' : 'unique-plus'}
-      onPrimaryClick={hasKeepForeverAccess ? () => router.push(ownedReadTarget) : isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
+      onPrimaryClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
       onCoverClick={isFreeSummaryDetail ? navigateFromHomeFreeSummary : () => router.push(href)}
       isSaved={false}
       onSaveClick={() => {

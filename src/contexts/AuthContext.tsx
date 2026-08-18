@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { authApi, User, LoginCredentials, RegisterData } from '@/services/api/authApi';
 import { useRouter } from 'next/navigation';
 
@@ -36,6 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [authModalReturnUrl, setAuthModalReturnUrl] = useState('');
+  const refreshFailureCountRef = useRef(0);
   const router = useRouter();
 
   // Initialize auth state from localStorage (checks both user and admin tokens)
@@ -94,10 +95,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const refreshAccessToken = async () => {
       const response = await authApi.refreshToken();
       if (response.success && response.data?.user) {
+        refreshFailureCountRef.current = 0;
         setUser(response.data.user);
       } else {
-        authApi.removeUser();
-        setUser(null);
+        refreshFailureCountRef.current += 1;
+        if (refreshFailureCountRef.current >= 3) {
+          authApi.removeUser();
+          setUser(null);
+        }
       }
     };
 

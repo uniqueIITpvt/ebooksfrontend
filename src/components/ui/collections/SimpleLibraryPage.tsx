@@ -315,7 +315,6 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     const hasUniquePlus = hasActiveSubscription(user);
     const displayPrice = formatDisplayPrice(item.price);
     const hasKeepForeverAccess = !isFreeSummaryCard && isOwned(item, 'ebook');
-    const ownedReadTarget = `/read/${item.slug || item._id || item.id || generateBookSlug(item.title)}`;
     const priceLine = isFreeItem ? null : hasKeepForeverAccess ? (
       <span className='font-semibold text-[#16A34A]'>Owned</span>
     ) : (
@@ -327,7 +326,7 @@ export default function SimpleLibraryPage<T extends SimpleLibraryItem>({
     );
 
     const handlePrimaryClick = () => {
-      router.push(hasKeepForeverAccess ? ownedReadTarget : getHref(item));
+      router.push(getHref(item));
     };
     const handleCoverClick = () => router.push(getHref(item));
     const handleSaveClick = () => void handleSaveBook(item);
