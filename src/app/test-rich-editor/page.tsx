@@ -18,7 +18,7 @@ import { stripHtmlTags, getWordCount, calculateReadTime, validateHtmlContent, ge
 export default function TestRichEditorPage() {
   const [content, setContent] = useState(`
     <h2>Welcome to the Rich Text Editor</h2>
-    <p>This is a <strong>comprehensive rich text editor</strong> built with <em>React Quill</em> for Dr. Syed M Quadri's blog management system.</p>
+    <p>This is a <strong>comprehensive rich text editor</strong> built with <em>React Quill</em> for Unique Books Plus's blog management system.</p>
     
     <h3>Features Include:</h3>
     <ul>
