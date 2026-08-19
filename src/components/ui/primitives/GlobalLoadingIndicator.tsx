@@ -1,51 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 
 const MIN_VISIBLE_MS = 280;
-const ACTION_VISIBLE_MS = 900;
-const MAX_VISIBLE_MS = 15000;
-
-const isModifiedClick = (event: MouseEvent) =>
-  event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
-
-const isSamePageHash = (anchor: HTMLAnchorElement) => {
-  if (!anchor.hash) return false;
-
-  const current = new URL(window.location.href);
-  const target = new URL(anchor.href, window.location.href);
-
-  return current.origin === target.origin && current.pathname === target.pathname && current.search === target.search;
-};
 
 export default function GlobalLoadingIndicator() {
-  const pathname = usePathname();
   const [active, setActive] = useState(true);
   const startedAtRef = useRef(Date.now());
   const hideTimerRef = useRef<number | null>(null);
-  const maxTimerRef = useRef<number | null>(null);
 
   const clearTimers = () => {
     if (hideTimerRef.current) {
       window.clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
     }
-
-    if (maxTimerRef.current) {
-      window.clearTimeout(maxTimerRef.current);
-      maxTimerRef.current = null;
-    }
-  };
-
-  const show = (maxMs = MAX_VISIBLE_MS) => {
-    clearTimers();
-    startedAtRef.current = Date.now();
-    setActive(true);
-
-    maxTimerRef.current = window.setTimeout(() => {
-      setActive(false);
-    }, maxMs);
   };
 
   const hide = (delayMs = MIN_VISIBLE_MS) => {
@@ -57,10 +25,6 @@ export default function GlobalLoadingIndicator() {
     }
 
     hideTimerRef.current = window.setTimeout(() => {
-      if (maxTimerRef.current) {
-        window.clearTimeout(maxTimerRef.current);
-        maxTimerRef.current = null;
-      }
       setActive(false);
     }, remaining);
   };
@@ -77,50 +41,6 @@ export default function GlobalLoadingIndicator() {
     return () => {
       window.removeEventListener('load', completeInitialLoad);
       clearTimers();
-    };
-  }, []);
-
-  useEffect(() => {
-    hide(420);
-  }, [pathname]);
-
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      if (isModifiedClick(event)) return;
-
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      const anchor = target.closest('a[href]');
-      if (anchor instanceof HTMLAnchorElement) {
-        if (anchor.target === '_blank' || anchor.hasAttribute('download') || isSamePageHash(anchor)) return;
-
-        const targetUrl = new URL(anchor.href, window.location.href);
-        if (targetUrl.href !== window.location.href) {
-          show();
-        }
-        return;
-      }
-
-      const button = target.closest('button, [role="button"], input[type="button"], input[type="submit"]');
-      if (!(button instanceof HTMLElement)) return;
-      if (button.hasAttribute('disabled') || button.getAttribute('aria-disabled') === 'true') return;
-
-      show(ACTION_VISIBLE_MS);
-      hide(ACTION_VISIBLE_MS);
-    };
-
-    const handleSubmit = () => show();
-    const handleBeforeUnload = () => show();
-
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('submit', handleSubmit, true);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('submit', handleSubmit, true);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
