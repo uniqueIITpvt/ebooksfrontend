@@ -217,13 +217,14 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/55 px-4 pb-8 pt-24">
-      <div className="relative w-full max-w-4xl">
+    <div className="fixed inset-0 z-[1400] flex items-center justify-center overflow-y-auto bg-gray-900/55 px-4 py-10">
+      <div className="relative my-auto w-full max-w-4xl">
         <button
           onClick={onClose}
-          className="no-print absolute -top-11 right-0 rounded border border-white/40 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50"
+          aria-label="Close invoice"
+          className="no-print absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-xl font-semibold leading-none text-slate-700 shadow hover:bg-slate-50"
         >
-          Close
+          &times;
         </button>
 
         {loading ? (
@@ -232,7 +233,7 @@ export default function InvoiceModal({ open, loading, invoice, payment, paymentI
           </div>
         ) : (
           <div className="shadow-2xl">
-            <div className="invoice-print-area mx-auto max-h-[calc(100vh-152px)] w-full max-w-[780px] overflow-y-auto bg-white px-8 py-7 text-black shadow-sm sm:px-10">
+            <div className="invoice-print-area mx-auto max-h-[calc(100vh-80px)] w-full max-w-[780px] overflow-y-auto bg-white px-8 py-7 text-black shadow-sm sm:px-10">
               <div className="mb-7 flex items-start justify-between gap-8">
                 <div>
                   <h2 className="text-2xl font-bold tracking-normal">Invoice</h2>
