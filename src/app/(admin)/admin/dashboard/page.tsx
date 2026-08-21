@@ -37,9 +37,6 @@ import { API_CONFIG } from '@/config/api';
 
 const API_BASE_URL = API_CONFIG.API_BASE_URL;
 
-// Delay utility to prevent rate limiting
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 interface DashboardStats {
   books: {
     total: number;
@@ -91,13 +88,10 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true);
 
-      // Fetch stats sequentially with delays to prevent rate limiting
-      const booksRes = await fetch(`${API_BASE_URL}/books/stats`).catch(() => null);
-      const bookListRes = await fetch(`${API_BASE_URL}/books?limit=1000`).catch(() => null);
-      await delay(300); // 300ms delay between requests
-      
-      const blogsRes = await fetch(`${API_BASE_URL}/blogs/stats`).catch(() => null);
-      const blogListRes = await fetch(`${API_BASE_URL}/blogs?limit=100&adminView=true`).catch(() => null);
+      const [booksRes, blogsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/books/stats`).catch(() => null),
+        fetch(`${API_BASE_URL}/blogs/stats`).catch(() => null),
+      ]);
 
       const newStats: DashboardStats = {
         books: { total: 0, published: 0, draft: 0, change: 0, trending: 'neutral' },
@@ -115,20 +109,6 @@ export default function AdminDashboard() {
             draft: booksData.data.draft || 0,
             change: Math.round(change * 10) / 10,
             trending: change > 0 ? 'up' : change < 0 ? 'down' : 'neutral',
-          };
-        }
-      }
-
-      if (bookListRes?.ok) {
-        const bookListData = await bookListRes.json();
-        const dashboardBooks = Array.isArray(bookListData?.data) ? bookListData.data : [];
-
-        if (bookListData?.success && dashboardBooks.length > 0) {
-          newStats.books = {
-            ...newStats.books,
-            total: dashboardBooks.length,
-            published: dashboardBooks.filter((book: any) => book.status === 'published').length,
-            draft: dashboardBooks.filter((book: any) => book.status === 'draft').length,
           };
         }
       }
@@ -151,21 +131,6 @@ export default function AdminDashboard() {
         }
       }
 
-      if (blogListRes?.ok) {
-        const blogListData = await blogListRes.json();
-        const dashboardBlogs = Array.isArray(blogListData?.data) ? blogListData.data : [];
-
-        if (blogListData?.success && dashboardBlogs.length > 0) {
-          newStats.blogs = {
-            ...newStats.blogs,
-            total: dashboardBlogs.length,
-            published: dashboardBlogs.filter((blog: any) => blog.status === 'published' || blog.isPublished).length,
-            draft: dashboardBlogs.filter((blog: any) => blog.status === 'draft' || blog.isPublished === false).length,
-            totalViews: dashboardBlogs.reduce((sum: number, blog: any) => sum + Number(blog.views || 0), 0),
-          };
-        }
-      }
-
       setStats(newStats);
 
       // Fetch recent content
@@ -179,8 +144,7 @@ export default function AdminDashboard() {
 
   const fetchRecentContent = async () => {
     try {
-      await delay(300); // Delay before fetching recent content
-      const blogsRes = await fetch(`${API_BASE_URL}/blogs?limit=3&sortBy=latest`).catch(() => null);
+      const blogsRes = await fetch(`${API_BASE_URL}/blogs/latest?limit=3`).catch(() => null);
 
       const recent: any[] = [];
 
