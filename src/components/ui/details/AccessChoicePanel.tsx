@@ -22,6 +22,7 @@ import { subscriptionPlansApi } from '@/services/api/subscriptionPlansApi';
 interface AccessChoicePanelProps {
   itemLabel?: 'book' | 'audiobook';
   price?: string | number | null;
+  originalPrice?: string | number | null;
   subscriptionPrice?: string | number;
   onStartUniquePlus: () => void;
   onKeepForever: () => void;
@@ -43,9 +44,15 @@ const formatRupees = (value?: string | number | null) => {
   return `\u20B9${Math.round(numeric)}`;
 };
 
+const parseRupees = (value?: string | number | null) =>
+  typeof value === 'number'
+    ? value
+    : Number.parseFloat(String(value || '').replace(/[^0-9.]/g, '')) || 0;
+
 export function AccessChoicePanel({
   itemLabel = 'book',
   price,
+  originalPrice,
   subscriptionPrice,
   onStartUniquePlus,
   onKeepForever,
@@ -84,6 +91,12 @@ export function AccessChoicePanel({
     : 'Unlock the full premium library';
   const subscriptionBadge = activePlanDetails ? 'Active Plan' : 'Best Value';
   const subscriptionButtonLabel = activePlanDetails ? planName : uniquePlusButtonLabel;
+  const finalPriceValue = parseRupees(price);
+  const originalPriceValue = parseRupees(originalPrice);
+  const discountPercent =
+    originalPriceValue > finalPriceValue && finalPriceValue > 0
+      ? Math.round(((originalPriceValue - finalPriceValue) / originalPriceValue) * 100)
+      : null;
 
   const uniquePlusBenefits = [
     { icon: BookOpenIcon, text: 'Access to all premium eBooks' },
@@ -180,6 +193,16 @@ export function AccessChoicePanel({
 
           <div className="mt-auto pt-3">
             <div className="mb-3 h-px bg-slate-200" />
+            {originalPriceValue > finalPriceValue && (
+              <div className="mb-2 flex items-center justify-center gap-2 text-sm font-semibold">
+                <span className="text-slate-400 line-through">{formatRupees(originalPrice)}</span>
+                {discountPercent ? (
+                  <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-700">
+                    {discountPercent}% off
+                  </span>
+                ) : null}
+              </div>
+            )}
 
             <button
               type="button"
