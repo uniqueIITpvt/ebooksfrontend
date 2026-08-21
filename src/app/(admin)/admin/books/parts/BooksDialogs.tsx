@@ -60,6 +60,11 @@ const getAutoSubtitle = (title: string) => {
   return trimmedTitle ? `A comprehensive guide to ${trimmedTitle}` : '';
 };
 
+const getOriginalPriceFromDiscountPrice = (discountPrice: number) => {
+  if (!Number.isFinite(discountPrice) || discountPrice <= 0) return undefined;
+  return Math.ceil(discountPrice / 0.3);
+};
+
 export default function BooksDialogs(props: BooksDialogsProps) {
   const {
   dialogOpen,
@@ -448,7 +453,11 @@ export default function BooksDialogs(props: BooksDialogsProps) {
                 value={selectedBook?.discountPrice || ''}
                 onChange={(e) => {
                   const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                  setSelectedBook({ ...selectedBook, discountPrice: value });
+                  setSelectedBook({
+                    ...selectedBook,
+                    discountPrice: value,
+                    originalPrice: getOriginalPriceFromDiscountPrice(value),
+                  });
                   if (validationErrors.discountPrice) {
                     setValidationErrors({ ...validationErrors, discountPrice: undefined });
                   }

@@ -545,6 +545,7 @@ export default function BookDetailClient({
               <AccessChoicePanel
                 itemLabel="book"
                 price={currentBook.price}
+                originalPrice={currentBook.originalPrice}
                 onStartUniquePlus={handleSubscribeClick}
                 onKeepForever={handleBuyNow}
                 uniquePlusButtonLabel={hasUniquePlusAccess ? 'Read with Unique Plus' : 'Start Unique Plus'}

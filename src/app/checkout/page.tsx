@@ -83,7 +83,7 @@ function CheckoutContent() {
       case 'Paperback':
         return basePrice;
       case 'E-book':
-        return basePrice * 0.7;
+        return basePrice;
       default:
         return basePrice;
     }
@@ -752,7 +752,7 @@ function CheckoutContent() {
     subtotal = totalAmount;
     displayPrice = `₹${totalAmount.toFixed(2)}`;
   } else if (book) {
-    priceVal = parseFloat(book.price.replace(/[₹$]/g, ''));
+    priceVal = parseCurrency(book.price);
     subtotal = priceVal * quantity;
     gstPercentage = book.gst || 0;
     gstAmount = subtotal * (gstPercentage / 100);
@@ -773,6 +773,14 @@ function CheckoutContent() {
     totalAmount = subtotal;
     displayPrice = audiobookMode === 'claim' ? '₹0.00' : `₹${priceVal.toFixed(2)}`;
   }
+
+  const bookOriginalPriceVal = book ? parseCurrency(book.originalPrice) : 0;
+  const bookDiscountAmount =
+    book && bookOriginalPriceVal > priceVal ? (bookOriginalPriceVal - priceVal) * quantity : 0;
+  const bookDiscountPercent =
+    bookOriginalPriceVal > priceVal && priceVal > 0
+      ? Math.round(((bookOriginalPriceVal - priceVal) / bookOriginalPriceVal) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50 text-gray-800 font-dm-sans py-12 px-4 sm:px-6 lg:px-8">
@@ -1144,7 +1152,17 @@ function CheckoutContent() {
                           {book.category}
                         </div>
                       </div>
-                      <div className="text-indigo-600 font-bold">{displayPrice}</div>
+                      <div>
+                        {bookOriginalPriceVal > priceVal && (
+                          <div className="mb-1 flex items-center gap-2 text-xs font-semibold">
+                            <span className="text-gray-400 line-through">₹{bookOriginalPriceVal.toFixed(2)}</span>
+                            <span className="rounded-full bg-green-50 px-2 py-0.5 text-green-700">
+                              {bookDiscountPercent}% off
+                            </span>
+                          </div>
+                        )}
+                        <div className="text-indigo-600 font-bold">{displayPrice}</div>
+                      </div>
                     </div>
                   </div>
                 ) : audiobook ? (
@@ -1190,6 +1208,18 @@ function CheckoutContent() {
                 ) : null}
 
                 <div className="space-y-4 pt-4 border-t border-blue-100">
+                  {book && bookOriginalPriceVal > priceVal && (
+                    <>
+                      <div className="flex justify-between text-gray-600">
+                        <span>Original Price</span>
+                        <span>₹{(bookOriginalPriceVal * quantity).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount ({bookDiscountPercent}%)</span>
+                        <span>- ₹{bookDiscountAmount.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between text-gray-600">
                     <span>Price</span>
                     <span>
