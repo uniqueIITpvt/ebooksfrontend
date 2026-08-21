@@ -1,11 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const MIN_VISIBLE_MS = 280;
+const LOADER_SHOWN_KEY = 'global-loading-indicator-shown';
 
 export default function GlobalLoadingIndicator() {
-  const [active, setActive] = useState(true);
+  const pathname = usePathname();
+  const shouldShowInitial =
+    typeof window === 'undefined' || sessionStorage.getItem(LOADER_SHOWN_KEY) !== 'true';
+  const [active, setActive] = useState(shouldShowInitial);
   const startedAtRef = useRef(Date.now());
   const hideTimerRef = useRef<number | null>(null);
 
@@ -30,6 +35,8 @@ export default function GlobalLoadingIndicator() {
   };
 
   useEffect(() => {
+    if (!active) return;
+
     const completeInitialLoad = () => hide(520);
 
     if (document.readyState === 'complete') {
@@ -42,7 +49,17 @@ export default function GlobalLoadingIndicator() {
       window.removeEventListener('load', completeInitialLoad);
       clearTimers();
     };
-  }, []);
+  }, [active]);
+
+  useEffect(() => {
+    if (!active && typeof window !== 'undefined') {
+      sessionStorage.setItem(LOADER_SHOWN_KEY, 'true');
+    }
+  }, [active]);
+
+  if (!active || pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <div

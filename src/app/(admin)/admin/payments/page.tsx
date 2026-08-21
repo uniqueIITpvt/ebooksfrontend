@@ -565,8 +565,8 @@ export default function PaymentsPage() {
       )}
 
       {detailsOpen && selectedPayment && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/50">
-          <div className="h-full w-full max-w-3xl overflow-y-auto bg-white p-6 shadow-xl dark:bg-gray-900">
+        <div className="fixed inset-0 z-[1400] flex items-center justify-center overflow-y-auto bg-black/50 px-4 py-10">
+          <div className="my-auto max-h-[calc(100vh-80px)] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Payment Details</h3>
