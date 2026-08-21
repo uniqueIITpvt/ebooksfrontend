@@ -1248,10 +1248,10 @@ function CheckoutContent() {
                       <span>₹{gstAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-gray-600">
+                  {/* <div className="flex justify-between text-gray-600">
                     <span>Service Fee</span>
                     <span className="text-green-600 font-medium">FREE</span>
-                  </div>
+                  </div> */}
                   <div className="flex justify-between text-gray-800 text-xl font-bold pt-4 border-t border-blue-100">
                     <span>Total</span>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
