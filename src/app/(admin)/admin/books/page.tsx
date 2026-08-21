@@ -130,6 +130,7 @@ export default function BooksPage() {
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const ebookInputRef = useRef<HTMLInputElement | null>(null);
   const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const filtersInitializedRef = useRef(false);
   const isReadOnlyMode = dialogMode === "view";
   const rowsPerPage = 20;
   const totalTablePages = Math.max(
@@ -148,7 +149,16 @@ export default function BooksPage() {
 
   // Filter books based on search and filters
   useEffect(() => {
-    fetchBooks();
+    if (!filtersInitializedRef.current) {
+      filtersInitializedRef.current = true;
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void fetchBooks();
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
   }, [searchQuery, filterCategory, filterStatus, filterType]);
 
   useEffect(() => {

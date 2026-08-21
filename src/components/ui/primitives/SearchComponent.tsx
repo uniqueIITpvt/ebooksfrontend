@@ -133,9 +133,9 @@ export default function SearchComponent({
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch popular topics (categories) from API
+  // Fetch popular topics (categories) from API once on open
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && popularTopics.length === 0) {
       setIsLoadingTopics(true);
       categoriesApi.getForSelect()
         .then(categories => {
@@ -151,7 +151,7 @@ export default function SearchComponent({
           setIsLoadingTopics(false);
         });
     }
-  }, [isOpen]);
+  }, [isOpen, popularTopics.length]);
 
   // Handle search functionality
   useEffect(() => {

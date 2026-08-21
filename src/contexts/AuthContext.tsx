@@ -55,18 +55,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         const hasStoredAccessToken = Boolean(authApi.getToken());
-        const isStoredAdmin =
-          storedUser.role === 'admin' || storedUser.role === 'superadmin';
-
-        if (isStoredAdmin || hasStoredAccessToken) {
-          setUser(storedUser);
-          setIsLoading(false);
-        }
 
         const refreshResponse = await authApi.refreshToken();
-        if (refreshResponse.success) {
-          const response = await authApi.getProfile();
-          setUser(response.success && response.data ? response.data : refreshResponse.data?.user || null);
+        if (refreshResponse.success && refreshResponse.data?.user) {
+          setUser(refreshResponse.data.user);
         } else if (hasStoredAccessToken) {
           setUser(storedUser);
         } else {
@@ -106,22 +98,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
+    // Scheduled token refresh every 13 minutes (JWT access token lifespan is 15 minutes)
     const intervalId = window.setInterval(refreshAccessToken, 13 * 60 * 1000);
-    const handleVisible = () => {
-      if (document.visibilityState === 'visible') {
-        void refreshAccessToken();
-      }
-    };
-
-    window.addEventListener('focus', refreshAccessToken);
-    document.addEventListener('visibilitychange', handleVisible);
 
     return () => {
       window.clearInterval(intervalId);
-      window.removeEventListener('focus', refreshAccessToken);
-      document.removeEventListener('visibilitychange', handleVisible);
     };
-  }, [user]);
+  }, [user?._id]);
 
   const login = async (credentials: LoginCredentials) => {
     try {

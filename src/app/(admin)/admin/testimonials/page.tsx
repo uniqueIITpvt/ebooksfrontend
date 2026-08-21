@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { API_CONFIG } from '@/config/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePublicSettings } from '@/contexts/SiteConfigContext';
 import { tokenStore } from '@/services/api/tokenStore';
 import {
   Alert,
@@ -140,6 +141,7 @@ const getErrorMessage = (data: unknown, fallback: string) => {
 
 export default function AdminTestimonialsPage() {
   const { isAdmin, isLoading: authLoading } = useAuth();
+  const publicSettings = usePublicSettings();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -185,25 +187,18 @@ export default function AdminTestimonialsPage() {
     }
   }, []);
 
-  const fetchStats = useCallback(async () => {
+  useEffect(() => {
     try {
-      const response = await fetch(`${API_URL}/settings/public`);
-      const data = await response.json();
-
-      if (data.success && typeof data.data?.testimonial_stats === 'string') {
-        const parsedStats = JSON.parse(data.data.testimonial_stats);
+      if (typeof publicSettings?.testimonial_stats === 'string') {
+        const parsedStats = JSON.parse(publicSettings.testimonial_stats);
         if (Array.isArray(parsedStats)) {
           setStats(parsedStats);
         }
       }
     } catch (err) {
-      console.error('Error fetching testimonial stats:', err);
+      console.error('Error parsing testimonial stats:', err);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+  }, [publicSettings]);
 
   useEffect(() => {
     if (authLoading) return;

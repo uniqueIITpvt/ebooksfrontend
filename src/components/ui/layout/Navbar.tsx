@@ -226,30 +226,6 @@ interface NavbarProps {
   siteLogo?: string | null;
 }
 
-interface PublicBookListResponse {
-  success?: boolean;
-  data?: PublicBookListItem[];
-}
-
-const countBooksByCategory = (items: PublicBookListItem[]) =>
-  items.reduce<Record<string, number>>((counts, item) => {
-    if (!item.category) return counts;
-
-    counts[item.category] = (counts[item.category] ?? 0) + 1;
-    return counts;
-  }, {});
-
-const fetchPublicBookItems = async (path: string) => {
-  const response = await fetch(`${API_URL}${path}?view=listing`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${path}`);
-  }
-
-  const data = (await response.json()) as PublicBookListResponse;
-  return Array.isArray(data.data) ? data.data : [];
-};
-
 export default function Navbar({ siteLogo }: NavbarProps) {
   const { totalItems } = useCart();
   const { user, openAuthModal } = useAuth();
@@ -292,20 +268,10 @@ export default function Navbar({ siteLogo }: NavbarProps) {
 
     try {
       setIsLoadingBookCategories(true);
-      const [response, books, audiobooks] = await Promise.all([
-        categoriesApi.getActive(),
-        fetchPublicBookItems('/books'),
-        fetchPublicBookItems('/audiobooks'),
-      ]);
+      const response = await categoriesApi.getActive();
 
       if (response.success && Array.isArray(response.data)) {
-        const categoryCounts = countBooksByCategory([...books, ...audiobooks]);
-        setBookCategories(
-          response.data.map((category) => ({
-            ...category,
-            bookCount: categoryCounts[category.name] ?? 0,
-          }))
-        );
+        setBookCategories(response.data);
         hasLoadedBookCategories.current = true;
       }
     } catch (error) {

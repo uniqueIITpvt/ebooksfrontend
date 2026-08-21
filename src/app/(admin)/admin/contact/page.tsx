@@ -141,9 +141,16 @@ export default function ContactPage() {
   };
 
   useEffect(() => {
-    fetchContacts();
-    fetchStats();
+    const timeoutId = window.setTimeout(() => {
+      void fetchContacts();
+    }, search ? 350 : 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [page, filter, search]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {

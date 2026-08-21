@@ -128,13 +128,10 @@ function AuthContent() {
         onClose?.();
         if (role === 'admin' || role === 'superadmin') {
           router.replace('/admin/dashboard');
-          void authApi.getProfile();
         } else {
-          const profileResponse = await authApi.getProfile();
-          const signedInUser = profileResponse.success && profileResponse.data ? profileResponse.data : result.user;
           // If returnUrl exists, redirect there (for checkout/subscription flow)
           if (returnUrl) {
-            router.push(getPostLoginReturnUrl(returnUrl, signedInUser));
+            router.push(getPostLoginReturnUrl(returnUrl, result.user));
           } else {
             router.push('/');
           }

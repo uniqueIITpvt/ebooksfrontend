@@ -39,7 +39,6 @@ export default function AddressesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalAddresses, setTotalAddresses] = useState(0);
-  const [siteLogo, setSiteLogo] = useState('');
 
   const fetchAddresses = async (page = 1, search = '') => {
     try {
@@ -72,22 +71,12 @@ export default function AddressesPage() {
   };
 
   useEffect(() => {
-    fetchAddresses(currentPage, searchQuery);
+    const timeoutId = window.setTimeout(() => {
+      void fetchAddresses(currentPage, searchQuery);
+    }, searchQuery ? 350 : 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [currentPage, searchQuery]);
-
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        const response = await fetch(`${API_CONFIG.API_BASE_URL}/settings/public`);
-        const data = await response.json();
-        setSiteLogo(String(data?.data?.site_logo || ''));
-      } catch {
-        setSiteLogo('');
-      }
-    };
-
-    fetchLogo();
-  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this address?')) return;

@@ -29,7 +29,6 @@ import {
   Delete as DeleteIcon,
   MarkEmailRead as MarkAllReadIcon,
 } from '@mui/icons-material';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { API_CONFIG } from '@/config/api';
 import { tokenStore } from '@/services/api/tokenStore';
 
@@ -209,8 +208,7 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <AdminLayout>
-      <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }}>
         <Paper elevation={0} sx={{ p: 3, mb: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Box>
@@ -332,7 +330,6 @@ export default function NotificationsPage() {
             </List>
           )}
         </Paper>
-      </Box>
-    </AdminLayout>
+    </Box>
   );
 }

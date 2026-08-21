@@ -57,19 +57,40 @@ const adminFetch = async (url: string, init: RequestInit = {}) => {
   return response;
 };
 
+let publicPlansCache: { data: SubscriptionPlan[]; timestamp: number } | null = null;
+let publicPlansInFlight: Promise<SubscriptionPlan[]> | null = null;
+const PUBLIC_PLANS_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export const subscriptionPlansApi = {
-  async getPublicPlans(): Promise<SubscriptionPlan[]> {
-    try {
-      const response = await fetch(`${API_CONFIG.API_BASE_URL}/subscriptions/plans/public`);
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Failed to load subscription plans');
-      }
-      return (result.data || []).map(normalizePlan);
-    } catch (error) {
-      console.error('Error loading public subscription plans:', error);
-      return fallbackSubscriptionPlans;
+  async getPublicPlans(forceRefresh = false): Promise<SubscriptionPlan[]> {
+    const now = Date.now();
+    if (!forceRefresh && publicPlansCache && now - publicPlansCache.timestamp < PUBLIC_PLANS_TTL_MS) {
+      return publicPlansCache.data;
     }
+
+    if (publicPlansInFlight) {
+      return publicPlansInFlight;
+    }
+
+    publicPlansInFlight = (async () => {
+      try {
+        const response = await fetch(`${API_CONFIG.API_BASE_URL}/subscriptions/plans/public`);
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || 'Failed to load subscription plans');
+        }
+        const normalized = (result.data || []).map(normalizePlan);
+        publicPlansCache = { data: normalized, timestamp: Date.now() };
+        return normalized;
+      } catch (error) {
+        console.error('Error loading public subscription plans:', error);
+        return publicPlansCache?.data || fallbackSubscriptionPlans;
+      } finally {
+        publicPlansInFlight = null;
+      }
+    })();
+
+    return publicPlansInFlight;
   },
 
   async getAdminPlans(): Promise<SubscriptionPlan[]> {
@@ -90,6 +111,7 @@ export const subscriptionPlansApi = {
     if (!response.ok || !result.success) {
       throw new Error(result.message || 'Failed to create subscription plan');
     }
+    publicPlansCache = null;
     return normalizePlan(result.data);
   },
 
@@ -102,6 +124,7 @@ export const subscriptionPlansApi = {
     if (!response.ok || !result.success) {
       throw new Error(result.message || 'Failed to update subscription plan');
     }
+    publicPlansCache = null;
     return normalizePlan(result.data);
   },
 
@@ -113,5 +136,6 @@ export const subscriptionPlansApi = {
     if (!response.ok || !result.success) {
       throw new Error(result.message || 'Failed to delete subscription plan');
     }
+    publicPlansCache = null;
   },
 };

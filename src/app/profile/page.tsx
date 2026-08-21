@@ -44,17 +44,21 @@ export default function UserProfilePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'subscription' | 'owned' | 'saved' | 'library' | 'orders'>('overview');
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+  const [libraryLoaded, setLibraryLoaded] = useState(false);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [librarySearch, setLibrarySearch] = useState('');
   const [libraryProgress, setLibraryProgress] = useState<Record<string, number>>({});
   const [savedBooks, setSavedBooks] = useState<SavedBook[]>([]);
+  const [savedBooksLoaded, setSavedBooksLoaded] = useState(false);
   const [savedBooksLoading, setSavedBooksLoading] = useState(false);
   const [savedBookMenuOpen, setSavedBookMenuOpen] = useState<string | null>(null);
   const [removingSavedBookId, setRemovingSavedBookId] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null);
+  const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [profilePayments, setProfilePayments] = useState<ProfilePayment[]>([]);
+  const [paymentsLoaded, setPaymentsLoaded] = useState(false);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false);
@@ -122,12 +126,6 @@ export default function UserProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      void refreshUser();
-    }
-  }, [isLoading, isAuthenticated]);
-
-  useEffect(() => {
     if (user?.phone) {
       setPhone(user.phone);
     }
@@ -189,6 +187,7 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (!['overview', 'subscription', 'owned', 'library'].includes(activeTab) || !isAuthenticated) return;
+    if (libraryLoaded) return;
 
     let ignore = false;
     setLibraryLoading(true);
@@ -198,6 +197,7 @@ export default function UserProfilePage() {
       .then((response) => {
         if (!ignore && response.success) {
           setLibraryItems(response.data);
+          setLibraryLoaded(true);
         }
       })
       .catch(() => {
@@ -210,7 +210,7 @@ export default function UserProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [activeTab, isAuthenticated]);
+  }, [activeTab, isAuthenticated, libraryLoaded]);
 
   useEffect(() => {
     const progressByItem: Record<string, number> = {};
@@ -232,6 +232,7 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (activeTab !== 'saved' || !isAuthenticated) return;
+    if (savedBooksLoaded) return;
 
     let ignore = false;
     setSavedBooksLoading(true);
@@ -241,6 +242,7 @@ export default function UserProfilePage() {
       .then((response) => {
         if (!ignore && response.success) {
           setSavedBooks(response.data || []);
+          setSavedBooksLoaded(true);
         }
       })
       .catch(() => {
@@ -253,13 +255,14 @@ export default function UserProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [activeTab, isAuthenticated]);
+  }, [activeTab, isAuthenticated, savedBooksLoaded]);
 
   useEffect(() => {
     if (activeTab !== 'subscription' || !isAuthenticated || !hasUserActiveSubscription) {
       setCurrentSubscription(null);
       return;
     }
+    if (subscriptionLoaded) return;
 
     let ignore = false;
     setSubscriptionLoading(true);
@@ -272,6 +275,7 @@ export default function UserProfilePage() {
 
         if (response.success) {
           setCurrentSubscription(response.data ?? null);
+          setSubscriptionLoaded(true);
           return;
         }
 
@@ -295,10 +299,11 @@ export default function UserProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [activeTab, isAuthenticated, hasUserActiveSubscription]);
+  }, [activeTab, isAuthenticated, hasUserActiveSubscription, subscriptionLoaded]);
 
   useEffect(() => {
     if (activeTab !== 'subscription' || !isAuthenticated) return;
+    if (paymentsLoaded) return;
 
     let ignore = false;
     setPaymentsLoading(true);
@@ -313,6 +318,7 @@ export default function UserProfilePage() {
       .then((data) => {
         if (!ignore && data.success) {
           setProfilePayments(data.data || []);
+          setPaymentsLoaded(true);
         }
       })
       .catch(() => {
@@ -325,7 +331,7 @@ export default function UserProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [activeTab, isAuthenticated]);
+  }, [activeTab, isAuthenticated, paymentsLoaded]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

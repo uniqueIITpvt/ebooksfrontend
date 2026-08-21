@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
   Box,
@@ -53,7 +53,7 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { blogsApi, type Blog } from '@/services/api/blogsApi';
-import { API_CONFIG } from '@/config/api';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 
 export default function BlogsPage() {
   const router = useRouter();
@@ -64,7 +64,9 @@ export default function BlogsPage() {
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [tablePage, setTablePage] = useState(1);
-  const [siteLogo, setSiteLogo] = useState('');
+  const siteLogo = useSiteLogo();
+  const initialLoadStartedRef = useRef(false);
+  const initialLoadCompleteRef = useRef(false);
   const [categories, setCategories] = useState<Array<{ category: string; count: number }>>([]);
   const [stats, setStats] = useState({
     totalBlogs: 0,
@@ -93,26 +95,21 @@ export default function BlogsPage() {
 
   // Load initial data
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    if (initialLoadStartedRef.current) return;
 
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        const response = await fetch(`${API_CONFIG.API_BASE_URL}/settings/public`);
-        const data = await response.json();
-        setSiteLogo(String(data?.data?.site_logo || ''));
-      } catch {
-        setSiteLogo('');
-      }
-    };
-
-    fetchLogo();
+    initialLoadStartedRef.current = true;
+    void loadInitialData();
   }, []);
 
   // Filter blogs when search or filters change
   useEffect(() => {
-    fetchBlogs();
+    if (!initialLoadCompleteRef.current) return;
+
+    const timeoutId = window.setTimeout(() => {
+      void fetchBlogs();
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
   }, [searchQuery, filterCategory, filterStatus]);
 
   useEffect(() => {
@@ -156,6 +153,7 @@ export default function BlogsPage() {
       console.error('Error loading initial data:', error);
       showErrorAlert('Failed to load data. Please refresh the page.');
     } finally {
+      initialLoadCompleteRef.current = true;
       setLoading(false);
     }
   };
@@ -165,6 +163,7 @@ export default function BlogsPage() {
       const params: any = {
         limit: 50,
         adminView: true, // Show all blogs including drafts
+        view: 'listing', // Exclude full article content from the table response
       };
 
       if (searchQuery) {

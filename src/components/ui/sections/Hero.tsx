@@ -1,12 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Banner } from '@/lib/server/public-data';
-import { API_CONFIG } from '@/config/api';
-
-const API_URL = API_CONFIG.API_BASE_URL;
 
 // REMOVE fallback slides - only show API banners
 
@@ -63,15 +60,12 @@ interface HeroProps {
   bannerEnabled: boolean;
 }
 
-export default function Hero({ banners: initialBanners, bannerEnabled: initialBannerEnabled }: HeroProps) {
+export default function Hero({ banners, bannerEnabled }: HeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
-  const [bannerEnabled, setBannerEnabled] = useState(initialBannerEnabled);
-  const [banners, setBanners] = useState(initialBanners);
-  const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleStartFreeLearning = () => {
@@ -91,52 +85,6 @@ export default function Hero({ banners: initialBanners, bannerEnabled: initialBa
       behavior: 'smooth',
     });
   };
-
-  useEffect(() => {
-    const fetchBannerSetting = async () => {
-      try {
-        const res = await fetch(`${API_URL}/settings/public`);
-        const data = await res.json();
-
-        const value = data?.success ? data?.data?.banner_visual : undefined;
-        const enabled = value === 1 || value === true || value === '1' || value === 'true';
-        setBannerEnabled(enabled);
-
-        if (!enabled) {
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Hero - Error fetching banner setting:', err);
-        setBannerEnabled(false);
-        setLoading(false);
-      }
-    };
-
-    fetchBannerSetting();
-  }, []);
-
-  // Fetch banners from API
-  const fetchBanners = useCallback(async () => {
-    try {
-      if (bannerEnabled !== true || banners.length > 0) return;
-      const response = await fetch(`${API_URL}/banners`);
-      const data = await response.json();
-      
-      if (data.success && data.data && data.data.length > 0) {
-        setBanners(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching banners:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [bannerEnabled, banners.length]);
-
-  useEffect(() => {
-    if (bannerEnabled === true) {
-      fetchBanners();
-    }
-  }, [fetchBanners]);
 
   // Convert banners to slides format - NO fallback
   const heroSlides = banners.length > 0 

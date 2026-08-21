@@ -37,25 +37,67 @@ export interface ClaimLibraryResponse {
 }
 
 class LibraryApiService {
+  private libraryCache: { data: ApiResponse<LibraryItem[]>; timestamp: number } | null = null;
+  private inFlightPromise: Promise<ApiResponse<LibraryItem[]>> | null = null;
+  private readonly CACHE_TTL_MS = 60 * 1000; // 1 minute cache
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('library:changed', () => {
+        this.clearCache();
+      });
+    }
+  }
+
+  clearCache() {
+    this.libraryCache = null;
+  }
+
   private getToken(): string | null {
     return tokenStore.getAccessToken();
   }
 
-  async getMyLibrary(): Promise<ApiResponse<LibraryItem[]>> {
+  async getMyLibrary(forceRefresh = false): Promise<ApiResponse<LibraryItem[]>> {
     const token = this.getToken();
-    const response = await fetch(`${API_BASE_URL}/library/my`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    if (!token) {
+      this.clearCache();
+      return { success: true, data: [] };
     }
 
-    return data;
+    const now = Date.now();
+    if (!forceRefresh && this.libraryCache && now - this.libraryCache.timestamp < this.CACHE_TTL_MS) {
+      return this.libraryCache.data;
+    }
+
+    if (this.inFlightPromise) {
+      return this.inFlightPromise;
+    }
+
+    this.inFlightPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/library/my`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+
+        if (data.success) {
+          this.libraryCache = { data, timestamp: Date.now() };
+        }
+
+        return data;
+      } finally {
+        this.inFlightPromise = null;
+      }
+    })();
+
+    return this.inFlightPromise;
   }
 
   async claim(bookId: string): Promise<ClaimLibraryResponse> {
@@ -71,6 +113,11 @@ class LibraryApiService {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    this.clearCache();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('library:changed'));
     }
 
     return data;

@@ -111,7 +111,6 @@ export default function AdminAudiobooksPage() {
     elapsedMs: 0,
   });
   const [generatingId, setGeneratingId] = useState<string | null>(null);
-  const [siteLogo, setSiteLogo] = useState('');
 
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
@@ -262,20 +261,6 @@ export default function AdminAudiobooksPage() {
 
     return () => window.clearInterval(intervalId);
   }, [items]);
-
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        const res = await fetch(`${API_CONFIG.API_BASE_URL}/settings/public`);
-        const data = await res.json();
-        setSiteLogo(String(data?.data?.site_logo || ''));
-      } catch {
-        setSiteLogo('');
-      }
-    };
-
-    fetchLogo();
-  }, []);
 
   useEffect(() => {
     if (!dialogOpen) return;

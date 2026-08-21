@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { API_CONFIG } from '@/config/api';
+import { useInitialSiteLogo } from '@/contexts/SiteConfigContext';
 
 const DEFAULT_LOGO = '/file.svg';
 
 export const useSiteLogo = (initialLogo?: string | null) => {
-  const [siteLogo, setSiteLogo] = useState(initialLogo || DEFAULT_LOGO);
+  const providedLogo = useInitialSiteLogo();
+  const resolvedInitialLogo = initialLogo !== undefined ? initialLogo : providedLogo;
+  const [siteLogo, setSiteLogo] = useState(resolvedInitialLogo || DEFAULT_LOGO);
 
   useEffect(() => {
-    if (initialLogo) {
-      setSiteLogo(initialLogo);
+    if (resolvedInitialLogo !== undefined) {
+      setSiteLogo(resolvedInitialLogo || DEFAULT_LOGO);
       return;
     }
 
@@ -30,7 +33,7 @@ export const useSiteLogo = (initialLogo?: string | null) => {
     return () => {
       ignore = true;
     };
-  }, [initialLogo]);
+  }, [resolvedInitialLogo]);
 
   return siteLogo;
 };

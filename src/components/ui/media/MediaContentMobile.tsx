@@ -92,7 +92,6 @@ function MobileShowcaseCard({ item, index, meta, href, libraryItems = [] }: Mobi
     try {
       const response = await libraryApi.claim(identifier);
       const nextReadTarget = `/read/${response.bookSlug || identifier}`;
-      window.dispatchEvent(new Event('library:changed'));
       if (navigateAfterClaim) {
         router.push(nextReadTarget);
       }

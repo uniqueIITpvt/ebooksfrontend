@@ -131,9 +131,11 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
     setClaiming(true);
     try {
       let nextReadTarget = defaultReadTarget;
+      let shouldDispatchLibraryChange = true;
       if (href.startsWith('/free-summaries/') || book.componentType === 'free-summaries') {
         const response = await libraryApi.claim(identifier);
         nextReadTarget = `/read/${response.bookSlug || identifier}`;
+        shouldDispatchLibraryChange = false;
       } else if (isAudiobook) {
         const response = await audiobooksApi.claim(identifier);
         nextReadTarget = response.data?.redirectTarget || `/audiobooks/${identifier}/listen`;
@@ -141,7 +143,9 @@ function BookCard({ book, index, href, subLabel, libraryItems = [], cartFormat }
         const response = await booksApi.claim(identifier);
         nextReadTarget = response.data?.redirectTarget || `/books/${identifier}/read`;
       }
-      window.dispatchEvent(new Event('library:changed'));
+      if (shouldDispatchLibraryChange) {
+        window.dispatchEvent(new Event('library:changed'));
+      }
       if (navigateAfterClaim) {
         router.push(nextReadTarget);
       }

@@ -4,6 +4,7 @@
  */
 
 import { API_CONFIG } from '@/config/api';
+import { authApi } from './authApi';
 import { tokenStore } from './tokenStore';
 
 // API base URL - adjust based on your backend configuration
@@ -123,13 +124,24 @@ class BlogsApiService {
         defaultHeaders['Content-Type'] = 'application/json';
       }
       
-      const response = await fetch(`${API_BASE_URL}${url}`, {
-        headers: {
-          ...defaultHeaders,
-          ...options.headers,
-        },
-        ...options,
-      });
+      const request = (authHeaders: Record<string, string> = {}) =>
+        fetch(`${API_BASE_URL}${url}`, {
+          ...options,
+          headers: {
+            ...defaultHeaders,
+            ...options.headers,
+            ...authHeaders,
+          },
+        });
+
+      let response = await request();
+
+      if (response.status === 401) {
+        const refreshResponse = await authApi.refreshToken();
+        if (refreshResponse.success) {
+          response = await request(this.getAuthHeaders());
+        }
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -159,6 +171,7 @@ class BlogsApiService {
     sortBy?: string;
     status?: string;
     adminView?: boolean;
+    view?: 'listing';
   } = {}): Promise<PaginatedResponse<Blog>> {
     const searchParams = new URLSearchParams();
     
@@ -171,7 +184,10 @@ class BlogsApiService {
     const queryString = searchParams.toString();
     const url = `/blogs${queryString ? `?${queryString}` : ''}`;
     
-    return this.fetchWithErrorHandling<PaginatedResponse<Blog>>(url);
+    return this.fetchWithErrorHandling<PaginatedResponse<Blog>>(
+      url,
+      params.adminView ? { headers: this.getAuthHeaders() } : {}
+    );
   }
 
   // Get single blog by ID
@@ -183,6 +199,7 @@ class BlogsApiService {
   async createBlog(blogData: BlogPayload): Promise<ApiResponse<Blog>> {
     return this.fetchWithErrorHandling<ApiResponse<Blog>>('/blogs', {
       method: 'POST',
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(blogData),
     });
   }
@@ -210,6 +227,7 @@ class BlogsApiService {
     
     return this.fetchWithErrorHandling<ApiResponse<Blog>>('/blogs', {
       method: 'POST',
+      headers: this.getAuthHeaders(),
       body: formData,
     });
   }
@@ -218,6 +236,7 @@ class BlogsApiService {
   async updateBlog(id: string, blogData: Partial<BlogPayload>): Promise<ApiResponse<Blog>> {
     return this.fetchWithErrorHandling<ApiResponse<Blog>>(`/blogs/${id}`, {
       method: 'PUT',
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(blogData),
     });
   }
@@ -245,6 +264,7 @@ class BlogsApiService {
     
     return this.fetchWithErrorHandling<ApiResponse<Blog>>('/blogs/' + id, {
       method: 'PUT',
+      headers: this.getAuthHeaders(),
       body: formData,
     });
   }
@@ -253,6 +273,7 @@ class BlogsApiService {
   async deleteBlog(id: string): Promise<ApiResponse<{ message: string }>> {
     return this.fetchWithErrorHandling<ApiResponse<{ message: string }>>(`/blogs/${id}`, {
       method: 'DELETE',
+      headers: this.getAuthHeaders(),
     });
   }
 

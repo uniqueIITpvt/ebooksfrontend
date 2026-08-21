@@ -27,6 +27,32 @@ declare global {
   }
 }
 
+let cachedTawkScriptUrl: string | null | undefined = undefined;
+let tawkConfigPromise: Promise<string | null> | null = null;
+
+const getTawkScriptUrl = async () => {
+  if (cachedTawkScriptUrl !== undefined) {
+    return cachedTawkScriptUrl;
+  }
+
+  if (!tawkConfigPromise) {
+    tawkConfigPromise = fetch(`${API_CONFIG.API_BASE_URL}/public-config/tawk`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Failed to load Tawk config');
+
+        const payload = (await response.json()) as TawkConfigResponse;
+        const scriptUrl = payload.data?.enabled ? payload.data.scriptUrl?.trim() || null : null;
+        cachedTawkScriptUrl = scriptUrl;
+        return scriptUrl;
+      })
+      .finally(() => {
+        tawkConfigPromise = null;
+      });
+  }
+
+  return tawkConfigPromise;
+};
+
 export default function TawkWidget() {
   const shouldOpenOnLoadRef = useRef(false);
   const scriptUrlRef = useRef<string | null>(null);
@@ -80,14 +106,7 @@ export default function TawkWidget() {
 
     const loadConfig = async () => {
       try {
-        const response = await fetch(`${API_CONFIG.API_BASE_URL}/public-config/tawk`, {
-          cache: 'no-store',
-        });
-
-        if (!response.ok) throw new Error('Failed to load Tawk config');
-
-        const payload = (await response.json()) as TawkConfigResponse;
-        const scriptUrl = payload.data?.enabled ? payload.data.scriptUrl?.trim() : null;
+        const scriptUrl = await getTawkScriptUrl();
 
         if (!isMounted) return;
 

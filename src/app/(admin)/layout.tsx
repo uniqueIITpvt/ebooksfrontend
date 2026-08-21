@@ -2,7 +2,6 @@
 
 import MuiThemeProvider from '@/components/admin/MuiThemeProvider';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { AuthProvider } from '@/contexts/AuthContext';
 import './admin.css';
 
 export default function AdminRootLayout({
@@ -11,12 +10,10 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <MuiThemeProvider>
-        <AdminLayout>
-          {children}
-        </AdminLayout>
-      </MuiThemeProvider>
-    </AuthProvider>
+    <MuiThemeProvider>
+      <AdminLayout>
+        {children}
+      </AdminLayout>
+    </MuiThemeProvider>
   );
 }

@@ -4,9 +4,10 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { PersistentAudioPlayerProvider } from '@/contexts/PersistentAudioPlayerContext';
 import AuthModal from '@/components/ui/auth/AuthModal';
-import { getSiteLogo } from '@/lib/server/public-data';
+import { getPublicSettings, getSiteLogo } from '@/lib/server/public-data';
 import ConditionalLayout from '@/components/ui/layout/ConditionalLayout';
 import GlobalLoadingIndicator from '@/components/ui/primitives/GlobalLoadingIndicator';
+import { SiteConfigProvider } from '@/contexts/SiteConfigContext';
 import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL, siteUrl } from '@/config/site.config';
 
 const fontVariables = {
@@ -82,22 +83,27 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const siteLogo = await getSiteLogo();
+  const publicSettings = await getPublicSettings();
+  const siteLogo = typeof publicSettings.site_logo === 'string' && publicSettings.site_logo
+    ? publicSettings.site_logo
+    : null;
 
   return (
     <html suppressHydrationWarning lang='en' style={fontVariables}>
       <body suppressHydrationWarning className="font-dm-sans">
-        <AuthProvider>
-          <CartProvider>
-            <PersistentAudioPlayerProvider>
-              <ConditionalLayout siteLogo={siteLogo}>
-                {children}
-              </ConditionalLayout>
-              <AuthModal />
-              <GlobalLoadingIndicator />
-            </PersistentAudioPlayerProvider>
-          </CartProvider>
-        </AuthProvider>
+        <SiteConfigProvider siteLogo={siteLogo} publicSettings={publicSettings}>
+          <AuthProvider>
+            <CartProvider>
+              <PersistentAudioPlayerProvider>
+                <ConditionalLayout siteLogo={siteLogo}>
+                  {children}
+                </ConditionalLayout>
+                <AuthModal />
+                <GlobalLoadingIndicator />
+              </PersistentAudioPlayerProvider>
+            </CartProvider>
+          </AuthProvider>
+        </SiteConfigProvider>
       </body>
     </html>
   );

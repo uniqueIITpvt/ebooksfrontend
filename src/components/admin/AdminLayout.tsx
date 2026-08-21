@@ -58,6 +58,7 @@ import { useThemeMode } from './MuiThemeProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { API_CONFIG } from '@/config/api';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 import { tokenStore } from '@/services/api/tokenStore';
 
 const navigation = [
@@ -89,7 +90,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [siteLogo, setSiteLogo] = useState<string>('');
+  const siteLogo = useSiteLogo();
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const [notifications, setNotifications] = useState<any[]>([]);
   const pathname = usePathname();
@@ -108,6 +109,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Fetch notifications
   useEffect(() => {
+    if (pathname === '/admin/notifications') {
+      return;
+    }
+
     const fetchNotifications = async () => {
       try {
         const token = tokenStore.getAccessToken();
@@ -149,26 +154,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     // Refresh notifications every 60 seconds (reduced polling)
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [user?.role]);
-
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        const res = await fetch(`${API_CONFIG.API_BASE_URL}/settings/public`);
-        const data = await res.json();
-        if (data?.success && data?.data?.site_logo) {
-          setSiteLogo(String(data.data.site_logo));
-          return;
-        }
-
-        setSiteLogo('');
-      } catch (err) {
-        setSiteLogo('');
-      }
-    };
-
-    fetchLogo();
-  }, []);
+  }, [pathname, user?.role]);
 
   useEffect(() => {
     if (!user || isSuperAdmin) return;

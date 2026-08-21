@@ -34,12 +34,6 @@ export default function SubscriptionPage() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      void refreshUser();
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     if (!isAuthenticated || !hasUniquePlus || !returnTo.startsWith('/')) return;
     router.replace(returnTo);
   }, [hasUniquePlus, isAuthenticated, returnTo, router]);

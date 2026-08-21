@@ -40,6 +40,23 @@ export default function MediaContent(props: MediaContentProps) {
       setIsLoading(false);
     }, 800);
 
+    // Use passed categories for category names and counts
+    if (Array.isArray(props.categories) && props.categories.length > 0) {
+      setAllCategoryNames(props.categories.map((c) => c.name));
+      const counts: Record<string, number> = {};
+      props.categories.forEach((cat) => {
+        if (cat.name) counts[cat.name] = cat.bookCount || 0;
+      });
+      setCategoryContentCounts(counts);
+    } else {
+      categoriesApi.getActive()
+        .then(res => {
+          const names = (res.data || []).map((c: { name: string }) => c.name);
+          setAllCategoryNames(names);
+        })
+        .catch(() => {});
+    }
+
     // Fetch formats from DB
     bookFormatsApi.getActive()
       .then(res => {
@@ -50,41 +67,11 @@ export default function MediaContent(props: MediaContentProps) {
       })
       .catch(() => {});
 
-    // Fetch all categories from DB
-    categoriesApi.getActive()
-      .then(res => {
-        const names = (res.data || []).map((c: { name: string }) => c.name);
-        setAllCategoryNames(names);
-      })
-      .catch(() => {});
-
-    const countByCategory = (items: PublicBookListItem[]) =>
-      items.reduce<Record<string, number>>((counts, item) => {
-        if (!item.category) return counts;
-        counts[item.category] = (counts[item.category] ?? 0) + 1;
-        return counts;
-      }, {});
-
-    const fetchListingItems = async (path: string) => {
-      const response = await fetch(`${API_CONFIG.API_BASE_URL}${path}`);
-      const data = await response.json();
-      return Array.isArray(data?.data) ? data.data : [];
-    };
-
-    Promise.all([
-      fetchListingItems('/books?view=listing&type=Books&excludeComponentType=free-summaries'),
-      fetchListingItems('/audiobooks?view=listing'),
-    ])
-      .then(([books, audiobooks]) => {
-        setCategoryContentCounts(countByCategory([...books, ...audiobooks]));
-      })
-      .catch(() => {});
-
     return () => {
       window.removeEventListener('resize', checkMobile);
       clearTimeout(timer);
     };
-  }, []);
+  }, [props.categories]);
 
   if (isLoading) {
     return (

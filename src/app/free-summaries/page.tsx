@@ -1,8 +1,8 @@
 import SimpleLibraryPage from '@/components/ui/collections/SimpleLibraryPage';
-import { getHomePageData } from '@/lib/server/public-data';
+import { getFreeSummariesPageData } from '@/lib/server/public-data';
 
 export default async function FreeSummariesPage() {
-  const { freeSummaries } = await getHomePageData();
+  const freeSummaries = await getFreeSummariesPageData();
 
   return (
     <SimpleLibraryPage

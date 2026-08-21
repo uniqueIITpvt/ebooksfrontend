@@ -257,41 +257,82 @@ export default function PagedReadClient({
     const loadSummary = async () => {
       try {
         let data: ReaderSummary | null = null;
-        try {
-          const response = await booksApi.getReadPayload(slug);
-          data = {
-            _id: response.data._id || response.data.id || slug,
-            title: response.data.title,
-            subtitle: response.data.subtitle,
-            slug: response.data.slug || slug,
-            author: response.data.author,
-            description: response.data.description,
-            category: response.data.category,
-            pages: response.data.pages,
-            publishDate: response.data.publishDate,
-            image: response.data.image,
-            featured: Boolean(response.data.featured),
-            isActive: true,
-            views: 0,
-            downloads: 0,
-            tags: response.data.tags || [],
-            createdAt: response.data.createdAt || response.data.publishDate || '',
-            updatedAt: response.data.updatedAt || response.data.publishDate || '',
-            type: response.data.type,
-            componentType: response.data.componentType,
-            accessLevel: response.data.accessLevel,
-            price: response.data.price,
-            files: response.data.files,
-          };
-        } catch {
-          const freeSummary = await freeSummariesApi.getReadPayload(slug);
-          data = {
-            ...freeSummary,
-            type: 'Books',
-            componentType: 'free-summaries',
-            accessLevel: 'free',
-            price: '0',
-          };
+        const isLikelyFreeSummary = backHref.includes('free-summaries') || backLabel.toLowerCase().includes('summary');
+
+        if (isLikelyFreeSummary) {
+          try {
+            const freeSummary = await freeSummariesApi.getReadPayload(slug);
+            data = {
+              ...freeSummary,
+              type: 'Books',
+              componentType: 'free-summaries',
+              accessLevel: 'free',
+              price: '0',
+            };
+          } catch {
+            const response = await booksApi.getReadPayload(slug);
+            data = {
+              _id: response.data._id || response.data.id || slug,
+              title: response.data.title,
+              subtitle: response.data.subtitle,
+              slug: response.data.slug || slug,
+              author: response.data.author,
+              description: response.data.description,
+              category: response.data.category,
+              pages: response.data.pages,
+              publishDate: response.data.publishDate,
+              image: response.data.image,
+              featured: Boolean(response.data.featured),
+              isActive: true,
+              views: 0,
+              downloads: 0,
+              tags: response.data.tags || [],
+              createdAt: response.data.createdAt || response.data.publishDate || '',
+              updatedAt: response.data.updatedAt || response.data.publishDate || '',
+              type: response.data.type,
+              componentType: response.data.componentType,
+              accessLevel: response.data.accessLevel,
+              price: response.data.price,
+              files: response.data.files,
+            };
+          }
+        } else {
+          try {
+            const response = await booksApi.getReadPayload(slug);
+            data = {
+              _id: response.data._id || response.data.id || slug,
+              title: response.data.title,
+              subtitle: response.data.subtitle,
+              slug: response.data.slug || slug,
+              author: response.data.author,
+              description: response.data.description,
+              category: response.data.category,
+              pages: response.data.pages,
+              publishDate: response.data.publishDate,
+              image: response.data.image,
+              featured: Boolean(response.data.featured),
+              isActive: true,
+              views: 0,
+              downloads: 0,
+              tags: response.data.tags || [],
+              createdAt: response.data.createdAt || response.data.publishDate || '',
+              updatedAt: response.data.updatedAt || response.data.publishDate || '',
+              type: response.data.type,
+              componentType: response.data.componentType,
+              accessLevel: response.data.accessLevel,
+              price: response.data.price,
+              files: response.data.files,
+            };
+          } catch {
+            const freeSummary = await freeSummariesApi.getReadPayload(slug);
+            data = {
+              ...freeSummary,
+              type: 'Books',
+              componentType: 'free-summaries',
+              accessLevel: 'free',
+              price: '0',
+            };
+          }
         }
         if (!ignore) setSummary(data);
       } catch (error: any) {

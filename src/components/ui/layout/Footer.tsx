@@ -2,17 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { API_CONFIG } from '@/config/api';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 import {
   ShieldCheckIcon,
   BookOpenIcon,
   UserIcon,
   CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
-
-const API_URL = API_CONFIG.API_BASE_URL;
-
 
 // Social media icons as SVG components
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -43,32 +39,8 @@ interface FooterProps {
   siteLogo?: string | null;
 }
 export default function Footer({ siteLogo: siteLogoProp }: FooterProps) {
-  const [siteLogo, setSiteLogo] = useState<string>(siteLogoProp || '');
+  const siteLogo = useSiteLogo(siteLogoProp);
   const currentYear = new Date().getFullYear();
-
-  useEffect(() => {
-    if (siteLogoProp) {
-      setSiteLogo(siteLogoProp);
-      return;
-    }
-    
-    const fetchLogo = async () => {
-      try {
-        const res = await fetch(`${API_URL}/settings/public`);
-        const data = await res.json();
-        if (data?.success && data?.data?.site_logo) {
-          setSiteLogo(String(data.data.site_logo));
-          return;
-        }
-
-        setSiteLogo('');
-      } catch {
-        setSiteLogo('');
-      }
-    };
-    
-    void fetchLogo();
-  }, [siteLogoProp]);
 
   const quickLinks = [
     { name: 'About', href: '/about' },
