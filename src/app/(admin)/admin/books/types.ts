@@ -16,6 +16,7 @@ export interface BookFormData extends Omit<BookPayload, 'price' | 'originalPrice
   // Override fields to make them optional for form
   tags?: string[]; // Optional in form, will default to empty array
   componentType?: 'none' | 'free-summaries' | 'trending-books' | 'premium-summaries';
+  platforms?: Array<'web' | 'android'>;
   gst?: number;
 }
 

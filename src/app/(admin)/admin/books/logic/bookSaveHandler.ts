@@ -88,6 +88,18 @@ export function createHandleSaveBook(ctx: BookSaveHandlerContext) {
       return;
     }
 
+    const selectedPlatforms = Array.isArray(selectedBook.platforms)
+      ? selectedBook.platforms.filter((platform: string) => platform === "web" || platform === "android")
+      : ["web"];
+
+    if ((selectedBook.status || "draft") === "published" && selectedPlatforms.length === 0) {
+      showErrorAlert(
+        "Publishing platform required",
+        "Select Website, Android App, or both before publishing.",
+      );
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -113,6 +125,7 @@ export function createHandleSaveBook(ctx: BookSaveHandlerContext) {
         featured: selectedBook.featured || false,
         bestseller: selectedBook.bestseller || false,
         status: selectedBook.status || "draft",
+        platforms: selectedPlatforms,
         tags: selectedBook.tags || [],
         publishDate:
           selectedBook.publishDate || new Date().toISOString().split("T")[0],

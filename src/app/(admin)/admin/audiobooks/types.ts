@@ -45,6 +45,7 @@ export type AudiobookForm = Omit<AudiobookPayload, 'type' | 'price' | 'tags'> & 
   script?: string;
   selectedVoice?: string;
   scripts?: ScriptData;
+  platforms?: Array<'web' | 'android'>;
   wordSync?: any;
   generatedAudio?: any;
   bookPages?: any;

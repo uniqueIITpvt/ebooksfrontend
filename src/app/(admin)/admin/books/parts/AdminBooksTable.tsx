@@ -159,6 +159,8 @@ export default function AdminBooksTable({
                   <TableCell sx={{ minWidth: 120 }}>Bestseller</TableCell>
                   <TableCell sx={{ minWidth: 220 }}>Tags</TableCell>
                   <TableCell sx={{ minWidth: 120 }}>Status</TableCell>
+                  <TableCell sx={{ minWidth: 90 }}>Web</TableCell>
+                  <TableCell sx={{ minWidth: 110 }}>Android</TableCell>
                   <TableCell sx={{ minWidth: 100 }}>Views</TableCell>
                   <TableCell sx={{ minWidth: 120 }}>Downloads</TableCell>
                   <TableCell sx={{ minWidth: 100 }}>Sales</TableCell>
@@ -273,6 +275,22 @@ export default function AdminBooksTable({
                       </TableCell>
                       <TableCell>
                         <Chip label={book.status} size="small" color={getStatusColor(book.status) as any} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={(book.platforms || ['web']).includes('web') ? 'Yes' : 'No'}
+                          size="small"
+                          color={(book.platforms || ['web']).includes('web') ? 'success' : 'default'}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={(book.platforms || []).includes('android') ? 'Yes' : 'No'}
+                          size="small"
+                          color={(book.platforms || []).includes('android') ? 'success' : 'default'}
+                          variant="outlined"
+                        />
                       </TableCell>
                       <TableCell>{book.views ?? 0}</TableCell>
                       <TableCell>{book.downloads ?? 0}</TableCell>

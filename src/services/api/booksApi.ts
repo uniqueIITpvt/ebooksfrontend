@@ -94,6 +94,7 @@ export interface Book {
   bestseller: boolean;
   tags: string[];
   status: 'draft' | 'review' | 'published' | 'archived';
+  platforms?: Array<'web' | 'android'>;
   gst?: number;
   language?: string;
   slug?: string;
@@ -176,6 +177,7 @@ export interface BookPayload {
   bestseller: boolean;
   tags: string[];
   status: 'draft' | 'review' | 'published' | 'archived';
+  platforms?: Array<'web' | 'android'>;
   files?: {
     ebook?: BookFile | null;
     audiobook?: BookFile | null;

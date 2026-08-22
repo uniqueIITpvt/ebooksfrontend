@@ -125,6 +125,40 @@ export default function AudiobookDialog(props: AudiobookDialogProps) {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
+                  <Paper sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, p: 2 }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#8a6d1d', textTransform: 'uppercase', mb: 1 }}>
+                      Publishing Settings
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                      {[
+                        { value: 'web', label: 'Website' },
+                        { value: 'android', label: 'Android App' },
+                      ].map((platform) => {
+                        const selectedPlatforms = form.platforms || ['web'];
+                        const checked = selectedPlatforms.includes(platform.value);
+
+                        return (
+                          <FormControlLabel
+                            key={platform.value}
+                            control={
+                              <Switch
+                                checked={checked}
+                                onChange={(event) => {
+                                  const nextPlatforms = event.target.checked
+                                    ? Array.from(new Set([...selectedPlatforms, platform.value]))
+                                    : selectedPlatforms.filter((item: string) => item !== platform.value);
+                                  setForm((f: any) => (f ? { ...f, platforms: nextPlatforms } : f));
+                                }}
+                              />
+                            }
+                            label={platform.label}
+                          />
+                        );
+                      })}
+                    </Box>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     required

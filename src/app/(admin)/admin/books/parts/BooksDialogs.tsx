@@ -440,6 +440,49 @@ export default function BooksDialogs(props: BooksDialogsProps) {
                 </Tooltip>
               </Box>
             </Grid>
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  p: 2,
+                  bgcolor: '#f8fafc',
+                }}
+              >
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                  Publishing Settings
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'web', label: 'Website' },
+                    { value: 'android', label: 'Android App' },
+                  ].map((platform) => {
+                    const selectedPlatforms = selectedBook?.platforms || ['web'];
+                    const checked = selectedPlatforms.includes(platform.value);
+
+                    return (
+                      <FormControlLabel
+                        key={platform.value}
+                        control={
+                          <Switch
+                            checked={checked}
+                            disabled={dialogMode === 'view'}
+                            onChange={(event) => {
+                              const nextPlatforms = event.target.checked
+                                ? Array.from(new Set([...selectedPlatforms, platform.value]))
+                                : selectedPlatforms.filter((item: string) => item !== platform.value);
+                              setSelectedBook({ ...selectedBook, platforms: nextPlatforms });
+                            }}
+                          />
+                        }
+                        label={platform.label}
+                      />
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Grid>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth

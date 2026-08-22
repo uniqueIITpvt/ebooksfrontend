@@ -113,6 +113,8 @@ export default function AdminAudiobooksTable({
               <TableCell>Language & Script</TableCell>
               <TableCell>Manual Audio</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Web</TableCell>
+              <TableCell>Android</TableCell>
               <TableCell>Timing</TableCell>
               <TableCell>Rating</TableCell>
             </TableRow>
@@ -179,6 +181,22 @@ export default function AdminAudiobooksTable({
                   </TableCell>
                   <TableCell>
                     <Chip size="small" label={displayStatus} color={displayStatus === 'published' ? 'success' : displayStatus === 'review' ? 'warning' : displayStatus === 'archived' ? 'error' : 'default'} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      label={(b.platforms || ['web']).includes('web') ? 'Yes' : 'No'}
+                      color={(b.platforms || ['web']).includes('web') ? 'success' : 'default'}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      label={(b.platforms || []).includes('android') ? 'Yes' : 'No'}
+                      color={(b.platforms || []).includes('android') ? 'success' : 'default'}
+                      variant="outlined"
+                    />
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>

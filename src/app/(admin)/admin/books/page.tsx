@@ -639,6 +639,9 @@ export default function BooksPage() {
             (book as any).salesCount ??
             (book as any).totalSales,
         ),
+        platforms: Array.isArray((book as any).platforms) && (book as any).platforms.length
+          ? (book as any).platforms
+          : ['web'],
         coverImage: book.image || (book as any).coverImage,
         // Format publishDate for HTML date input (YYYY-MM-DD)
         publishDate: book.publishDate
@@ -664,6 +667,7 @@ export default function BooksPage() {
         status: "draft",
         featured: false,
         bestseller: false,
+        platforms: ['web'],
         discountPrice: 0,
         description: "",
         pages: 0,

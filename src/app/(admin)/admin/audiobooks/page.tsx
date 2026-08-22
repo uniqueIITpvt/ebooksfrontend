@@ -472,6 +472,7 @@ export default function AdminAudiobooksPage() {
       featured: false,
       bestseller: false,
       status: 'draft',
+      platforms: ['web'],
       tags: [],
       publishDate: new Date().toISOString().split('T')[0],
       isbn: '',
@@ -534,6 +535,7 @@ export default function AdminAudiobooksPage() {
         featured: !!book.featured,
         bestseller: !!book.bestseller,
         status: book.status || 'draft',
+        platforms: Array.isArray(book.platforms) && book.platforms.length ? book.platforms : ['web'],
         isActive: book.isActive ?? true,
         isPublished: book.isPublished ?? book.status === 'published',
         tags: Array.isArray(book.tags) ? book.tags : [],
@@ -726,6 +728,13 @@ export default function AdminAudiobooksPage() {
       const normalizedScripts = normalizeScripts(form.scripts, undefined, form.language || 'English');
       const desiredStatus = form.status;
       const desiredIsPublished = desiredStatus === 'published';
+      const selectedPlatforms: Array<'web' | 'android'> = Array.isArray(form.platforms)
+        ? form.platforms.filter((platform): platform is 'web' | 'android' => platform === 'web' || platform === 'android')
+        : ['web'];
+      if (desiredStatus === 'published' && selectedPlatforms.length === 0) {
+        showSnackbar('error', 'Select Website, Android App, or both before publishing');
+        return;
+      }
       const hasExistingAudio = Boolean(form.files?.audiobook?.url);
       if (dialogMode === 'add' && !audiobookFile && !hasExistingAudio) {
         showSnackbar('error', 'Manual audio file is required');
@@ -758,6 +767,7 @@ export default function AdminAudiobooksPage() {
         bestseller: !!form.bestseller,
         tags: Array.isArray(form.tags) ? form.tags : [],
         status: audiobookFile ? 'review' : form.status,
+        platforms: selectedPlatforms,
         language: form.language,
         isActive: form.isActive ?? true,
         isPublished: audiobookFile ? false : desiredIsPublished,

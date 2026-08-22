@@ -66,6 +66,7 @@ export interface Audiobook {
   bestseller: boolean;
   tags: string[];
   status: 'draft' | 'review' | 'published' | 'archived';
+  platforms?: Array<'web' | 'android'>;
   isActive?: boolean;
   isPublished?: boolean;
   language?: string;
@@ -134,6 +135,7 @@ export interface AudiobookPayload {
   bestseller: boolean;
   tags: string[];
   status: 'draft' | 'review' | 'published' | 'archived';
+  platforms?: Array<'web' | 'android'>;
   files?: {
     ebook?: any | null;
     audiobook?: any | null;
